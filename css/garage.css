@@ -4,7 +4,7 @@
 #ghero{
   position:relative;min-height:72svh;overflow:hidden;
   display:flex;flex-direction:column;justify-content:flex-end;
-  padding:5rem 2.5rem 0;
+  padding:5rem 2.5rem 2.75rem;
 }
 .ghero-bg{position:absolute;inset:0;z-index:0;}
 .ghero-bg img{
@@ -69,14 +69,14 @@
 .gfilters{display:flex;gap:.4rem;flex-wrap:wrap;}
 .gfilter{
   background:none;border:1px solid transparent;border-radius:2px;cursor:none;
-  font-family:'JetBrains Mono',monospace;font-size:.52rem;font-weight:700;
-  letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
-  padding:.5rem .8rem;transition:color .3s ease,border-color .3s ease,background .3s ease;
+  font-family:'JetBrains Mono',monospace;font-size:.64rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  padding:.55rem .95rem;transition:color .3s ease,border-color .3s ease,background .3s ease;
 }
 .gfilter:hover{color:var(--off);}
 .gfilter.active{color:var(--off);border-color:rgba(var(--red-glow),.6);background:rgba(var(--red-glow),.14);}
 .gcount{
-  font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.18em;
+  font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.16em;
   text-transform:uppercase;color:var(--muted);
 }
 .gcount em{font-style:normal;color:var(--red);}
@@ -252,6 +252,7 @@
   .ghero-stats{gap:1.6rem;}
   .ghero-stat{text-align:left;}
   #gshelf{padding:.9rem 1.5rem;top:56px;}
+  #ghero{padding-bottom:2rem;}
   #gbays{padding:3rem 1.5rem 5rem;}
   .gbay-grid{grid-template-columns:1fr;gap:2.5rem;}
   .gx-box{width:58%;}
