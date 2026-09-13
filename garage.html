@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!-- SEO:START -->
+<meta name="description" content="The Garage. LUTs, sound effects and presets pulled off real timelines, released as they get finished. Colour and audio tools by Rahul Kuttappy."/>
+<link rel="canonical" href="https://rahulkuttappy.github.io/garage.html"/>
+<meta name="robots" content="index, follow"/>
+<meta name="author" content="Rahul Kuttappy"/>
+<meta name="theme-color" content="#080808"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Rahul Kuttappy"/>
+<meta property="og:title" content="Garage · Rahul Kuttappy"/>
+<meta property="og:description" content="LUTs, sound effects and presets pulled off real timelines, released as they get finished."/>
+<meta property="og:url" content="https://rahulkuttappy.github.io/garage.html"/>
+<meta property="og:image" content="https://rahulkuttappy.github.io/assets/images/projects/amg/amg-05.jpg"/>
+<meta property="og:locale" content="en_IN"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Garage · Rahul Kuttappy"/>
+<meta name="twitter:description" content="LUTs, sound effects and presets pulled off real timelines, released as they get finished."/>
+<meta name="twitter:image" content="https://rahulkuttappy.github.io/assets/images/projects/amg/amg-05.jpg"/>
+<link rel="icon" type="image/png" href="assets/images/favicon.png"/>
+<link rel="apple-touch-icon" href="assets/images/favicon.png"/>
+<!-- SEO:END -->
+<title>Garage · Rahul Kuttappy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/garage.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<canvas id="cursorFX" aria-hidden="true"></canvas>
+<div id="pageFade"><span class="pf-mark"><img src="assets/images/logo.png" alt=""/></span></div>
+<audio id="bgm" src="assets/audio/singularity.m4a" loop preload="auto"></audio>
+<div id="audioDock">
+  <button class="viz-btn" id="vizBtn" aria-label="Sound controls">
+    <canvas id="vizCanvas" aria-hidden="true"></canvas>
+  </button>
+  <div class="audio-panel" id="audioPanel">
+    <button class="audio-toggle" id="audioToggle" aria-label="Toggle sound">Sound Off</button>
+    <input class="audio-vol" id="audioVol" type="range" min="0" max="0.4" step="0.01" value="0.12" aria-label="Volume"/>
+  </div>
+</div>
+<div id="scrollbar" aria-hidden="true">
+  <div class="scrollbar-track"></div>
+  <div class="scrollbar-fill" id="sbFill"></div>
+  <div class="scrollbar-dot" id="sbDot"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav" style="opacity:1;">
+  <a href="index.html"><img class="nav-logo" src="assets/images/logo.png" alt="RK"/></a>
+  <ul class="nav-links">
+    <li><a href="index.html#works">Works</a></li>
+    <li><a href="index.html#photography">Photography</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="index.html#reel">Reel</a></li>
+    <li><a href="garage.html" class="active-link">Garage</a></li>
+  </ul>
+  <div class="nav-right">
+    <span id="clock">00:00:00</span>
+    <a class="nav-cta" href="index.html#contact">Let's Talk</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="ghero">
+  <div class="ghero-bg" aria-hidden="true">
+    <img src="assets/images/projects/amg/amg-05.jpg" alt=""/>
+  </div>
+  <div class="ghero-shutter" aria-hidden="true"></div>
+  <div class="ghero-inner">
+    <div class="ghero-top">
+      <p class="s-eye">Bay 01 · Open</p>
+      <p class="gcount">Luts &middot; Sfx &middot; Presets</p>
+    </div>
+    <h1 class="ghero-title"><span class="dither-word" data-dither>GARAGE</span></h1>
+    <div class="ghero-lower">
+      <p class="ghero-blurb">The bench where the tools end up. Every LUT and every sound in here came off a real timeline first, then got cleaned up enough to hand over. Things appear as they get finished.</p>
+      <div class="ghero-stats">
+        <div class="ghero-stat"><b>05</b><span>On the shelf</span></div>
+        <div class="ghero-stat"><b>01</b><span>Ready now</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FILTER BAR -->
+<section id="gshelf">
+  <div class="gfilters" role="tablist" aria-label="Filter products">
+    <button class="gfilter active" data-filter="all" role="tab" aria-selected="true">All</button>
+    <button class="gfilter" data-filter="lut" role="tab" aria-selected="false">LUTs</button>
+    <button class="gfilter" data-filter="sfx" role="tab" aria-selected="false">SFX</button>
+    <button class="gfilter" data-filter="preset" role="tab" aria-selected="false">Presets</button>
+  </div>
+  <p class="gcount"><em id="gShown">5</em> / 5 on the shelf</p>
+</section>
+
+<!-- BAYS -->
+<section id="gbays">
+  <div class="gbay-grid" id="gbayGrid">
+
+    <article class="gbay reveal" data-kind="lut">
+      <div class="gx-stage">
+        <div class="gx-box" data-tilt>
+          <div class="gx-face gx-spine"><span>RK &middot; Mixed Light &middot; LUTs</span></div>
+          <div class="gx-face gx-front">
+            <p class="gx-brand">Rahul Kuttappy</p>
+            <div class="gx-art">
+              <img src="assets/images/gala/gala-03.jpg" alt="Mixed Light LUT pack"/>
+              <p class="gx-arttext">Mixed Light</p>
+            </div>
+            <div class="gx-foot">
+              <span class="gx-kind">LUTs</span>
+              <div class="gx-apps"><span class="gx-app">Pr</span><span class="gx-app">Dvr</span><span class="gx-app">Fcp</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gbay-head">
+        <span class="gbay-num">Bay 01</span>
+        <span class="gbay-status ready">Ready</span>
+      </div>
+      <h2 class="gbay-name">MIXED LIGHT</h2>
+      <p class="gbay-desc">Built for rooms that refuse to agree on a colour temperature. Tungsten wash, moving heads and phone screens, pulled into one look with skin left alone.</p>
+      <ul class="gbay-specs">
+        <li>6 LUTs, .cube 33x</li>
+        <li>Rec.709 and Log variants</li>
+      </ul>
+      <div class="gbay-foot">
+        <span class="gbay-price"><em>Free</em></span>
+        <a class="gbay-btn" href="mailto:rahulkuttappy805@gmail.com?subject=Mixed%20Light%20LUTs">Get It</a>
+      </div>
+    </article>
+
+    <article class="gbay reveal" data-kind="lut">
+      <div class="gx-stage">
+        <div class="gx-box" data-tilt>
+          <div class="gx-face gx-spine"><span>RK &middot; Stage Haze &middot; LUTs</span></div>
+          <div class="gx-face gx-front">
+            <p class="gx-brand">Rahul Kuttappy</p>
+            <div class="gx-art">
+              <img src="assets/images/projects/ards/ards-03.jpg" alt="Stage Haze LUT pack"/>
+              <p class="gx-arttext">Stage &amp; Haze</p>
+            </div>
+            <div class="gx-foot">
+              <span class="gx-kind">LUTs</span>
+              <div class="gx-apps"><span class="gx-app">Pr</span><span class="gx-app">Dvr</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gbay-head">
+        <span class="gbay-num">Bay 02</span>
+        <span class="gbay-status building">In build</span>
+      </div>
+      <h2 class="gbay-name">STAGE &amp; HAZE</h2>
+      <p class="gbay-desc">For hard reds, hard blues and a lot of atmosphere. Holds the blacks genuinely black so the colour that survives the frame feels earned rather than lifted.</p>
+      <ul class="gbay-specs">
+        <li>8 LUTs, .cube 33x</li>
+        <li>Includes a halation utility</li>
+      </ul>
+      <div class="gbay-foot">
+        <span class="gbay-price">TBC</span>
+        <a class="gbay-btn" href="mailto:rahulkuttappy805@gmail.com?subject=Tell%20me%20when%20Stage%20%26%20Haze%20drops">Notify Me</a>
+      </div>
+    </article>
+
+    <article class="gbay reveal" data-kind="sfx">
+      <div class="gx-stage">
+        <div class="gx-box" data-tilt>
+          <div class="gx-face gx-spine"><span>RK &middot; Whooshes &middot; SFX</span></div>
+          <div class="gx-face gx-front">
+            <p class="gx-brand">Rahul Kuttappy</p>
+            <div class="gx-art">
+              <img src="assets/images/projects/ards/ards-07.jpg" alt="Whooshes SFX pack"/>
+              <p class="gx-arttext">Whooshes</p>
+            </div>
+            <div class="gx-foot">
+              <span class="gx-kind">SFX</span>
+              <div class="gx-apps"><span class="gx-app">Wav</span><span class="gx-app">48k</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gbay-head">
+        <span class="gbay-num">Bay 03</span>
+        <span class="gbay-status building">In build</span>
+      </div>
+      <h2 class="gbay-name">WHOOSHES</h2>
+      <p class="gbay-desc">Transition moves designed to sit under a cut without announcing themselves. Recorded and processed rather than pulled from a library everyone already owns.</p>
+      <ul class="gbay-specs">
+        <li>40 files, 24 bit wav</li>
+        <li>48kHz, tail trimmed</li>
+      </ul>
+      <div class="gbay-foot">
+        <span class="gbay-price">TBC</span>
+        <a class="gbay-btn" href="mailto:rahulkuttappy805@gmail.com?subject=Tell%20me%20when%20Whooshes%20drops">Notify Me</a>
+      </div>
+    </article>
+
+    <article class="gbay reveal" data-kind="sfx">
+      <div class="gx-stage">
+        <div class="gx-box" data-tilt>
+          <div class="gx-face gx-spine"><span>RK &middot; Impacts &middot; SFX</span></div>
+          <div class="gx-face gx-front">
+            <p class="gx-brand">Rahul Kuttappy</p>
+            <div class="gx-art">
+              <img src="assets/images/hyrox/hyrox-01.jpg" alt="Impacts SFX pack"/>
+              <p class="gx-arttext">Impacts</p>
+            </div>
+            <div class="gx-foot">
+              <span class="gx-kind">SFX</span>
+              <div class="gx-apps"><span class="gx-app">Wav</span><span class="gx-app">48k</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gbay-head">
+        <span class="gbay-num">Bay 04</span>
+        <span class="gbay-status building">In build</span>
+      </div>
+      <h2 class="gbay-name">IMPACTS</h2>
+      <p class="gbay-desc">Hits, booms and sub drops for the frame that needs weight. Layered dry and wet so you can decide how much room the moment is allowed to have.</p>
+      <ul class="gbay-specs">
+        <li>30 files, 24 bit wav</li>
+        <li>Dry and wet pairs</li>
+      </ul>
+      <div class="gbay-foot">
+        <span class="gbay-price">TBC</span>
+        <a class="gbay-btn" href="mailto:rahulkuttappy805@gmail.com?subject=Tell%20me%20when%20Impacts%20drops">Notify Me</a>
+      </div>
+    </article>
+
+    <article class="gbay reveal" data-kind="preset">
+      <div class="gx-stage">
+        <div class="gx-box" data-tilt>
+          <div class="gx-face gx-spine"><span>RK &middot; Stills Mono &middot; Presets</span></div>
+          <div class="gx-face gx-front">
+            <p class="gx-brand">Rahul Kuttappy</p>
+            <div class="gx-art">
+              <img src="assets/images/projects/amg/amg-03.jpg" alt="Stills Mono preset pack"/>
+              <p class="gx-arttext">Stills &amp; Mono</p>
+            </div>
+            <div class="gx-foot">
+              <span class="gx-kind">Presets</span>
+              <div class="gx-apps"><span class="gx-app">Lr</span><span class="gx-app">Acr</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gbay-head">
+        <span class="gbay-num">Bay 05</span>
+        <span class="gbay-status building">In build</span>
+      </div>
+      <h2 class="gbay-name">STILLS &amp; MONO</h2>
+      <p class="gbay-desc">The Lightroom side of the same thinking. Cool silver, deep neutral black, and a grain profile that survives being posted and recompressed.</p>
+      <ul class="gbay-specs">
+        <li>12 presets, .xmp</li>
+        <li>Desktop and mobile</li>
+      </ul>
+      <div class="gbay-foot">
+        <span class="gbay-price">TBC</span>
+        <a class="gbay-btn" href="mailto:rahulkuttappy805@gmail.com?subject=Tell%20me%20when%20Stills%20%26%20Mono%20drops">Notify Me</a>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- REQUEST -->
+<section id="grequest">
+  <div class="grequest-inner reveal">
+    <div>
+      <h2>NOTHING HERE<br>THAT YOU NEED?</h2>
+      <p>Tell me what you are trying to make and what keeps getting in the way. Most of the things on this shelf exist because somebody asked for them first.</p>
+    </div>
+    <a class="gbay-btn" href="mailto:rahulkuttappy805@gmail.com?subject=Garage%20request">Send A Request</a>
+  </div>
+</section>
+
+<footer>
+  <canvas id="plexus" aria-hidden="true"></canvas>
+  <img class="f-logo" src="assets/images/logo.png" alt="RK"/>
+  <p>&copy; 2026 Rahul Kuttappy. All rights reserved</p>
+  <a class="f-back" href="index.html#hero">Back to home &uarr;</a>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
