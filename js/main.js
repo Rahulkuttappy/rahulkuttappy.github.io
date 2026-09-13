@@ -711,7 +711,7 @@ if(gFilters.length){
 const igGrid=document.getElementById('igGrid');
 if(igGrid){
   const IG_PROFILE='https://www.instagram.com/rahul____kuttappy/';
-  const IG_MAX=8;
+  const IG_MAX=6;   /* Behold's free tier caps a feed at 6 posts */
   const igEndpoint=(igGrid.dataset.endpoint||'').trim();
 
   function igFallback(label){
@@ -727,9 +727,17 @@ if(igGrid){
   function igNormalise(json){
     const arr=Array.isArray(json)?json:(json.posts||json.data||json.media||[]);
     if(!Array.isArray(arr)) return [];
+    const sized=p=>{
+      /* Behold mirrors each post to its own CDN under `sizes`. Prefer those:
+         the raw mediaUrl is an Instagram signed URL that expires. */
+      const s=p.sizes||{};
+      return (s.medium&&s.medium.mediaUrl)||(s.large&&s.large.mediaUrl)||
+             (s.small&&s.small.mediaUrl)||p.thumbnailUrl||p.thumbnail_url||
+             p.mediaUrl||p.media_url||p.image||'';
+    };
     return arr.slice(0,IG_MAX).map(p=>({
       link:p.permalink||p.link||IG_PROFILE,
-      img:p.thumbnailUrl||p.thumbnail_url||p.mediaUrl||p.media_url||p.image||'',
+      img:sized(p),
       type:String(p.mediaType||p.media_type||'').toUpperCase(),
       caption:String(p.caption||p.text||'').replace(/\s+/g,' ').slice(0,110)
     })).filter(p=>/^https:\/\//.test(p.img));

@@ -396,7 +396,8 @@ nav.scrolled{
   transition:color .3s ease;white-space:nowrap;
 }
 .ig-handle:hover{color:var(--red);}
-.ig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;}
+/* three across, so a six post feed fills two clean rows */
+.ig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;}
 .ig-item{
   position:relative;display:block;aspect-ratio:1;overflow:hidden;
   background:var(--surface);cursor:none;
