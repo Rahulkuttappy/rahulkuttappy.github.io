@@ -221,6 +221,19 @@ nav.scrolled{
 #clock{font-size:.56rem;letter-spacing:.12em;color:rgba(237,234,226,.45);font-variant-numeric:tabular-nums;}
 .nav-cta{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--off);text-decoration:none;font-weight:500;border-bottom:1px solid var(--red);padding-bottom:2px;}
 
+/* Menu button: desktop shows the links inline, so it only appears on mobile */
+.nav-toggle{
+  display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;
+  width:34px;height:34px;padding:0;margin-left:1rem;
+  background:none;border:none;cursor:none;position:relative;z-index:520;
+}
+.nav-toggle span{
+  display:block;width:22px;height:1.5px;background:var(--off);
+  transition:transform .38s cubic-bezier(.16,1,.3,1),opacity .3s ease;
+}
+body.nav-open .nav-toggle span:nth-child(1){transform:translateY(3.25px) rotate(45deg);}
+body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.25px) rotate(-45deg);}
+
 /* ── HERO ── */
 #hero{min-height:100svh;position:relative;overflow:hidden;display:flex;align-items:flex-end;}
 .hero-bg{position:absolute;inset:0;z-index:0;}
@@ -664,7 +677,29 @@ footer p{font-size:.5rem;letter-spacing:.1em;color:var(--muted);}
   body{cursor:auto;}
   #cursorFX{display:none;}
   nav{padding:1.2rem 1.5rem;}
-  .nav-links{display:none;}
+  .nav-toggle{display:flex;}
+  #clock{display:none;}
+  /* The panel is a sibling inside nav, so lift the logo and CTA over it */
+  nav>a,.nav-right{position:relative;z-index:520;}
+  /* Full screen menu. Sits below the bar so the logo and button stay live. */
+  .nav-links{
+    display:flex;position:fixed;inset:0;z-index:480;
+    flex-direction:column;align-items:stretch;justify-content:center;
+    gap:0;padding:4.5rem 1.5rem 2rem;margin:0;
+    background:rgba(8,8,8,.97);
+    backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+    opacity:0;pointer-events:none;transform:translateY(-10px);
+    transition:opacity .38s ease,transform .5s cubic-bezier(.16,1,.3,1);
+  }
+  body.nav-open .nav-links{opacity:1;pointer-events:auto;transform:none;}
+  .nav-links li{border-bottom:1px solid var(--border);}
+  .nav-links li:first-child{border-top:1px solid var(--border);}
+  .nav-links a{
+    display:block;padding:1.15rem .2rem;
+    font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.05em;
+    color:var(--off);
+  }
+  .nav-links a.active-link{color:var(--red);border-bottom:none;padding-bottom:1.15rem;}
   .hero-side{display:none;}
   .hero-content{max-width:100%;padding:0 1.5rem 4rem;}
   #works{padding:5rem 1.5rem 0;}

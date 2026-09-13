@@ -18,6 +18,28 @@ if(navLogoLink){
 function tick(){const c=document.getElementById('clock'); if(c) c.textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:'Asia/Kolkata'});}
 tick();setInterval(tick,1000);
 
+/* ── Mobile menu ──
+   The link list is the same element the desktop nav uses; on small screens
+   CSS turns it into a full screen panel and this toggles it. No scroll lock:
+   body overflow would give the page a second scroll container and break the
+   sticky section headers. */
+const navToggle=document.getElementById('navToggle');
+if(navToggle){
+  const closeNav=()=>{
+    document.body.classList.remove('nav-open');
+    navToggle.setAttribute('aria-expanded','false');
+  };
+  navToggle.addEventListener('click',e=>{
+    e.stopPropagation();
+    const open=document.body.classList.toggle('nav-open');
+    navToggle.setAttribute('aria-expanded',open?'true':'false');
+  });
+  document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',closeNav));
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeNav(); });
+  /* Rotating the phone back to a wide layout should not strand the panel */
+  window.addEventListener('resize',()=>{ if(window.innerWidth>768) closeNav(); });
+}
+
 /* ── Page transitions ── */
 const pageFade=document.getElementById('pageFade');
 if(pageFade){
