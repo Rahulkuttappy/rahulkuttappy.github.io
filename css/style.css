@@ -240,6 +240,10 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 #hero{min-height:100svh;position:relative;overflow:hidden;display:flex;align-items:flex-end;}
 .hero-bg{position:absolute;inset:0;z-index:0;}
 .hero-bg img,.hero-bg video{width:100%;height:100%;object-fit:cover;object-position:60% center;filter:brightness(.72);display:block;}
+/* Second clip sits on top of the first and crossfades in at the handover */
+.hero-bg video{position:absolute;inset:0;}
+#heroVideo2{opacity:0;transition:opacity 1s ease;}
+#heroVideo2.is-on{opacity:1;}
 .hero-bg::after{
   content:'';position:absolute;inset:0;
   background:linear-gradient(to right,rgba(8,8,8,.88) 0%,rgba(8,8,8,.55) 45%,rgba(8,8,8,.1) 100%);

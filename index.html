@@ -109,9 +109,14 @@
 <!-- HERO -->
 <section id="hero">
   <div class="hero-bg">
-    <video id="heroVideo" autoplay muted loop playsinline preload="auto"
+    <video id="heroVideo" autoplay muted playsinline preload="auto"
            poster="assets/images/hero-poster.jpg" aria-label="Rahul Kuttappy, Filmmaker">
       <source src="assets/video/hero-loop.mp4" type="video/mp4"/>
+    </video>
+    <!-- Takes over once the first finishes, then loops. preload=none so the
+         opening clip gets the bandwidth; it is told to load once that plays. -->
+    <video id="heroVideo2" muted loop playsinline preload="none" aria-hidden="true">
+      <source src="assets/video/hero-loop-2.mp4" type="video/mp4"/>
     </video>
   </div>
   <div class="hero-side" id="hside">

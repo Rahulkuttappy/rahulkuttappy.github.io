@@ -35,34 +35,63 @@ if(navLogoLink){
 function tick(){const c=document.getElementById('clock'); if(c) c.textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:'Asia/Kolkata'});}
 tick();setInterval(tick,1000);
 
-/* ── Hero video keep-alive ──
-   iOS pauses autoplaying video for a lot of reasons: backgrounding the tab,
-   an incoming call, another app taking the audio session, or simply scrolling
-   it out of view. Nothing restarts it on its own, so watch for the pause and
-   resume when it is on screen. Low Power Mode blocks playback outright and
-   play() just rejects, hence the attempt cap: the poster frame stands in. */
-const heroVideo=document.getElementById('heroVideo');
-if(heroVideo){
-  heroVideo.muted=true;                 /* re-assert: autoplay needs it */
-  heroVideo.setAttribute('playsinline','');
-  heroVideo.setAttribute('webkit-playsinline','');
-  heroVideo.disablePictureInPicture=true;
+/* ── Hero: opening clip, then a looping one ──
+   The first video plays once and hands over to the second, which loops for
+   good. The keep-alive below tracks whichever clip is current, otherwise it
+   would fight the handover by restarting the one we just retired.
 
+   iOS pauses autoplaying video for a lot of reasons: backgrounding the tab,
+   an incoming call, another app taking the audio session, or scrolling it out
+   of view. Nothing restarts it on its own. Low Power Mode blocks playback
+   outright and play() just rejects, hence the attempt cap: the poster frame
+   stands in. */
+const heroVideo=document.getElementById('heroVideo');
+const heroVideo2=document.getElementById('heroVideo2');
+if(heroVideo){
+  let active=heroVideo;
   let inView=true, attempts=0;
   const MAX_ATTEMPTS=30;
 
+  [heroVideo,heroVideo2].forEach(v=>{
+    if(!v) return;
+    v.muted=true;                       /* re-assert: autoplay needs it */
+    v.setAttribute('playsinline','');
+    v.setAttribute('webkit-playsinline','');
+    v.disablePictureInPicture=true;
+  });
+
   function resumeHero(reset){
     if(reset) attempts=0;
-    if(!inView||document.hidden||!heroVideo.paused) return;
+    if(!inView||document.hidden||!active.paused) return;
     if(attempts++>MAX_ATTEMPTS) return;
-    const p=heroVideo.play();
+    const p=active.play();
     if(p&&p.catch) p.catch(()=>{});
   }
 
-  heroVideo.addEventListener('pause',()=>{ setTimeout(()=>resumeHero(false),140); });
-  heroVideo.addEventListener('playing',()=>{ attempts=0; });
-  heroVideo.addEventListener('stalled',()=>resumeHero(true));
-  heroVideo.addEventListener('suspend',()=>resumeHero(false));
+  if(heroVideo2){
+    /* let the opening clip have the bandwidth, then fetch the loop */
+    heroVideo.addEventListener('playing',()=>{ heroVideo2.load(); },{once:true});
+
+    heroVideo.addEventListener('ended',()=>{
+      active=heroVideo2;
+      attempts=0;
+      heroVideo2.currentTime=0;
+      const p=heroVideo2.play();
+      if(p&&p.catch) p.catch(()=>{ active=heroVideo; heroVideo.loop=true; resumeHero(true); });
+      heroVideo2.classList.add('is-on');
+      /* retire the first one only after the crossfade has covered it */
+      setTimeout(()=>{ if(active===heroVideo2) heroVideo.pause(); },1100);
+    },{once:true});
+  }else{
+    heroVideo.loop=true;
+  }
+
+  [heroVideo,heroVideo2].forEach(v=>{
+    if(!v) return;
+    v.addEventListener('pause',()=>{ if(v===active) setTimeout(()=>resumeHero(false),140); });
+    v.addEventListener('playing',()=>{ if(v===active) attempts=0; });
+    v.addEventListener('stalled',()=>{ if(v===active) resumeHero(true); });
+  });
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden) resumeHero(true); });
   window.addEventListener('pageshow',()=>resumeHero(true));
   ['touchstart','pointerdown','click'].forEach(ev=>
@@ -71,10 +100,8 @@ if(heroVideo){
   if('IntersectionObserver' in window){
     new IntersectionObserver(es=>{
       inView=es[0].isIntersecting;
-      /* pausing off screen saves battery, and the pause handler ignores it
-         because inView is already false */
       if(inView) resumeHero(true);
-      else if(!heroVideo.paused) heroVideo.pause();
+      else if(!active.paused) active.pause();
     },{threshold:0.01}).observe(heroVideo);
   }
 }
