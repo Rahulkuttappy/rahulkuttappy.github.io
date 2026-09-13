@@ -709,7 +709,13 @@ document.querySelectorAll('.film .film-media').forEach(btn=>{
 
 /* Keep the films count honest without hand-editing it */
 const fCount=document.getElementById('fCount');
-if(fCount) fCount.textContent=String(document.querySelectorAll('.film').length);
+if(fCount){
+  const n=document.querySelectorAll('.film').length;
+  fCount.textContent='';
+  const em=document.createElement('em');
+  em.textContent=String(n);
+  fCount.append(em, n===1 ? ' film' : ' films');
+}
 
 /* ── Garage: packshots tilt toward the cursor ── */
 const tiltBoxes=document.querySelectorAll('[data-tilt]');

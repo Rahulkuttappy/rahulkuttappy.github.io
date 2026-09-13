@@ -79,7 +79,7 @@
     <h1 class="fhero-title"><span class="dither-word" data-dither>FILMS</span></h1>
     <div class="fhero-lower">
       <p class="fhero-blurb">The work nobody asked for. Made because the idea would not leave, shot when there was time, and finished when it was actually finished rather than when it was due.</p>
-      <p class="fhero-count"><em id="fCount">3</em> films</p>
+      <p class="fhero-count" id="fCount"><em>1</em> film</p>
     </div>
   </div>
 </section>
@@ -94,6 +94,29 @@
 
   Leave data-id / data-src as REPLACE_ME and the player shows a tidy
   "not linked yet" note instead of a broken embed.
+
+  Once there is more than one film, the grid section goes back in:
+
+  <section id="ffilms">
+    <div class="ffilms-hdr reveal">
+      <p class="s-eye">Everything Else</p>
+      <h2 class="s-hed">THE REST</h2>
+    </div>
+    <div class="ffilm-grid" id="filmGrid">
+      <article class="film reveal" data-type="youtube" data-id="...">
+        <button class="film-media" aria-label="Play NAME">
+          <img src="assets/images/..." alt=""/>
+          <span class="film-play">&#9654;</span>
+        </button>
+        <div class="film-body">
+          <div class="film-head"><span class="film-num">02</span></div>
+          <h3 class="film-title">NAME</h3>
+          <p class="film-line">YEAR <span>/</span> Short <span>/</span> 00:00</p>
+          <p class="film-syn">Synopsis.</p>
+        </div>
+      </article>
+    </div>
+  </section>
   ────────────────────────────────────────────────────────────────────────
 -->
 
@@ -124,49 +147,6 @@
       <p class="ffeature-syn">One paragraph on what the film is and why it exists. Replace this with the real synopsis, or send me the film and I will write a draft you can correct.</p>
     </div>
   </article>
-</section>
-
-<!-- GRID -->
-<section id="ffilms">
-  <div class="ffilms-hdr reveal">
-    <p class="s-eye">Everything Else</p>
-    <h2 class="s-hed">THE REST</h2>
-  </div>
-  <div class="ffilm-grid" id="filmGrid">
-
-    <article class="film reveal" data-type="youtube" data-id="REPLACE_ME">
-      <button class="film-media" aria-label="Play film two">
-        <img src="assets/images/photography/clubs-01.jpg" alt=""/>
-        <span class="film-play">&#9654;</span>
-      </button>
-      <div class="film-body">
-        <div class="film-head">
-          <span class="film-num">02</span>
-          <span class="film-badge">Placeholder</span>
-        </div>
-        <h3 class="film-title">SECOND FILM</h3>
-        <p class="film-line">2025 <span>/</span> Short <span>/</span> 00:00</p>
-        <p class="film-syn">A line or two on this one. Swap in the real title, year, runtime and synopsis.</p>
-      </div>
-    </article>
-
-    <article class="film reveal" data-type="file" data-src="REPLACE_ME">
-      <button class="film-media" aria-label="Play film three">
-        <img src="assets/images/photography/portrait-01.jpg" alt=""/>
-        <span class="film-play">&#9654;</span>
-      </button>
-      <div class="film-body">
-        <div class="film-head">
-          <span class="film-num">03</span>
-          <span class="film-badge">Placeholder</span>
-        </div>
-        <h3 class="film-title">THIRD FILM</h3>
-        <p class="film-line">2025 <span>/</span> Short <span>/</span> 00:00</p>
-        <p class="film-syn">This slot is set up for a file hosted on the site rather than YouTube, to show both working side by side.</p>
-      </div>
-    </article>
-
-  </div>
 </section>
 
 <!-- CONTACT CTA -->
