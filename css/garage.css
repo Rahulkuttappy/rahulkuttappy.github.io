@@ -2,9 +2,9 @@
 
 /* ══ HERO ══ */
 #ghero{
-  position:relative;min-height:100svh;overflow:hidden;
+  position:relative;min-height:72svh;overflow:hidden;
   display:flex;flex-direction:column;justify-content:flex-end;
-  padding:7rem 2.5rem 3.5rem;
+  padding:5rem 2.5rem 0;
 }
 .ghero-bg{position:absolute;inset:0;z-index:0;}
 .ghero-bg img{
@@ -42,9 +42,9 @@
   border-top:1px solid rgba(237,234,226,.12);padding-top:1.6rem;
 }
 .ghero-blurb{
-  font-family:'Instrument Serif',Georgia,serif;font-style:italic;
-  font-size:clamp(1rem,1.5vw,1.35rem);line-height:1.55;
-  color:rgba(237,234,226,.78);max-width:40ch;
+  font-family:'JetBrains Mono',monospace;font-weight:400;
+  font-size:clamp(.7rem,.88vw,.82rem);line-height:2;letter-spacing:.01em;
+  color:rgba(237,234,226,.62);max-width:56ch;
 }
 .ghero-stats{display:flex;gap:2.4rem;}
 .ghero-stat{text-align:right;}
@@ -147,10 +147,10 @@
   background:linear-gradient(to top,rgba(6,6,6,.82) 0%,transparent 55%);
 }
 .gx-arttext{
-  position:absolute;left:0;right:0;bottom:.9rem;z-index:2;text-align:center;
-  font-family:'Instrument Serif',Georgia,serif;
-  font-size:clamp(.95rem,1.5vw,1.4rem);letter-spacing:.01em;color:var(--off);
-  text-shadow:0 2px 18px rgba(0,0,0,.8);padding:0 .6rem;
+  position:absolute;left:0;right:0;bottom:.8rem;z-index:2;text-align:center;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(1.1rem,1.8vw,1.6rem);letter-spacing:.07em;color:var(--off);
+  text-shadow:0 2px 18px rgba(0,0,0,.85);padding:0 .6rem;
 }
 .gx-foot{
   padding:.85rem 1rem 1.1rem;display:flex;align-items:flex-end;justify-content:space-between;gap:.6rem;
@@ -180,8 +180,12 @@
   letter-spacing:.18em;text-transform:uppercase;
   padding:.24rem .42rem;border-radius:2px;white-space:nowrap;
 }
-.gbay-status.ready{color:#cfe8cf;background:rgba(90,150,90,.18);border:1px solid rgba(120,180,120,.32);}
-.gbay-status.building{color:rgba(237,234,226,.65);background:rgba(237,234,226,.05);border:1px solid rgba(237,234,226,.14);}
+/* Hazard strip: same language as the tape across the packshot */
+.gbay-status.soon{
+  color:#fff;border:1px solid rgba(0,0,0,.55);
+  background:repeating-linear-gradient(45deg,#141414 0 6px,rgba(var(--red-glow),.9) 6px 12px);
+  text-shadow:0 1px 2px rgba(0,0,0,.9);
+}
 .gbay-name{
   font-family:'Bebas Neue',sans-serif;font-size:1.75rem;letter-spacing:.04em;
   line-height:1;color:var(--off);margin-bottom:.55rem;
@@ -205,6 +209,34 @@
   transition:border-color .3s ease,background .3s ease;
 }
 .gbay-btn:hover{border-color:var(--red);background:rgba(var(--red-glow),.18);}
+.gbay-btn.wide{flex:1;text-align:center;}
+
+/* ══ COMING SOON TAPE ══ */
+.gx-tape{
+  position:absolute;left:-16%;right:-16%;top:43%;height:30px;z-index:4;
+  transform:rotate(-11deg);
+  display:flex;align-items:center;justify-content:center;
+  background:repeating-linear-gradient(45deg,#121212 0 9px,var(--red) 9px 18px);
+  border-top:2px solid #090909;border-bottom:2px solid #090909;
+  box-shadow:0 10px 26px rgba(0,0,0,.62);
+  animation:tapeCrawl 1.6s linear infinite;
+}
+/* one full stripe period measured along the 45deg axis */
+@keyframes tapeCrawl{to{background-position:25.46px 0;}}
+.gx-tape b{
+  font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
+  letter-spacing:.24em;text-transform:uppercase;color:#fff;
+  background:#0a0a0a;padding:.3rem .65rem;border-radius:2px;
+  white-space:nowrap;box-shadow:0 0 0 1px rgba(237,234,226,.1);
+}
+
+/* ══ DITHER RULE ══ */
+.dither-rule{
+  display:block;width:100%;height:16px;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  position:relative;z-index:2;
+}
+.dither-rule.dr-wide{height:22px;margin-top:4.5rem;}
 
 /* ══ REQUEST STRIP ══ */
 #grequest{
@@ -238,4 +270,5 @@
 }
 @media(prefers-reduced-motion:reduce){
   .gx-box{transition:none;}
+  .gx-tape{animation:none;}
 }
