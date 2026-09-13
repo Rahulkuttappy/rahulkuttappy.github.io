@@ -289,12 +289,42 @@ if(bgm&&audioDock){
   /* run on into the next track rather than looping one forever */
   bgm.addEventListener('ended',()=>step(1));
 
-  /* Pressing the visualizer reveals the transport */
+  /* Pressing the visualizer reveals the transport, which then tucks itself
+     away again. Every interaction restarts the countdown, so tapping through
+     tracks or dragging the volume never yanks the panel out from under you,
+     and it will not close while the pointer is resting on it. */
   const vizBtn=document.getElementById('vizBtn');
   if(vizBtn){
-    vizBtn.addEventListener('click',e=>{ e.stopPropagation(); audioDock.classList.toggle('open'); });
-    document.addEventListener('click',e=>{ if(!audioDock.contains(e.target)) audioDock.classList.remove('open'); });
-    document.addEventListener('keydown',e=>{ if(e.key==='Escape') audioDock.classList.remove('open'); });
+    const AUTO_HIDE=3200;
+    let hideTimer=null;
+    const closeDock=()=>{ clearTimeout(hideTimer); audioDock.classList.remove('open'); };
+    const holdOpen=()=>clearTimeout(hideTimer);
+    const scheduleHide=()=>{
+      clearTimeout(hideTimer);
+      if(!audioDock.classList.contains('open')) return;
+      hideTimer=setTimeout(()=>{
+        /* a pointer parked on the panel counts as still in use */
+        if(audioDock.matches(':hover')) return scheduleHide();
+        audioDock.classList.remove('open');
+      },AUTO_HIDE);
+    };
+
+    vizBtn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const open=audioDock.classList.toggle('open');
+      open ? scheduleHide() : clearTimeout(hideTimer);
+    });
+
+    const panel=document.getElementById('audioPanel');
+    if(panel){
+      ['pointerdown','click','input','change','keydown'].forEach(ev=>
+        panel.addEventListener(ev,scheduleHide));
+      panel.addEventListener('pointerenter',holdOpen);
+      panel.addEventListener('pointerleave',scheduleHide);
+    }
+
+    document.addEventListener('click',e=>{ if(!audioDock.contains(e.target)) closeDock(); });
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeDock(); });
   }
   if(audioVol){
     audioVol.addEventListener('input',()=>{
