@@ -613,6 +613,16 @@ if(plexusCanvas){
   plexusLoop();
 }
 
+/* ── Casual image-lifting deterrents ──
+   Scoped to media only, so right-clicking a link or text still behaves
+   normally. This stops the easy save, nothing more. */
+document.addEventListener('contextmenu',e=>{
+  if(e.target.closest('img,video,.photo-item,.lightbox,.hero-bg,.wkhero-bg')) e.preventDefault();
+});
+document.addEventListener('dragstart',e=>{
+  if(e.target.tagName==='IMG'||e.target.tagName==='VIDEO') e.preventDefault();
+});
+
 /* ── Dithered word (ordered 4x4 Bayer dissolve on [data-dither] text) ── */
 const ditherWords=document.querySelectorAll('[data-dither]');
 if(ditherWords.length){

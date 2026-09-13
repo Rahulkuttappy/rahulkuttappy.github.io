@@ -8,6 +8,13 @@ html::-webkit-scrollbar{display:none;}
 body{background:var(--ink);color:var(--off);font-family:'Inter',sans-serif;font-weight:300;cursor:none;}
 body::-webkit-scrollbar{display:none;}
 
+/* Stop images being dragged out of the page, and kill the iOS long-press
+   "Save Image" sheet. A speed bump, not a lock. */
+img,video{
+  -webkit-user-drag:none;user-drag:none;
+  -webkit-touch-callout:none;
+}
+
 /* ── PAGE TRANSITION ── */
 #pageFade{
   position:fixed;inset:0;z-index:9500;pointer-events:none;
