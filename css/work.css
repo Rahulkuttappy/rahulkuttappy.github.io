@@ -77,3 +77,17 @@
   #wkvideo{padding:0 1.5rem 5rem;}
   #wknext{padding:4rem 1.5rem 5rem;}
 }
+
+
+/* ── TRAILER SET (masterclass, showreels) ── */
+.trailer-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2.6rem 1.6rem;}
+.trailer-grid .film-body{padding-top:1rem;}
+.trailer-grid .film-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.3rem,2.2vw,1.8rem);
+  letter-spacing:.04em;line-height:1;color:var(--off);margin-bottom:.35rem;
+}
+.trailer-grid .film-line{
+  font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--muted);margin:0;
+}
+@media(max-width:768px){.trailer-grid{grid-template-columns:1fr;gap:2.2rem;}}
