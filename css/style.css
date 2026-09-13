@@ -431,12 +431,14 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 .wgrid.lv .wc:hover .wc-info{transform:translateX(-18px);}
 .wgrid.lv .wc-title{transition:color .35s ease;}
 .wgrid.lv .wc:hover .wc-title{color:var(--red);}
+/* Travels with the title, otherwise an 18px gap closes to nothing the
+   moment the title slides. Wider resting gap so the two never crowd. */
 .wgrid.lv .wc-list-type{
-  position:relative;z-index:2;display:block;padding-right:.5rem;
-  opacity:0;transform:translateY(5px);
-  transition:opacity .35s ease,transform .35s ease,color .3s ease;
+  position:relative;z-index:2;display:block;padding-right:1.4rem;
+  opacity:0;transform:translate(0,5px);
+  transition:opacity .35s ease,transform .5s cubic-bezier(.16,1,.3,1),color .3s ease;
 }
-.wgrid.lv .wc:hover .wc-list-type{opacity:1;transform:translateY(0);color:var(--red);}
+.wgrid.lv .wc:hover .wc-list-type{opacity:1;transform:translate(-18px,0);color:var(--red);}
 .wgrid.lv .wc-type{display:none;}
 .wgrid.lv .wc-play{display:none;}
 .wgrid.lv .wc-title{font-size:clamp(1.1rem,2.5vw,2rem);}
