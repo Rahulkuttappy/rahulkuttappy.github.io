@@ -69,19 +69,28 @@ if(heroVideo){
   }
 
   if(heroVideo2){
-    /* let the opening clip have the bandwidth, then fetch the loop */
+    /* let the opening clip have the bandwidth, then fetch the other */
     heroVideo.addEventListener('playing',()=>{ heroVideo2.load(); },{once:true});
 
-    heroVideo.addEventListener('ended',()=>{
-      active=heroVideo2;
+    /* The pair alternate forever. Only the second carries the fade class, so
+       handing forward means fading it in over the first, and handing back
+       means fading it out to reveal the first already running underneath.
+       The outgoing clip is paused only after the crossfade has covered it. */
+    function handOver(next,prev,fadeIn){
+      active=next;
       attempts=0;
-      heroVideo2.currentTime=0;
-      const p=heroVideo2.play();
-      if(p&&p.catch) p.catch(()=>{ active=heroVideo; heroVideo.loop=true; resumeHero(true); });
-      heroVideo2.classList.add('is-on');
-      /* retire the first one only after the crossfade has covered it */
-      setTimeout(()=>{ if(active===heroVideo2) heroVideo.pause(); },1100);
-    },{once:true});
+      try{ next.currentTime=0; }catch(e){}
+      const p=next.play();
+      if(p&&p.catch) p.catch(()=>{
+        /* if the other clip will not start, keep the current one going */
+        active=prev; prev.loop=true; resumeHero(true);
+      });
+      heroVideo2.classList.toggle('is-on',fadeIn);
+      setTimeout(()=>{ if(active===next && !prev.paused) prev.pause(); },1100);
+    }
+
+    heroVideo.addEventListener('ended',()=>handOver(heroVideo2,heroVideo,true));
+    heroVideo2.addEventListener('ended',()=>handOver(heroVideo,heroVideo2,false));
   }else{
     heroVideo.loop=true;
   }
