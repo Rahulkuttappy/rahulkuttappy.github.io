@@ -654,6 +654,63 @@ if(plexusCanvas){
   plexusLoop();
 }
 
+/* ── Films: click to play, one handler for YouTube, Vimeo and own files ──
+   Nothing autoplays on load. The poster is swapped for the player only once
+   the visitor presses it, and an unfilled slot says so rather than embedding
+   something broken. */
+document.querySelectorAll('.film .film-media').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const film=btn.closest('.film');
+    const type=(film.dataset.type||'').toLowerCase();
+    const id=(film.dataset.id||'').trim();
+    const src=(film.dataset.src||'').trim();
+    const title=(film.querySelector('.film-title')||{}).textContent||'Film';
+
+    const frame=document.createElement('div');
+    frame.className='film-frame';
+
+    const unset=v=>!v||v==='REPLACE_ME';
+    if((type==='youtube'||type==='vimeo') ? unset(id) : unset(src)){
+      frame.classList.add('film-missing');
+      frame.textContent='Not linked yet';
+      btn.replaceWith(frame);
+      return;
+    }
+
+    /* The visitor asked for this, so playing over the background track
+       would just be two things at once. */
+    if(typeof bgm!=='undefined' && bgm && !bgm.paused){
+      bgm.pause();
+      if(typeof updateToggleLabel==='function') updateToggleLabel();
+    }
+
+    if(type==='youtube'){
+      const f=document.createElement('iframe');
+      f.src='https://www.youtube.com/embed/'+encodeURIComponent(id)+'?autoplay=1&rel=0&modestbranding=1&playsinline=1';
+      f.title=title;
+      f.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      f.allowFullscreen=true;
+      frame.appendChild(f);
+    }else if(type==='vimeo'){
+      const f=document.createElement('iframe');
+      f.src='https://player.vimeo.com/video/'+encodeURIComponent(id)+'?autoplay=1&title=0&byline=0&portrait=0';
+      f.title=title;
+      f.allow='autoplay; fullscreen; picture-in-picture';
+      f.allowFullscreen=true;
+      frame.appendChild(f);
+    }else{
+      const v=document.createElement('video');
+      v.src=src;v.controls=true;v.autoplay=true;v.playsInline=true;v.preload='metadata';
+      frame.appendChild(v);
+    }
+    btn.replaceWith(frame);
+  });
+});
+
+/* Keep the films count honest without hand-editing it */
+const fCount=document.getElementById('fCount');
+if(fCount) fCount.textContent=String(document.querySelectorAll('.film').length);
+
 /* ── Garage: packshots tilt toward the cursor ── */
 const tiltBoxes=document.querySelectorAll('[data-tilt]');
 if(tiltBoxes.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){

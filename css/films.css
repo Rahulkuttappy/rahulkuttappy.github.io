@@ -1,0 +1,139 @@
+.nav-links a.active-link{color:var(--off);border-bottom:1px solid var(--red);padding-bottom:2px;}
+
+/* ══ HERO ══ */
+#fhero{
+  position:relative;min-height:62svh;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:6rem 2.5rem 3rem;
+  border-bottom:1px solid var(--border);
+}
+/* No photograph here on purpose: nothing should imply one particular film */
+#fhero::after{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(100% 62% at 12% 108%,rgba(var(--red-glow),.3) 0%,transparent 60%),
+    repeating-linear-gradient(to bottom,rgba(237,234,226,.022) 0px,rgba(237,234,226,.022) 1px,transparent 1px,transparent 4px);
+}
+.fhero-inner{position:relative;z-index:1;width:100%;}
+.fhero-top{display:flex;align-items:baseline;justify-content:space-between;gap:2rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+.fhero-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(4rem,16vw,14rem);line-height:.82;letter-spacing:.01em;
+  color:var(--off);margin-bottom:1.6rem;
+}
+.fhero-lower{
+  display:grid;grid-template-columns:1fr auto;gap:3rem;align-items:end;
+  border-top:1px solid rgba(237,234,226,.12);padding-top:1.5rem;
+}
+.fhero-blurb{
+  font-family:'JetBrains Mono',monospace;font-weight:400;
+  font-size:clamp(.7rem,.88vw,.82rem);line-height:2;letter-spacing:.01em;
+  color:rgba(237,234,226,.62);max-width:56ch;
+}
+.fhero-count{
+  font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);white-space:nowrap;
+}
+.fhero-count em{font-style:normal;color:var(--red);}
+
+/* ══ SHARED PLAYER ══ */
+.film-media{
+  position:relative;display:block;width:100%;padding:0;border:none;cursor:none;
+  aspect-ratio:16/9;overflow:hidden;background:var(--surface);
+  border:1px solid var(--border);
+}
+.film-media img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:brightness(.62) saturate(.9);
+  transition:transform .8s cubic-bezier(.16,1,.3,1),filter .45s ease;
+}
+.film-media:hover img{transform:scale(1.03);filter:brightness(.8) saturate(1);}
+.film-play{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:64px;height:64px;border-radius:50%;
+  border:1px solid rgba(237,234,226,.5);color:var(--off);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;padding-left:4px;
+  background:rgba(8,8,8,.35);backdrop-filter:blur(8px);
+  transition:border-color .35s ease,color .35s ease,transform .35s ease,background .35s ease;
+}
+.film-media:hover .film-play{
+  border-color:var(--red);color:var(--red);
+  transform:translate(-50%,-50%) scale(1.1);
+  background:rgba(8,8,8,.5);
+}
+/* swapped in once the visitor presses play */
+.film-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000;border:1px solid var(--border);}
+.film-frame iframe,.film-frame video{position:absolute;inset:0;width:100%;height:100%;border:none;display:block;}
+.film-missing{
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:1.5rem;
+  font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+}
+
+/* ══ FEATURED ══ */
+#ffeature{padding:5rem 2.5rem 2rem;}
+.ffeature-hdr{display:flex;align-items:baseline;justify-content:space-between;gap:2rem;flex-wrap:wrap;margin-bottom:1.8rem;}
+.ffeature-meta{
+  display:flex;gap:2rem;flex-wrap:wrap;margin-top:1.4rem;
+  padding-top:1.2rem;border-top:1px solid var(--border);
+}
+.ffeature-meta div{display:flex;flex-direction:column;gap:.35rem;}
+.ffeature-meta dt{
+  font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+}
+.ffeature-meta dd{font-size:.8rem;color:rgba(237,234,226,.7);}
+.ffeature-syn{
+  margin-top:1.4rem;font-size:.84rem;line-height:1.9;
+  color:rgba(237,234,226,.55);max-width:62ch;
+}
+
+/* ══ GRID ══ */
+#ffilms{padding:4rem 2.5rem 7rem;border-top:1px solid var(--border);}
+.ffilms-hdr{padding:2.5rem 0 2.2rem;}
+.ffilm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3.5rem 2rem;}
+.film-body{padding-top:1.2rem;}
+.film-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.5rem;}
+.film-num{
+  font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+}
+.film-badge{
+  font-family:'JetBrains Mono',monospace;font-size:.42rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--off);
+  background:rgba(237,234,226,.07);border:1px solid rgba(237,234,226,.14);
+  padding:.24rem .42rem;border-radius:2px;white-space:nowrap;
+}
+.film-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.5rem,2.6vw,2.2rem);
+  letter-spacing:.04em;line-height:1;color:var(--off);margin-bottom:.5rem;
+}
+.film-line{
+  font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:.85rem;
+}
+.film-line span{color:var(--red);margin:0 .45rem;}
+.film-syn{font-size:.8rem;line-height:1.85;color:rgba(237,234,226,.5);max-width:52ch;}
+
+@media(max-width:900px){
+  .ffilm-grid{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  #fhero{padding:5rem 1.5rem 2.5rem;min-height:54svh;}
+  .fhero-lower{grid-template-columns:1fr;gap:1.4rem;}
+  #ffeature{padding:3.5rem 1.5rem 1.5rem;}
+  #ffilms{padding:3rem 1.5rem 5rem;}
+  .ffeature-meta{gap:1.4rem;}
+  .film-play{width:52px;height:52px;font-size:.8rem;}
+}
+
+/* ── CONTACT CTA (shares the About page treatment) ── */
+#ab-contact{
+  padding:7rem 2.5rem 8rem;border-top:1px solid var(--border);
+  text-align:center;position:relative;overflow:hidden;
+}
+#ab-contact .contact-hed{font-size:clamp(2.6rem,8vw,7rem);}
+#ab-contact>.reveal{position:relative;z-index:1;}
+@media(max-width:768px){#ab-contact{padding:5rem 1.5rem 6rem;}}
