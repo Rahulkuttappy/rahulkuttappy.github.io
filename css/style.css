@@ -57,33 +57,66 @@ img,video{
 .viz-btn:hover{background:rgba(237,234,226,.08);}
 #vizCanvas{display:block;width:78px;height:26px;image-rendering:pixelated;}
 
-/* volume + toggle slide out when the visualizer is pressed */
+/* transport slides out when the visualizer is pressed */
 .audio-panel{
-  display:flex;align-items:center;gap:.7rem;
+  display:flex;flex-direction:column;gap:.55rem;
   max-width:0;opacity:0;overflow:hidden;pointer-events:none;
-  padding:.5rem 0;
+  padding:.55rem 0;
   transition:max-width .5s cubic-bezier(.16,1,.3,1),opacity .35s ease,padding .5s ease,margin .5s ease;
 }
 #audioDock.open .audio-panel{
-  max-width:230px;opacity:1;pointer-events:auto;
-  padding:.5rem .8rem;margin-left:.4rem;
+  max-width:290px;opacity:1;pointer-events:auto;
+  padding:.6rem .85rem;margin-left:.4rem;
   background:rgba(237,234,226,.04);
   backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);
-  border-radius:3px;
+  border:1px solid rgba(237,234,226,.09);border-radius:3px;
+  position:relative;
 }
-.audio-toggle{
-  background:none;border:none;padding:0;cursor:none;
-  font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
-  letter-spacing:.16em;text-transform:uppercase;color:rgba(237,234,226,.65);
-  transition:color .25s ease;white-space:nowrap;
+/* readout scanlines, the HUD tell */
+#audioDock.open .audio-panel::after{
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:3px;
+  background:repeating-linear-gradient(to bottom,rgba(237,234,226,.03) 0px,rgba(237,234,226,.03) 1px,transparent 1px,transparent 3px);
 }
-.audio-toggle:hover{color:var(--red);}
+.ap-head{
+  display:flex;align-items:baseline;gap:.5rem;
+  padding-bottom:.45rem;border-bottom:1px solid rgba(237,234,226,.1);
+  position:relative;z-index:1;
+}
+.ap-idx{
+  font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
+  letter-spacing:.14em;color:var(--red);flex:none;
+}
+.ap-title{
+  font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:rgba(237,234,226,.72);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ap-controls{display:flex;align-items:center;gap:.45rem;position:relative;z-index:1;}
+.ap-btn{
+  display:flex;align-items:center;justify-content:center;flex:none;
+  width:22px;height:22px;padding:0;border:none;border-radius:2px;cursor:none;
+  background:rgba(237,234,226,.05);color:rgba(237,234,226,.7);
+  transition:background .25s ease,color .25s ease;
+}
+.ap-btn svg{width:12px;height:12px;fill:currentColor;display:block;}
+.ap-btn:hover{background:rgba(var(--red-glow),.28);color:var(--off);}
+.ap-btn.ap-main{
+  width:26px;height:26px;
+  background:rgba(var(--red-glow),.3);color:var(--off);
+  box-shadow:0 0 0 1px rgba(var(--red-glow),.5);
+}
+.ap-btn.ap-main:hover{background:rgba(var(--red-glow),.5);}
+/* scoped to .ap-btn so these outrank `.ap-btn svg{display:block}` above,
+   which otherwise wins on specificity and shows both icons at once */
+.ap-btn .ap-i-pause{display:none;}
+#audioDock.playing .ap-btn .ap-i-play{display:none;}
+#audioDock.playing .ap-btn .ap-i-pause{display:block;}
 /* The bar stays 2px, but the input itself is tall enough to actually grab.
    touch-action keeps a drag from scrolling the page on a phone. */
 .audio-vol{
   -webkit-appearance:none;appearance:none;
-  width:84px;height:20px;background:none;
-  outline:none;cursor:none;flex:none;touch-action:none;
+  width:84px;height:20px;background:none;margin-left:.2rem;
+  outline:none;cursor:none;flex:1 1 auto;min-width:52px;touch-action:none;
 }
 .audio-vol::-webkit-slider-runnable-track{
   height:2px;background:rgba(237,234,226,.18);border-radius:2px;
@@ -105,8 +138,8 @@ img,video{
 @media(max-width:768px){
   #audioDock{left:1rem;bottom:1rem;}
   #vizCanvas{width:56px;height:20px;}
-  #audioDock.open .audio-panel{max-width:190px;}
-  .audio-vol{width:64px;}
+  #audioDock.open .audio-panel{max-width:240px;}
+  .audio-vol{width:60px;min-width:44px;}
 }
 
 /* ── CUSTOM SCROLL PROGRESS ── */

@@ -161,13 +161,26 @@ if(pageFade){
   });
 }
 
-/* ── Background music + dithered visualizer ── */
+/* ── Background music: playlist with transport ── */
 const bgm=document.getElementById('bgm');
 const audioDock=document.getElementById('audioDock');
 const vizCanvas=document.getElementById('vizCanvas');
 const audioToggle=document.getElementById('audioToggle');
 const audioVol=document.getElementById('audioVol');
+const apPrev=document.getElementById('apPrev');
+const apNext=document.getElementById('apNext');
+const apIdx=document.getElementById('apIdx');
+const apTitle=document.getElementById('apTitle');
 const AUDIO_KEY='rk_audio';
+
+const TRACKS=[
+  {file:'singularity.m4a',  name:'Singularity'},
+  {file:'warm-soul.m4a',    name:'Warm Soul'},
+  {file:'my-existence.m4a', name:'My Existence'},
+  {file:'bleak.m4a',        name:'Bleak'}
+];
+const AUDIO_BASE=(audioDock&&audioDock.dataset.audioBase)||'assets/audio/';
+let trackIndex=0;
 let audioCtx=null,analyser=null,freqData=null;
 
 function readAudioState(){
@@ -180,9 +193,7 @@ function saveAudioState(){
   if(!bgm) return;
   try{
     sessionStorage.setItem(AUDIO_KEY,JSON.stringify({
-      want: audioWant,
-      vol: bgm.volume,
-      t: bgm.currentTime||0
+      want:audioWant, vol:bgm.volume, t:bgm.currentTime||0, i:trackIndex
     }));
   }catch(e){}
 }
@@ -203,27 +214,47 @@ function setupAnalyser(){
   }catch(e){ analyser=null; }
 }
 
-function updateToggleLabel(){
-  if(!audioToggle||!bgm) return;
-  audioToggle.textContent = (!bgm.paused) ? 'Sound On' : (audioWant ? 'Resume' : 'Sound Off');
+function pad2(n){ return String(n).padStart(2,'0'); }
+function paintTransport(){
+  if(apIdx)   apIdx.textContent=pad2(trackIndex+1)+'/'+pad2(TRACKS.length);
+  if(apTitle) apTitle.textContent=TRACKS[trackIndex].name;
+  if(audioDock) audioDock.classList.toggle('playing', !!bgm && !bgm.paused);
+  if(audioToggle) audioToggle.setAttribute('aria-label', (bgm&&!bgm.paused)?'Pause':'Play');
+}
+
+/* Only points the element at a file. Loading waits for a play request,
+   which is what keeps preload=none meaningful. */
+function loadTrack(i,{autoplay=false,at=0}={}){
+  if(!bgm) return;
+  trackIndex=(i+TRACKS.length)%TRACKS.length;
+  bgm.src=AUDIO_BASE+TRACKS[trackIndex].file;
+  if(at) bgm.addEventListener('loadedmetadata',()=>{ try{bgm.currentTime=at;}catch(e){} },{once:true});
+  paintTransport();
+  if(autoplay) playAudio();
+  else saveAudioState();
 }
 
 function playAudio(userInitiated){
   if(!bgm) return;
   if(userInitiated!==false) audioWant=true;
+  if(!bgm.getAttribute('src')) bgm.src=AUDIO_BASE+TRACKS[trackIndex].file;
   setupAnalyser();
   if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
   const p=bgm.play();
   if(p&&p.catch) p.catch(()=>{ armAutoplayRetry(); });
-  updateToggleLabel();
+  paintTransport();
   saveAudioState();
 }
 function pauseAudio(){
   if(!bgm) return;
   audioWant=false;
   bgm.pause();
-  updateToggleLabel();
+  paintTransport();
   saveAudioState();
+}
+function step(dir){
+  const wasPlaying = bgm && !bgm.paused;
+  loadTrack(trackIndex+dir,{autoplay:wasPlaying||audioWant});
 }
 
 /* Autoplay is blocked on a fresh document until the visitor interacts,
@@ -248,25 +279,22 @@ if(bgm&&audioDock){
   const st=readAudioState();
   bgm.volume = typeof st.vol==='number' ? st.vol : 0.12;
   audioWant = !!st.want;
+  trackIndex = (typeof st.i==='number' && st.i>=0 && st.i<TRACKS.length) ? st.i : 0;
   if(audioVol) audioVol.value=String(bgm.volume);
+  paintTransport();
 
-  if(audioToggle){
-    audioToggle.addEventListener('click',()=>{ bgm.paused ? playAudio() : pauseAudio(); });
-  }
+  if(audioToggle) audioToggle.addEventListener('click',()=>{ bgm.paused ? playAudio() : pauseAudio(); });
+  if(apPrev) apPrev.addEventListener('click',()=>step(-1));
+  if(apNext) apNext.addEventListener('click',()=>step(1));
+  /* run on into the next track rather than looping one forever */
+  bgm.addEventListener('ended',()=>step(1));
 
-  /* Pressing the visualizer reveals the volume controls */
+  /* Pressing the visualizer reveals the transport */
   const vizBtn=document.getElementById('vizBtn');
   if(vizBtn){
-    vizBtn.addEventListener('click',e=>{
-      e.stopPropagation();
-      audioDock.classList.toggle('open');
-    });
-    document.addEventListener('click',e=>{
-      if(!audioDock.contains(e.target)) audioDock.classList.remove('open');
-    });
-    document.addEventListener('keydown',e=>{
-      if(e.key==='Escape') audioDock.classList.remove('open');
-    });
+    vizBtn.addEventListener('click',e=>{ e.stopPropagation(); audioDock.classList.toggle('open'); });
+    document.addEventListener('click',e=>{ if(!audioDock.contains(e.target)) audioDock.classList.remove('open'); });
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') audioDock.classList.remove('open'); });
   }
   if(audioVol){
     audioVol.addEventListener('input',()=>{
@@ -275,8 +303,8 @@ if(bgm&&audioDock){
       saveAudioState();
     });
   }
-  bgm.addEventListener('play',updateToggleLabel);
-  bgm.addEventListener('pause',updateToggleLabel);
+  bgm.addEventListener('play',paintTransport);
+  bgm.addEventListener('pause',paintTransport);
   let lastSave=0;
   bgm.addEventListener('timeupdate',()=>{
     const now=Date.now();
@@ -287,13 +315,12 @@ if(bgm&&audioDock){
 
   /* Resume across page navigations */
   if(audioWant){
-    if(st.t){ try{ bgm.currentTime=st.t; }catch(e){} }
+    loadTrack(trackIndex,{at:st.t||0});
     audioDock.classList.add('show');
     playAudio(false);
   }else if(st.vol!==undefined){
     audioDock.classList.add('show');
   }
-  updateToggleLabel();
 
   /* No loader on this page (project/about pages): reveal the dock right away */
   if(!document.getElementById('loader')) audioDock.classList.add('show');
@@ -812,7 +839,7 @@ document.querySelectorAll('.film .film-media').forEach(btn=>{
        would just be two things at once. */
     if(typeof bgm!=='undefined' && bgm && !bgm.paused){
       bgm.pause();
-      if(typeof updateToggleLabel==='function') updateToggleLabel();
+      if(typeof paintTransport==='function') paintTransport();
     }
 
     if(type==='youtube'){
