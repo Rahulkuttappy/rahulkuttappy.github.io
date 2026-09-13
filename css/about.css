@@ -50,6 +50,13 @@
 /* ── ABOUT STORY ── */
 #abstory{padding:6rem 2.5rem;border-top:1px solid var(--border);}
 .abstory-inner{display:grid;grid-template-columns:.8fr 1.2fr;gap:5rem;}
+.abstory-photo{margin-top:2.2rem;overflow:hidden;background:var(--surface);}
+.abstory-photo img{
+  width:100%;display:block;
+  filter:brightness(.82) saturate(.95);
+  transition:transform .7s cubic-bezier(.16,1,.3,1),filter .45s ease;
+}
+.abstory-photo:hover img{transform:scale(1.03);filter:brightness(1) saturate(1);}
 .abstory-body{font-size:.92rem;line-height:2;color:rgba(237,234,226,.55);}
 .abstory-body p+p{margin-top:1.2rem;}
 

@@ -765,16 +765,21 @@ if(igGrid){
     if(window.ScrollTrigger) ScrollTrigger.refresh();
   }
 
+  /* Posts can also be placed by hand in the markup. If any are there they
+     stand as-is, and an absent or failing live feed must not wipe them. */
+  const igHasStatic=!!igGrid.querySelector('.ig-item');
+
   if(!igEndpoint){
-    igFallback('Feed not connected yet');
+    if(!igHasStatic) igFallback('Feed not connected yet');
   }else{
     fetch(igEndpoint,{mode:'cors'})
       .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(json=>{
         const posts=igNormalise(json);
-        posts.length ? igRender(posts) : igFallback('Nothing to show right now');
+        if(posts.length) igRender(posts);
+        else if(!igHasStatic) igFallback('Nothing to show right now');
       })
-      .catch(()=>igFallback('Feed unavailable'));
+      .catch(()=>{ if(!igHasStatic) igFallback('Feed unavailable'); });
   }
 }
 
