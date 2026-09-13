@@ -1,5 +1,22 @@
 gsap.registerPlugin(ScrollTrigger);
 
+/* ── A reload sends you home ──
+   Asked for deliberately. Note this means refreshing a project page will
+   not show you that page again, which is worth remembering while editing.
+   First visits, shared links and crawlers are untouched: only a genuine
+   reload redirects. */
+(function(){
+  try{
+    const nav=performance.getEntriesByType('navigation')[0];
+    if(!nav||nav.type!=='reload') return;
+    const path=location.pathname;
+    const atHome=/\/(index\.html)?$/.test(path);
+    if(atHome) return;
+    const home=path.includes('/work/') ? '../index.html' : 'index.html';
+    location.replace(home);
+  }catch(e){}
+})();
+
 /* Always land at the top of the page (unless an anchor was requested) */
 if('scrollRestoration' in history) history.scrollRestoration='manual';
 window.addEventListener('pageshow',()=>{ if(!location.hash) window.scrollTo(0,0); });
@@ -922,17 +939,85 @@ document.addEventListener('dragstart',e=>{
   if(e.target.tagName==='IMG'||e.target.tagName==='VIDEO') e.preventDefault();
 });
 
-/* ── The mark: scroll-linked push in ──
-   The sheen runs on its own; this only adds the slow scale and lift as the
-   section crosses the viewport, so it lands like a title card rather than
-   just sitting there. */
-const markEl=document.querySelector('[data-mark]');
-if(markEl && window.gsap && window.ScrollTrigger &&
-   !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-  gsap.fromTo(markEl,
-    {scale:.84,opacity:.25,y:26},
-    {scale:1,opacity:1,y:0,ease:'none',
-     scrollTrigger:{trigger:'#abmark',start:'top bottom',end:'center center',scrub:.8}});
+/* ── About hero: fade and parallax ──
+   Mirrors the home hero: the portrait drifts and scales slightly slower
+   than the page while the whole block fades out as it leaves. */
+const abHeroPhoto=document.querySelector('.abhero-photo');
+if(abHeroPhoto && window.gsap && window.ScrollTrigger){
+  gsap.fromTo('.abhero-photo img',
+    {yPercent:-4,scale:1.1},
+    {yPercent:10,scale:1.16,ease:'none',
+     scrollTrigger:{trigger:'#abhero',start:'top top',end:'bottom top',scrub:1}});
+  gsap.to('#abhero',
+    {opacity:.15,ease:'none',
+     scrollTrigger:{trigger:'#abhero',start:'40% top',end:'bottom top',scrub:1}});
+  /* the statement lifts a touch faster, which is what sells the depth */
+  gsap.to('.abhero-inner',
+    {yPercent:-9,ease:'none',
+     scrollTrigger:{trigger:'#abhero',start:'top top',end:'bottom top',scrub:1}});
+}
+
+/* ── The mark: dithered wave ──
+   Same Bayer matrix as the loader bar and the headings. The logo is drawn
+   into a small pixel grid, then a wave travels through it thinning the
+   stipple as it passes, so the mark breathes against the page instead of
+   sitting on it. */
+const markCanvas=document.getElementById('markCanvas');
+if(markCanvas && markCanvas.getContext){
+  const mctx=markCanvas.getContext('2d',{willReadFrequently:true});
+  const M_BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+  const M_BLK=2;
+  const calmMark=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let MW=0,MH=0,msrc=null,mout=null,mVisible=true,mRaf=0;
+
+  const logo=new Image();
+  logo.onload=()=>{ buildMark(); startMark(); };
+  logo.src='assets/images/logo.png';
+
+  function buildMark(){
+    const cssW=markCanvas.clientWidth||176;
+    MW=Math.max(24,Math.round(cssW/M_BLK));
+    MH=Math.max(12,Math.round(MW*logo.naturalHeight/logo.naturalWidth));
+    markCanvas.width=MW;markCanvas.height=MH;
+    markCanvas.style.height=(MH*M_BLK)+'px';
+    mctx.clearRect(0,0,MW,MH);
+    mctx.drawImage(logo,0,0,MW,MH);
+    msrc=mctx.getImageData(0,0,MW,MH);
+    mout=mctx.createImageData(MW,MH);
+  }
+
+  function drawMark(t){
+    if(!msrc) return;
+    const a=msrc.data,o=mout.data;
+    o.fill(0);
+    /* wave sweeps diagonally, pausing between passes */
+    const s=calmMark ? -99 : ((t*0.00016)%1.8)-0.35;
+    for(let y=0;y<MH;y++){
+      for(let x=0;x<MW;x++){
+        const i=(y*MW+x)*4;
+        const alpha=Math.min(1,(a[i+3]/255)*1.4);
+        if(alpha<=0.02) continue;
+        const d=(x/MW)*0.8+(y/MH)*0.2-s;
+        const wave=Math.exp(-(d*d)/0.05);
+        const level=alpha*(1-0.8*wave);
+        if(level<=(M_BAYER[y&3][x&3]+0.5)/16) continue;
+        o[i]=237;o[i+1]=234;o[i+2]=226;o[i+3]=255;
+      }
+    }
+    mctx.putImageData(mout,0,0);
+  }
+
+  function markLoop(t){ mRaf=0; if(!mVisible) return; drawMark(t); if(!calmMark) mRaf=requestAnimationFrame(markLoop); }
+  function startMark(){ if(!mRaf&&mVisible) mRaf=requestAnimationFrame(markLoop); }
+
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(es=>{
+      mVisible=es[0].isIntersecting;
+      if(mVisible) startMark(); else if(mRaf){cancelAnimationFrame(mRaf);mRaf=0;}
+    },{rootMargin:'100px'}).observe(markCanvas);
+  }
+  let mT;
+  window.addEventListener('resize',()=>{clearTimeout(mT);mT=setTimeout(()=>{if(logo.complete){buildMark();startMark();}},180);});
 }
 
 /* ── Dithered word (ordered 4x4 Bayer dissolve on [data-dither] text) ── */
