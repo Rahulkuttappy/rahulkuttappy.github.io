@@ -922,6 +922,19 @@ document.addEventListener('dragstart',e=>{
   if(e.target.tagName==='IMG'||e.target.tagName==='VIDEO') e.preventDefault();
 });
 
+/* ── The mark: scroll-linked push in ──
+   The sheen runs on its own; this only adds the slow scale and lift as the
+   section crosses the viewport, so it lands like a title card rather than
+   just sitting there. */
+const markEl=document.querySelector('[data-mark]');
+if(markEl && window.gsap && window.ScrollTrigger &&
+   !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  gsap.fromTo(markEl,
+    {scale:.84,opacity:.25,y:26},
+    {scale:1,opacity:1,y:0,ease:'none',
+     scrollTrigger:{trigger:'#abmark',start:'top bottom',end:'center center',scrub:.8}});
+}
+
 /* ── Dithered word (ordered 4x4 Bayer dissolve on [data-dither] text) ── */
 const ditherWords=document.querySelectorAll('[data-dither]');
 if(ditherWords.length){

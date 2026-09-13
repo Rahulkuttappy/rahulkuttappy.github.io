@@ -93,3 +93,53 @@
   .abgallery-hdr{padding:4rem 0 2rem;}
   #ab-contact{padding:5rem 1.5rem 6rem;}
 }
+
+/* ── THE MARK ──
+   A title-card beat between the story and the gallery. The logo is a mask,
+   so the moving highlight travels through the letterforms rather than over
+   them, which is what makes it read as metal catching a light. */
+#abmark{
+  position:relative;overflow:hidden;
+  padding:9rem 2.5rem;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  background:#050505;
+}
+.abmark-glow{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(60% 90% at 50% 50%,rgba(var(--red-glow),.22) 0%,transparent 62%),
+    repeating-linear-gradient(to bottom,rgba(237,234,226,.02) 0px,rgba(237,234,226,.02) 1px,transparent 1px,transparent 4px);
+}
+.abmark-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:2.2rem;}
+.abmark-logo{
+  display:block;width:min(460px,64vw);aspect-ratio:400/256;
+  -webkit-mask:url(../assets/images/logo.png) center/contain no-repeat;
+          mask:url(../assets/images/logo.png) center/contain no-repeat;
+  background:linear-gradient(112deg,
+    #2b2b29 0%, #55524c 26%, #9d998f 40%,
+    #EDEAE2 48%, #ffffff 51%, #EDEAE2 54%,
+    #9d998f 62%, #55524c 76%, #2b2b29 100%);
+  background-size:300% 100%;
+  background-position:120% 0;
+  animation:markSheen 7s cubic-bezier(.5,0,.2,1) infinite;
+  filter:drop-shadow(0 0 26px rgba(var(--red-glow),.35));
+}
+@keyframes markSheen{
+  0%   {background-position:130% 0;}
+  55%  {background-position:-30% 0;}
+  100% {background-position:-30% 0;}
+}
+.abmark-cap{
+  font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
+  letter-spacing:.34em;text-transform:uppercase;color:rgba(237,234,226,.42);
+  text-align:center;
+}
+@media(prefers-reduced-motion:reduce){
+  .abmark-logo{animation:none;background-position:50% 0;}
+}
+@media(max-width:768px){
+  #abmark{padding:6rem 1.5rem;}
+  .abmark-inner{gap:1.6rem;}
+  .abmark-cap{font-size:.44rem;letter-spacing:.24em;}
+}
