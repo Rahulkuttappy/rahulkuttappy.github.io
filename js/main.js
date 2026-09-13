@@ -371,11 +371,51 @@ if(loaderEl){
     const lpctWrap=lpct.parentElement;
     const loaderTextEl=document.getElementById('loaderText');
 
+    /* Dithered progress bar: solid behind the head, breaking into ordered
+       stipple across the leading edge, over a faint dotted track. */
+    const lbar=document.getElementById('loaderBar');
+    const LB_BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+    let lbCtx=null,LB_W=0,LB_H=0,LB_BLK=3,lbImg=null;
+    if(lbar&&lbar.getContext){
+      lbCtx=lbar.getContext('2d');
+      const r=lbar.getBoundingClientRect();
+      LB_W=Math.max(24,Math.round((r.width||280)/LB_BLK));
+      LB_H=Math.max(3,Math.round((r.height||12)/LB_BLK));
+      lbar.width=LB_W;lbar.height=LB_H;
+      lbar.style.width=(LB_W*LB_BLK)+'px';
+      lbar.style.height=(LB_H*LB_BLK)+'px';
+      lbImg=lbCtx.createImageData(LB_W,LB_H);
+    }
+    function drawLoaderBar(p,t){
+      if(!lbCtx) return;
+      const o=lbImg.data;
+      const head=p*LB_W;
+      for(let y=0;y<LB_H;y++){
+        for(let x=0;x<LB_W;x++){
+          const i=(y*LB_W+x)*4;
+          const th=(LB_BAYER[y&3][x&3]+0.5)/16;
+          /* fade the fill out over roughly six cells behind the head */
+          let v=Math.max(0,Math.min(1,(head-x)/6));
+          v*=0.93+0.07*Math.sin(t*0.006+x*0.7+y*1.3);
+          if(v>th){
+            const hot=Math.abs(x-head)<3.5;
+            o[i]=hot?196:237;o[i+1]=hot?54:234;o[i+2]=hot?46:226;o[i+3]=255;
+          }else{
+            o[i]=237;o[i+1]=234;o[i+2]=226;
+            o[i+3]=(LB_BAYER[y&3][x&3]<2)?30:0;   /* dotted track */
+          }
+        }
+      }
+      lbCtx.putImageData(lbImg,0,0);
+    }
+
     if(loaderTextEl) scrambleReveal(loaderTextEl,'ARE YOU READY?');
 
     const showEnter=function(){
       lpct.textContent='100';
+      drawLoaderBar(1,performance.now());
       lpctWrap.classList.add('hide');
+      if(lbar) lbar.classList.add('hide');
       lenter.classList.add('show');
       const b1=document.getElementById('ebtn1');
       const b2=document.getElementById('ebtn2');
@@ -390,6 +430,7 @@ if(loaderEl){
       const elapsed=ts-loaderStart;
       const pct=Math.min(99,Math.round(elapsed/LOADER_DURATION*100));
       lpct.textContent=String(pct).padStart(2,'0');
+      drawLoaderBar(pct/100,ts);
       if(elapsed<LOADER_DURATION) requestAnimationFrame(loaderProgress);
       else showEnter();
     }

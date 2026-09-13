@@ -23,12 +23,18 @@ img,video{
 }
 #pageFade.ready{opacity:0;}
 #pageFade.leaving{opacity:1;pointer-events:auto;transition:opacity .42s ease;}
+/* The mark is painted as a red fill masked by the logo, so it takes the site
+   red exactly and the URL resolves from this stylesheet on every page depth.
+   Sized to the cap height of the .56rem wordmark it replaces. */
 #pageFade .pf-mark{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   opacity:0;transition:opacity .3s ease;
+  height:15px;aspect-ratio:400/256;
+  background-color:var(--red);
+  -webkit-mask:url(../assets/images/logo.png) center/contain no-repeat;
+          mask:url(../assets/images/logo.png) center/contain no-repeat;
 }
-/* Sized to the cap height of the .56rem wordmark it replaces */
-#pageFade .pf-mark img{display:block;height:15px;width:auto;}
+#pageFade .pf-mark img{display:none;}
 #pageFade.leaving .pf-mark{opacity:1;}
 
 /* ── AUDIO PLAYER / DITHERED VISUALIZER ── */
@@ -161,6 +167,12 @@ img,video{
 }
 .loader-text .lc{display:inline-block;opacity:0;transform:translateY(8px);color:var(--red);}
 .loader-text .lc.in{opacity:1;transform:translateY(0);color:var(--off);transition:opacity .25s ease,transform .25s ease,color .15s ease;}
+.loader-bar{
+  display:block;width:min(300px,64vw);height:12px;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  transition:opacity .35s ease;
+}
+.loader-bar.hide{opacity:0;}
 .loader-pct{
   font-family:'JetBrains Mono',monospace;font-size:.85rem;letter-spacing:.3em;
   color:rgba(237,234,226,.45);font-variant-numeric:tabular-nums;
@@ -246,12 +258,12 @@ nav.scrolled{
 .n1{display:block;color:var(--off);transform:translateY(110%);}
 .n2{display:block;color:var(--red);transform:translateY(110%);}
 .hero-rule{width:2.5rem;height:2px;background:var(--red);margin:1.3rem 0;transform:scaleX(0);transform-origin:left;}
-/* Serif italic, bigger and brighter than the old small grey sans. Picks up
-   the same face the About page uses for emphasis. */
+/* Mono, to sit with the blocky display type rather than against it. Same
+   face as the eyebrows, clock and loader. */
 .hero-bio{
-  font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;
-  font-size:clamp(1.1rem,1.6vw,1.45rem);line-height:1.55;letter-spacing:.005em;
-  color:rgba(237,234,226,.72);max-width:30ch;
+  font-family:'JetBrains Mono',monospace;font-weight:400;
+  font-size:clamp(.72rem,.9vw,.84rem);line-height:2;letter-spacing:.01em;
+  color:rgba(237,234,226,.62);max-width:42ch;
 }
 .hero-scroll{
   position:absolute;bottom:3rem;right:2.5rem;z-index:2;
