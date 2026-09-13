@@ -323,30 +323,40 @@ nav.scrolled{
 .wgrid.lv{grid-template-columns:1fr;gap:0;border-top:1px solid var(--border);}
 .wgrid.lv .wc{
   aspect-ratio:unset;display:grid;
-  grid-template-columns:88px 3.5rem 1fr auto;column-gap:1.1rem;
+  grid-template-columns:3.5rem 1fr auto;column-gap:1.1rem;
   align-items:center;padding:1.4rem 0;background:transparent;
   border-bottom:1px solid var(--border);transform:none!important;
   position:relative;overflow:hidden;
 }
+/* Red wash sits above the artwork, below the type */
 .wgrid.lv .wc::before{
-  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(90deg,rgba(var(--red-glow),.16),rgba(var(--red-glow),.04) 45%,transparent 75%);
   opacity:0;transition:opacity .4s ease;
 }
 .wgrid.lv .wc:hover::before{opacity:1;}
 .wgrid.lv .wc:hover{padding-left:.6rem;transition:padding .2s;}
+/* The project frame fills the whole row, faded out to the right so the
+   title and year stay legible over it. */
 .wgrid.lv .wc-img{
-  position:relative;z-index:1;width:88px;height:58px;overflow:hidden;
-  opacity:0;transform:scale(.85);pointer-events:none;
-  box-shadow:0 10px 26px rgba(0,0,0,.5);
-  transition:opacity .45s cubic-bezier(.16,1,.3,1),transform .45s cubic-bezier(.16,1,.3,1);
+  position:absolute;inset:0;z-index:0;overflow:hidden;
+  width:auto;height:auto;pointer-events:none;
+  opacity:0;transition:opacity .55s cubic-bezier(.16,1,.3,1);
+  -webkit-mask-image:linear-gradient(90deg,#000 0%,rgba(0,0,0,.6) 42%,transparent 80%);
+  mask-image:linear-gradient(90deg,#000 0%,rgba(0,0,0,.6) 42%,transparent 80%);
 }
-.wgrid.lv .wc-img img{filter:brightness(.8);}
-.wgrid.lv .wc:hover .wc-img{opacity:1;transform:scale(1);}
-.wgrid.lv .wc-num{display:block;position:relative;z-index:1;top:auto;left:auto;opacity:1;}
-.wgrid.lv .wc-info{position:relative;z-index:1;padding:0;opacity:1;transform:none;background:none;}
+.wgrid.lv .wc-img img{
+  width:100%;height:100%;object-fit:cover;object-position:center 42%;
+  filter:grayscale(.4) brightness(.72);
+  transform:scale(1.06);
+  transition:transform .9s cubic-bezier(.16,1,.3,1);
+}
+.wgrid.lv .wc:hover .wc-img{opacity:.28;}
+.wgrid.lv .wc:hover .wc-img img{transform:scale(1);}
+.wgrid.lv .wc-num{display:block;position:relative;z-index:2;top:auto;left:auto;opacity:1;}
+.wgrid.lv .wc-info{position:relative;z-index:2;padding:0;opacity:1;transform:none;background:none;}
 .wgrid.lv .wc-list-type{
-  position:relative;z-index:1;display:block;padding-right:.5rem;
+  position:relative;z-index:2;display:block;padding-right:.5rem;
   opacity:0;transform:translateY(5px);
   transition:opacity .35s ease,transform .35s ease,color .3s ease;
 }
@@ -356,7 +366,7 @@ nav.scrolled{
 .wgrid.lv .wc-title{font-size:clamp(1.1rem,2.5vw,2rem);}
 @media(max-width:600px){
   .wgrid.lv .wc{grid-template-columns:2.4rem 1fr auto;column-gap:.7rem;}
-  .wgrid.lv .wc-img{display:none;}
+  .wgrid.lv .wc:hover .wc-img{opacity:.18;}
 }
 
 /* ── MODAL / LIGHTBOX ── */
