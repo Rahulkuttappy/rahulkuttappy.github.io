@@ -330,12 +330,19 @@ if(vizCanvas){
   drawViz();
 }
 
-/* ── Cursor: glowing orb with fading streak trail ── */
+/* ── Cursor: glowing orb with a tapered streak ──
+   Three things make this smooth rather than steppy:
+   the easing is delta-time based so it behaves the same at 60 and 120Hz;
+   the trail samples the eased position once per frame instead of pushing
+   raw mousemove events, which vary with pointer speed and leave gaps; and
+   the streak is a stroked curve through those points rather than a row of
+   separate dots. The radius eases on hover too, instead of snapping. */
 const fx=document.getElementById('cursorFX');
 const fxCtx=fx.getContext('2d');
 let fxMx=innerWidth/2,fxMy=innerHeight/2,fxSx=fxMx,fxSy=fxMy;
-let fxHover=false;
+let fxHover=false,fxR=9,fxAlpha=0;
 const trail=[];
+const TRAIL_MAX=26;
 
 function resizeFX(){
   fx.width=innerWidth*devicePixelRatio;
@@ -347,50 +354,64 @@ function resizeFX(){
 resizeFX();
 window.addEventListener('resize',resizeFX);
 
-document.addEventListener('mousemove',e=>{
-  fxMx=e.clientX;fxMy=e.clientY;
-  trail.push({x:fxMx,y:fxMy,life:1});
-  if(trail.length>40) trail.shift();
-});
+document.addEventListener('mousemove',e=>{ fxMx=e.clientX;fxMy=e.clientY;fxAlpha=1; },{passive:true});
+document.addEventListener('mouseleave',()=>{ fxAlpha=0; });
 
-document.querySelectorAll('a,button,.photo-item').forEach(el=>{
+document.querySelectorAll('a,button,.photo-item,input').forEach(el=>{
   el.addEventListener('mouseenter',()=>{fxHover=true;});
   el.addEventListener('mouseleave',()=>{fxHover=false;});
 });
 
-function cursorLoop(){
-  fxSx+=(fxMx-fxSx)*.18;
-  fxSy+=(fxMy-fxSy)*.18;
-  fxCtx.clearRect(0,0,innerWidth,innerHeight);
+let fxLast=performance.now();
+function cursorLoop(now){
+  /* clamp dt so a backgrounded tab does not fling the orb across the screen */
+  const dt=Math.min((now-fxLast)/1000,0.05); fxLast=now;
+  const ease=r=>1-Math.pow(1-r,dt*60);
 
-  for(let i=trail.length-1;i>=0;i--){
-    const p=trail[i];
-    p.life-=0.045;
-    if(p.life<=0){trail.splice(i,1);continue;}
-    fxCtx.beginPath();
-    fxCtx.arc(p.x,p.y,2.4*p.life,0,Math.PI*2);
-    fxCtx.fillStyle=`rgba(${'237,234,226'},${p.life*0.35})`;
-    fxCtx.fill();
+  const k=ease(0.16);
+  fxSx+=(fxMx-fxSx)*k;
+  fxSy+=(fxMy-fxSy)*k;
+  fxR+=((fxHover?15:9)-fxR)*ease(0.12);
+
+  trail.push({x:fxSx,y:fxSy});
+  if(trail.length>TRAIL_MAX) trail.shift();
+
+  fxCtx.clearRect(0,0,innerWidth,innerHeight);
+  if(fxAlpha<=0){ requestAnimationFrame(cursorLoop); return; }
+
+  /* tapered streak: one curve, width and opacity falling off toward the tail */
+  if(trail.length>2){
+    fxCtx.lineCap='round';fxCtx.lineJoin='round';
+    for(let i=1;i<trail.length;i++){
+      const t=i/trail.length;
+      const p0=trail[i-1],p1=trail[i];
+      fxCtx.beginPath();
+      fxCtx.moveTo(p0.x,p0.y);
+      fxCtx.lineTo(p1.x,p1.y);
+      fxCtx.lineWidth=Math.max(0.4,t*3.2);
+      fxCtx.strokeStyle='rgba(237,234,226,'+(t*t*0.3*fxAlpha)+')';
+      fxCtx.stroke();
+    }
   }
 
-  const r=fxHover?15:9;
-  const grad=fxCtx.createRadialGradient(fxSx,fxSy,0,fxSx,fxSy,r*2.4);
-  grad.addColorStop(0,'rgba(237,234,226,0.9)');
-  grad.addColorStop(.35,`rgba(122,27,24,0.65)`);
+  const glow=fxR*2.4;
+  const grad=fxCtx.createRadialGradient(fxSx,fxSy,0,fxSx,fxSy,glow);
+  grad.addColorStop(0,'rgba(237,234,226,'+(0.9*fxAlpha)+')');
+  grad.addColorStop(.35,'rgba(122,27,24,'+(0.65*fxAlpha)+')');
   grad.addColorStop(1,'rgba(122,27,24,0)');
   fxCtx.beginPath();
-  fxCtx.arc(fxSx,fxSy,r*2.4,0,Math.PI*2);
+  fxCtx.arc(fxSx,fxSy,glow,0,Math.PI*2);
   fxCtx.fillStyle=grad;
   fxCtx.fill();
 
   fxCtx.beginPath();
-  fxCtx.arc(fxSx,fxSy,r*.35,0,Math.PI*2);
-  fxCtx.fillStyle='rgba(255,255,255,0.95)';
+  fxCtx.arc(fxSx,fxSy,fxR*.35,0,Math.PI*2);
+  fxCtx.fillStyle='rgba(255,255,255,'+(0.95*fxAlpha)+')';
   fxCtx.fill();
 
   requestAnimationFrame(cursorLoop);
 }
-cursorLoop();
+requestAnimationFrame(cursorLoop);
 
 /* ── Scramble text reveal (futuristic decode effect) ── */
 function scrambleReveal(el,finalText,opts={}){
@@ -986,12 +1007,28 @@ if(markCanvas && markCanvas.getContext){
     mout=mctx.createImageData(MW,MH);
   }
 
+  /* pointer, in grid coordinates, with an eased strength so the glow
+     arrives and leaves rather than snapping on */
+  let mPx=-99,mPy=-99,mHeat=0,mHeatTarget=0;
+  const M_RADIUS=9;
+  markCanvas.addEventListener('pointermove',e=>{
+    const r=markCanvas.getBoundingClientRect();
+    mPx=((e.clientX-r.left)/r.width)*MW;
+    mPy=((e.clientY-r.top)/r.height)*MH;
+    mHeatTarget=1;
+    startMark();
+  });
+  markCanvas.addEventListener('pointerleave',()=>{ mHeatTarget=0; startMark(); });
+
   function drawMark(t){
     if(!msrc) return;
     const a=msrc.data,o=mout.data;
     o.fill(0);
+    mHeat+=(mHeatTarget-mHeat)*0.12;
     /* wave sweeps diagonally, pausing between passes */
     const s=calmMark ? -99 : ((t*0.00016)%1.8)-0.35;
+    const hot=mHeat>0.01;
+    const r2=M_RADIUS*M_RADIUS;
     for(let y=0;y<MH;y++){
       for(let x=0;x<MW;x++){
         const i=(y*MW+x)*4;
@@ -999,15 +1036,30 @@ if(markCanvas && markCanvas.getContext){
         if(alpha<=0.02) continue;
         const d=(x/MW)*0.8+(y/MH)*0.2-s;
         const wave=Math.exp(-(d*d)/0.05);
-        const level=alpha*(1-0.8*wave);
+        let level=alpha*(1-0.8*wave);
+
+        /* under the pointer the mark fills back in as well as reddening,
+           so the cursor reads as light falling on it */
+        let heat=0;
+        if(hot){
+          const dx=x-mPx, dy=y-mPy;
+          const dd=(dx*dx+dy*dy)/r2;
+          if(dd<1){ heat=(1-dd)*(1-dd)*mHeat; level+=heat*0.55; }
+        }
         if(level<=(M_BAYER[y&3][x&3]+0.5)/16) continue;
-        o[i]=237;o[i+1]=234;o[i+2]=226;o[i+3]=255;
+        if(heat>0.02){
+          o[i]=237+(206-237)*heat;
+          o[i+1]=234+(46-234)*heat;
+          o[i+2]=226+(38-226)*heat;
+        }else{ o[i]=237;o[i+1]=234;o[i+2]=226; }
+        o[i+3]=255;
       }
     }
     mctx.putImageData(mout,0,0);
   }
 
-  function markLoop(t){ mRaf=0; if(!mVisible) return; drawMark(t); if(!calmMark) mRaf=requestAnimationFrame(markLoop); }
+  function markLoop(t){ mRaf=0; if(!mVisible) return; drawMark(t);
+    if(!calmMark || mHeat>0.01 || mHeatTarget>0) mRaf=requestAnimationFrame(markLoop); }
   function startMark(){ if(!mRaf&&mVisible) mRaf=requestAnimationFrame(markLoop); }
 
   if('IntersectionObserver' in window){
