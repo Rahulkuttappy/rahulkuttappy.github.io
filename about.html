@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>About · Rahul Kuttappy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/about.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<canvas id="cursorFX" aria-hidden="true"></canvas>
+<div id="pageFade"><span class="pf-mark">RK</span></div>
+<audio id="bgm" src="assets/audio/singularity.m4a" loop preload="auto"></audio>
+<div id="audioDock">
+  <button class="viz-btn" id="vizBtn" aria-label="Sound controls">
+    <canvas id="vizCanvas" aria-hidden="true"></canvas>
+  </button>
+  <div class="audio-panel" id="audioPanel">
+    <button class="audio-toggle" id="audioToggle" aria-label="Toggle sound">Sound Off</button>
+    <input class="audio-vol" id="audioVol" type="range" min="0" max="0.4" step="0.01" value="0.12" aria-label="Volume"/>
+  </div>
+</div>
+<div id="scrollbar" aria-hidden="true">
+  <div class="scrollbar-track"></div>
+  <div class="scrollbar-fill" id="sbFill"></div>
+  <div class="scrollbar-dot" id="sbDot"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav" style="opacity:1;">
+  <a href="index.html"><img class="nav-logo" src="assets/images/logo.png" alt="RK"/></a>
+  <ul class="nav-links">
+    <li><a href="index.html#works">Works</a></li>
+    <li><a href="index.html#photography">Photography</a></li>
+    <li><a href="about.html" class="active-link">About</a></li>
+    <li><a href="index.html#reel">Reel</a></li>
+  </ul>
+  <div class="nav-right">
+    <span id="clock">00:00:00</span>
+    <a class="nav-cta" href="index.html#contact">Let's Talk</a>
+  </div>
+</nav>
+
+<!-- ABOUT HERO -->
+<section id="abhero">
+  <div class="abhero-photo">
+    <img src="assets/images/about/about-hero.jpg" alt="Rahul Kuttappy on set"/>
+  </div>
+  <span class="abhero-vlabel">About</span>
+  <div class="abhero-inner">
+    <h1 class="abhero-statement">
+      As a <em>filmmaker and editor</em>, I craft tailor-made visual stories, blending technical precision and <em>emotion</em>.
+    </h1>
+    <div class="abhero-lower">
+      <span class="abhero-year">(26)</span>
+      <div class="abhero-intro">
+        <p>My name is Rahul. A filmmaker and editor based in Bengaluru, I build memorable visual experiences, always seeking the symbiosis between story and feeling.</p>
+        <p class="abhero-info-lbl">INFO</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT STORY -->
+<section id="abstory">
+  <div class="abstory-inner">
+    <div class="reveal">
+      <p class="s-eye">Origin</p>
+      <h2 class="s-hed">HOW IT STARTED</h2>
+    </div>
+    <div class="abstory-body reveal">
+      <p>I grew up in Calicut, watching more films than was probably healthy. At some point that turned into a question I couldn't drop: what does it feel like from the other side of the camera. So I picked one up, and never really put it down.</p>
+      <p>Six years, seventy plus projects and a few thousand hours of edited footage later, I'm now based in Bengaluru, working across fashion, automobiles, music videos, documentary and event coverage. Every project starts the same way: figure out what the moment actually feels like, then build everything around protecting that feeling through the shoot and the edit.</p>
+      <p>I'm not precious about gear or workflow. I'm precious about the frame that makes someone feel something they weren't expecting to feel.</p>
+      <p>When I'm not on a shoot or in the edit bay, I'm usually still holding a camera, just pointed at something with no client and no deadline. A few of those frames are in the gallery below.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT GALLERY -->
+<section id="abgallery">
+  <div class="abgallery-hdr reveal">
+    <span class="s-eye">Off Duty</span>
+    <h2 class="s-hed">IN THE FRAME</h2>
+  </div>
+  <div class="abgallery-grid">
+    <div class="photo-item reveal"><img src="assets/images/about/about-01.jpg" alt="Rahul portrait"/></div>
+    <div class="photo-item reveal"><img src="assets/images/about/about-03.jpg" alt="On set, studio shoot"/></div>
+    <div class="photo-item reveal"><img src="assets/images/about/about-02.jpg" alt="Gym, everyday life"/></div>
+    <div class="photo-item reveal"><img src="assets/images/about/about-04.jpg" alt="Shooting the AMG SL Roadster"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/bts-03.jpg" alt="Editing suite"/></div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div>
+  <button class="lb-close" data-close aria-label="Close">&times;</button>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">&larr;</button>
+  <img class="lb-img" id="lbImg" src="" alt=""/>
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Next">&rarr;</button>
+</div>
+
+<!-- CONTACT CTA -->
+<section id="ab-contact">
+  <div class="contact-bg" aria-hidden="true">
+    <img src="assets/images/about/about-03.jpg" alt=""/>
+  </div>
+  <div class="reveal">
+    <h2 class="contact-hed">LET'S<br>MAKE<br><em>SOMETHING</em><br><span class="dither-word" data-dither>REAL</span></h2>
+    <a class="about-more" href="index.html#contact">Get In Touch &rarr;</a>
+  </div>
+</section>
+
+<footer>
+  <canvas id="plexus" aria-hidden="true"></canvas>
+  <img class="f-logo" src="assets/images/logo.png" alt="RK"/>
+  <p>&copy; 2026 Rahul Kuttappy. All rights reserved</p>
+  <a class="f-back" href="index.html#hero">Back to home &uarr;</a>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

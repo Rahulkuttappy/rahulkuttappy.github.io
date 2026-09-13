@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>KNARI SS'24 · Rahul Kuttappy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../css/style.css"/>
+<link rel="stylesheet" href="../css/work.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<canvas id="cursorFX" aria-hidden="true"></canvas>
+<div id="pageFade"><span class="pf-mark">RK</span></div>
+<audio id="bgm" src="../assets/audio/singularity.m4a" loop preload="auto"></audio>
+<div id="audioDock">
+  <button class="viz-btn" id="vizBtn" aria-label="Sound controls">
+    <canvas id="vizCanvas" aria-hidden="true"></canvas>
+  </button>
+  <div class="audio-panel" id="audioPanel">
+    <button class="audio-toggle" id="audioToggle" aria-label="Toggle sound">Sound Off</button>
+    <input class="audio-vol" id="audioVol" type="range" min="0" max="0.4" step="0.01" value="0.12" aria-label="Volume"/>
+  </div>
+</div>
+<div id="scrollbar" aria-hidden="true">
+  <div class="scrollbar-track"></div>
+  <div class="scrollbar-fill" id="sbFill"></div>
+  <div class="scrollbar-dot" id="sbDot"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav" style="opacity:1;">
+  <a href="../index.html"><img class="nav-logo" src="../assets/images/logo.png" alt="RK"/></a>
+  <ul class="nav-links">
+    <li><a href="../index.html#works">Works</a></li>
+    <li><a href="../index.html#photography">Photography</a></li>
+    <li><a href="../about.html">About</a></li>
+    <li><a href="../index.html#reel">Reel</a></li>
+  </ul>
+  <div class="nav-right">
+    <span id="clock">00:00:00</span>
+    <a class="nav-cta" href="../index.html#contact">Let's Talk</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="wkhero">
+  <div class="wkhero-bg">
+    <img src="../assets/images/projects/knari-ss24.jpg" alt="KNARI SS'24"/>
+  </div>
+  <div class="wkhero-content">
+    <a class="wkhero-back" href="../index.html#works">&larr; All Works</a>
+    <p class="s-eye">Brand Promo</p>
+    <h1 class="wkhero-title">KNARI SS'24</h1>
+    <div class="wkhero-meta">
+      <div class="wk-meta-item"><span class="wk-meta-lbl">Client</span><span class="wk-meta-val">Knari</span></div>
+      <div class="wk-meta-item"><span class="wk-meta-lbl">Year</span><span class="wk-meta-val">2024</span></div>
+      <div class="wk-meta-item"><span class="wk-meta-lbl">Role</span><span class="wk-meta-val">Direction, Edit</span></div>
+      <div class="wk-meta-item"><span class="wk-meta-lbl">Format</span><span class="wk-meta-val">Seasonal Brand Film</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- INTRO -->
+<section id="wkintro">
+  <div class="wkintro-grid">
+    <div class="reveal">
+      <p class="s-eye">The Brief</p>
+      <h2 class="s-hed">SHE<br/>IS YOU</h2>
+    </div>
+    <div class="wkintro-body reveal">
+      <p>Knari's SS'24 line needed a film that sold the drape of the fabric more than the styling around it. Movement first, product second, and the tagline carrying the rest.</p>
+      <p>We kept the palette tight and the camera patient. Slow push-ins, a locked frame where the garment does the moving, and negative space wherever the fabric needed room.</p>
+      <p><em>The whole campaign rests on one line: she is you.</em> Everything in the cut serves that idea.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- GALLERY -->
+<section id="wkgallery">
+  <div class="wkgallery-hdr reveal">
+    <p class="s-eye">Selected Frames</p>
+    <h2 class="s-hed">FROM THE SHOOT</h2>
+  </div>
+  <div class="wkgallery-grid wkgallery-wide">
+    <div class="photo-item reveal"><img src="../assets/images/projects/knari-ss24.jpg" alt="KNARI SS'24 frame 1"/></div>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div>
+  <button class="lb-close" data-close aria-label="Close">&times;</button>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">&larr;</button>
+  <img class="lb-img" id="lbImg" src="" alt=""/>
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Next">&rarr;</button>
+</div>
+
+<!-- EXTERNAL -->
+<section id="wkvideo">
+  <div class="wkvideo-hdr reveal">
+    <p class="s-eye">Full Case Study</p>
+    <h2 class="s-hed">SEE MORE</h2>
+    <p class="photo-sub" style="margin-top:1rem;">The complete project, with process notes and the finished film, lives on Behance.</p>
+    <a class="about-more" href="https://www.behance.net/gallery/203794217/KNARI-SS24-Promo" target="_blank" rel="noopener">View On Behance &rarr;</a>
+  </div>
+</section>
+
+<!-- NEXT -->
+<section id="wknext">
+  <p class="s-eye" style="margin-bottom:1rem;">Next Project</p>
+  <a class="wknext-link" href="miles-masterclass.html">
+    <span class="wknext-title">MILES MASTERCLASS</span>
+    <span class="wknext-lbl">Trailer Series &rarr;</span>
+  </a>
+</section>
+
+<footer>
+  <canvas id="plexus" aria-hidden="true"></canvas>
+  <img class="f-logo" src="../assets/images/logo.png" alt="RK"/>
+  <p>&copy; 2026 Rahul Kuttappy. All rights reserved</p>
+  <a class="f-back" href="../index.html#works">Back to works &uarr;</a>
+</footer>
+
+<script src="../js/main.js"></script>
+</body>
+</html>

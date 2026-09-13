@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rahul Kuttappy · Filmmaker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<canvas id="cursorFX" aria-hidden="true"></canvas>
+<div id="pageFade"><span class="pf-mark">RK</span></div>
+<audio id="bgm" src="assets/audio/singularity.m4a" loop preload="auto"></audio>
+<div id="audioDock">
+  <button class="viz-btn" id="vizBtn" aria-label="Sound controls">
+    <canvas id="vizCanvas" aria-hidden="true"></canvas>
+  </button>
+  <div class="audio-panel" id="audioPanel">
+    <button class="audio-toggle" id="audioToggle" aria-label="Toggle sound">Sound Off</button>
+    <input class="audio-vol" id="audioVol" type="range" min="0" max="0.4" step="0.01" value="0.12" aria-label="Volume"/>
+  </div>
+</div>
+<div id="scrollbar" aria-hidden="true">
+  <div class="scrollbar-track"></div>
+  <div class="scrollbar-fill" id="sbFill"></div>
+  <div class="scrollbar-dot" id="sbDot"></div>
+</div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-scanlines" aria-hidden="true"></div>
+  <div class="loader-text-wrap">
+    <p class="loader-eyebrow">SYSTEM BOOT</p>
+    <h1 class="loader-text" id="loaderText">ARE YOU READY?</h1>
+  </div>
+  <div class="loader-pct"><span id="lpct">00</span><em>%</em></div>
+  <div class="loader-enter" id="lenter">
+    <button class="enter-btn" id="ebtn1">Enter with sound</button>
+    <button class="enter-btn sec" id="ebtn2">Enter without</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#hero" id="navLogoLink"><img class="nav-logo" src="assets/images/logo.png" alt="RK"/></a>
+  <ul class="nav-links">
+    <li><a href="#works">Works</a></li>
+    <li><a href="#photography">Photography</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="#reel">Reel</a></li>
+  </ul>
+  <div class="nav-right">
+    <span id="clock">00:00:00</span>
+    <a class="nav-cta" href="#contact">Let's Talk</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg">
+    <video id="heroVideo" autoplay muted loop playsinline preload="auto"
+           poster="assets/images/hero-poster.jpg" aria-label="Rahul Kuttappy, Filmmaker">
+      <source src="assets/video/hero-loop.mp4" type="video/mp4"/>
+    </video>
+  </div>
+  <div class="hero-side" id="hside">
+    <div class="hero-side-bar"></div>
+    <p class="hero-side-txt">DONT THINK JUST DO</p>
+  </div>
+  <div class="hero-content" id="hcontent">
+    <p class="hero-pre"><span>&bull;</span>&nbsp; Filmmaker · Visual Storyteller</p>
+    <div class="hero-name">
+      <span class="n1">RAHUL</span>
+      <span class="n2">KUTTAPPY</span>
+    </div>
+    <div class="hero-rule" id="hrule"></div>
+    <p class="hero-bio">I chase the moment just before something breaks, and hold it still long enough to feel it.</p>
+  </div>
+  <div class="hero-scroll" id="hscroll">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="mq-wrap" aria-hidden="true">
+  <div class="mq-track">
+    <span>Aspiring Filmmaker</span><span class="dot">·</span>
+    <span>Editor</span><span class="dot">·</span>
+    <span>Sound Design</span><span class="dot">·</span>
+    <span>Calicut // Bengaluru</span><span class="dot">·</span>
+    <span>Aspiring Filmmaker</span><span class="dot">·</span>
+    <span>Editor</span><span class="dot">·</span>
+    <span>Sound Design</span><span class="dot">·</span>
+    <span>Calicut // Bengaluru</span><span class="dot">·</span>
+    <span>Aspiring Filmmaker</span><span class="dot">·</span>
+    <span>Editor</span><span class="dot">·</span>
+    <span>Sound Design</span><span class="dot">·</span>
+    <span>Calicut // Bengaluru</span><span class="dot">·</span>
+    <span>Aspiring Filmmaker</span><span class="dot">·</span>
+    <span>Editor</span><span class="dot">·</span>
+    <span>Sound Design</span><span class="dot">·</span>
+    <span>Calicut // Bengaluru</span><span class="dot">·</span>
+  </div>
+</div>
+
+<!-- WORKS -->
+<section id="works">
+  <div class="works-hdr">
+    <h2 class="works-hed">Selected Works <em>(08)</em></h2>
+    <div class="view-toggle">
+      <button class="vtbtn" id="gbtn">Grid</button>
+      <button class="vtbtn active" id="lbtn">List</button>
+    </div>
+  </div>
+  <div class="wgrid lv" id="wgrid">
+
+    <a class="wc reveal" href="work/spunk-your-creak.html">
+      <div class="wc-img"><img src="assets/images/projects/eilin.jpg" alt="Spunk Your Creak"/></div>
+      <span class="wc-num">01</span>
+      <span class="wc-list-type">Dance Battle · Showcase</span>
+      <div class="wc-info">
+        <p class="wc-type">Dance Battle · Showcase</p>
+        <h3 class="wc-title">SPUNK YOUR CREAK</h3>
+        <p class="wc-year">2023</p>
+      </div>
+    </a>
+    <a class="wc reveal" href="work/ards.html">
+      <div class="wc-img"><img src="assets/images/projects/ards.jpg" alt="ARDS"/></div>
+      <span class="wc-num">02</span>
+      <span class="wc-list-type">Music Video</span>
+      <div class="wc-info">
+        <p class="wc-type">Music Video</p>
+        <h3 class="wc-title">ARDS</h3>
+        <p class="wc-year">2024</p>
+      </div>
+    </a>
+    <a class="wc reveal" href="work/amg-sl-roadster.html">
+      <div class="wc-img"><img src="assets/images/projects/amg-sl-roadster.jpg" alt="AMG SL ROADSTER"/></div>
+      <span class="wc-num">03</span>
+      <span class="wc-list-type">Commercial</span>
+      <div class="wc-info">
+        <p class="wc-type">Commercial</p>
+        <h3 class="wc-title">AMG SL ROADSTER</h3>
+        <p class="wc-year">2023</p>
+      </div>
+    </a>
+    <a class="wc reveal" href="work/pearl-noir.html">
+      <div class="wc-img"><img src="assets/images/projects/pearl-noir.jpg" alt="PEARL NOIR"/></div>
+      <span class="wc-num">04</span>
+      <span class="wc-list-type">Fashion BTS</span>
+      <div class="wc-info">
+        <p class="wc-type">Fashion BTS</p>
+        <h3 class="wc-title">PEARL NOIR</h3>
+        <p class="wc-year">2024</p>
+      </div>
+    </a>
+    <a class="wc reveal" href="work/knari-ss24.html">
+      <div class="wc-img"><img src="assets/images/projects/knari-ss24.jpg" alt="KNARI SS'24"/></div>
+      <span class="wc-num">05</span>
+      <span class="wc-list-type">Brand Promo</span>
+      <div class="wc-info">
+        <p class="wc-type">Brand Promo</p>
+        <h3 class="wc-title">KNARI SS'24</h3>
+        <p class="wc-year">2024</p>
+      </div>
+    </a>
+    <a class="wc wc-wide reveal" href="work/miles-masterclass.html">
+      <div class="wc-img"><img src="assets/images/projects/joe-oringel.jpg" alt="MILES Masterclass"/></div>
+      <span class="wc-play" aria-hidden="true">&#9654;</span>
+      <span class="wc-num">06</span>
+      <span class="wc-list-type">Trailer Series</span>
+      <div class="wc-info">
+        <p class="wc-type">Trailer Series · 3 Films</p>
+        <h3 class="wc-title">MILES MASTERCLASS</h3>
+        <p class="wc-year">2026</p>
+      </div>
+    </a>
+    <a class="wc reveal" href="work/gala-night.html">
+      <div class="wc-img"><img src="assets/images/gala/gala-01.jpg" alt="Gala Night"/></div>
+      <span class="wc-num">07</span>
+      <span class="wc-list-type">Event Film · Colour Grade</span>
+      <div class="wc-info">
+        <p class="wc-type">Event Film · Colour Grade</p>
+        <h3 class="wc-title">GALA NIGHT</h3>
+        <p class="wc-year">2026</p>
+      </div>
+    </a>
+    <a class="wc reveal" href="work/hyrox.html">
+      <div class="wc-img"><img src="assets/images/hyrox/hyrox-01.jpg" alt="HYROX"/></div>
+      <span class="wc-num">08</span>
+      <span class="wc-list-type">Sports · Event Coverage</span>
+      <div class="wc-info">
+        <p class="wc-type">Sports · Event Coverage</p>
+        <h3 class="wc-title">HYROX</h3>
+        <p class="wc-year">2026</p>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <div class="modal-backdrop" data-close></div>
+  <button class="lb-close" data-close aria-label="Close">&times;</button>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">&larr;</button>
+  <img class="lb-img" id="lbImg" src="" alt=""/>
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Next">&rarr;</button>
+</div>
+
+<!-- PHOTOGRAPHY -->
+<section id="photography">
+  <div class="photo-hdr">
+    <span class="s-eye">Beyond The Frame</span>
+    <h2 class="s-hed">STILLS</h2>
+    <p class="photo-sub">Photographs from between shoots: backstage, on the floor, after hours.</p>
+  </div>
+  <div class="photo-grid">
+    <div class="photo-item reveal"><img src="assets/images/photography/concert-01.jpg" alt="Concert photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/concert-02.jpg" alt="Concert photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/dance-01.jpg" alt="Dance photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/bts-02.jpg" alt="Editing behind the scenes"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/clubs-03.jpg" alt="Club photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/portrait-02.jpg" alt="Portrait detail"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/bts-01.jpg" alt="Studio portrait"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/clubs-01.jpg" alt="Club photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/dance-02.jpg" alt="Dance photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/fashion-01.jpg" alt="Fashion photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/bts-04.jpg" alt="Rooftop silhouette"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/clubs-02.jpg" alt="Club photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/portrait-01.jpg" alt="Portrait photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/clubs-04.jpg" alt="Club photography"/></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="reveal">
+    <h2 class="about-hed" data-text="I FILM WHAT LINGERS">I FILM WHAT <em>LINGERS</em></h2>
+    <p class="about-pull">Not the event, the second after. Not the word, the breath before it.</p>
+    <div class="about-img">
+      <img src="assets/images/about.jpg" alt="Rahul at work"/>
+    </div>
+  </div>
+  <div class="reveal">
+    <div class="about-body">
+      <p>I'm Rahul, a filmmaker and editor from Calicut, currently based in Bengaluru. I started with a camera because I couldn't stop watching films and needed to know what it felt like from the other side.</p>
+      <p>I work with brands, musicians, and people with something real to say, from fashion and automobiles to music videos and documentary. My process is deliberate and my cuts are earned.</p>
+      <p>I'm not interested in footage. I'm interested in feeling.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><p class="stat-n">6+</p><p class="stat-l">Years Active</p></div>
+      <div class="stat"><p class="stat-n">70+</p><p class="stat-l">Projects</p></div>
+      <div class="stat"><p class="stat-n">3K+</p><p class="stat-l">Hours Edited</p></div>
+    </div>
+    <a class="about-more" href="about.html">More About Me &rarr;</a>
+  </div>
+</section>
+
+<!-- CLIENTS & TOOLS -->
+<section id="clients">
+  <div class="clients-hdr reveal">
+    <span class="s-eye">Trusted By</span>
+    <h2 class="s-hed">BRANDS &amp; TOOLS</h2>
+  </div>
+  <div class="brand-grid reveal">
+    <div class="brand-logo">
+      <span class="brand-name">KNARI</span>
+      <span class="brand-tag">She Is You</span>
+    </div>
+    <div class="brand-logo">
+      <span class="brand-name brand-ring">ZEE5</span>
+    </div>
+    <div class="brand-logo">
+      <span class="brand-name">UMBER<span class="brand-dot">.</span></span>
+    </div>
+    <div class="brand-logo">
+      <span class="brand-name">ALUER</span>
+      <span class="brand-tag">Skin Clinic</span>
+    </div>
+    <div class="brand-logo">
+      <span class="brand-name">AR</span>
+      <span class="brand-tag">Abida Rasheed</span>
+    </div>
+    <div class="brand-logo">
+      <span class="brand-name">FFM</span>
+    </div>
+    <div class="brand-logo">
+      <span class="brand-name brand-2l">Urban<br/>Ladder</span>
+    </div>
+    <div class="brand-logo">
+      <span class="brand-name brand-ring">TOYOTA</span>
+    </div>
+  </div>
+  <div class="tool-row reveal">
+    <span class="tool-item">DaVinci Resolve</span><span class="tool-dot">·</span>
+    <span class="tool-item">Adobe Premiere Pro</span><span class="tool-dot">·</span>
+    <span class="tool-item">Adobe After Effects</span><span class="tool-dot">·</span>
+    <span class="tool-item">Adobe Photoshop</span>
+  </div>
+</section>
+
+<!-- REEL -->
+<section id="reel">
+  <div class="reel-hdr reveal">
+    <span class="s-eye">Watch</span>
+    <h2 class="s-hed">THE REEL</h2>
+  </div>
+  <div class="reel-box reveal">
+    <iframe src="https://www.youtube.com/embed/PQT5-LklP4s?rel=0&modestbranding=1" allowfullscreen title="Showreel, Rahul Kuttappy"></iframe>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-bg" aria-hidden="true">
+    <img src="assets/images/about/about-03.jpg" alt=""/>
+  </div>
+  <div class="contact-inner">
+    <div class="reveal">
+      <h2 class="contact-hed">LET'S<br>MAKE<br><em>SOMETHING</em><br><span class="dither-word" data-dither>REAL</span></h2>
+    </div>
+    <div class="reveal">
+      <p class="c-lbl">Open to projects, collabs, conversations</p>
+      <a class="c-email" href="mailto:rahulkuttappy805@gmail.com">rahulkuttappy805@gmail.com</a>
+      <div class="socials">
+        <a href="https://www.instagram.com/rahul____kuttappy/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.youtube.com/@rahulkuttappy" target="_blank" rel="noopener">YouTube</a>
+        <a href="https://www.behance.net/rahulkuttappy" target="_blank" rel="noopener">Behance</a>
+        <a href="https://www.linkedin.com/in/rahulkuttappy" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <canvas id="plexus" aria-hidden="true"></canvas>
+  <img class="f-logo" src="assets/images/logo.png" alt="RK"/>
+  <p>&copy; 2026 Rahul Kuttappy. All rights reserved</p>
+  <a class="f-back" href="#hero">Back to top ↑</a>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

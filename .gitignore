@@ -1,0 +1,9 @@
+# Raw source material — not part of the published site
+Dump/
+
+# Local editor / tooling
+.claude/
+
+# macOS
+.DS_Store
+**/.DS_Store

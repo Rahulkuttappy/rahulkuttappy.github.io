@@ -1,0 +1,79 @@
+/* ── PROJECT DETAIL PAGES ── */
+#wkhero{
+  position:relative;min-height:86vh;display:flex;align-items:flex-end;
+  overflow:hidden;padding-top:5rem;
+}
+.wkhero-bg{position:absolute;inset:0;z-index:0;}
+.wkhero-bg img{width:100%;height:100%;object-fit:cover;filter:brightness(.5);}
+.wkhero-bg::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(8,8,8,.96) 0%,rgba(8,8,8,.45) 55%,rgba(8,8,8,.2) 100%);
+}
+.wkhero-content{position:relative;z-index:1;padding:0 2.5rem 4rem;width:100%;}
+.wkhero-back{
+  display:inline-block;margin-bottom:2rem;
+  font-size:.54rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(237,234,226,.6);text-decoration:none;transition:color .3s ease;
+}
+.wkhero-back:hover{color:var(--red);}
+.wkhero-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,11vw,9rem);
+  letter-spacing:.02em;line-height:.9;color:var(--off);
+}
+.wkhero-meta{
+  display:flex;flex-wrap:wrap;gap:2.5rem;margin-top:2rem;
+  padding-top:1.5rem;border-top:1px solid var(--border);
+}
+.wk-meta-item{display:flex;flex-direction:column;gap:.35rem;}
+.wk-meta-lbl{font-size:.46rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
+.wk-meta-val{font-size:.82rem;color:rgba(237,234,226,.82);}
+
+/* Intro */
+#wkintro{padding:6rem 2.5rem;border-top:1px solid var(--border);}
+.wkintro-grid{display:grid;grid-template-columns:.75fr 1.25fr;gap:5rem;}
+.wkintro-body{font-size:.94rem;line-height:2;color:rgba(237,234,226,.55);}
+.wkintro-body p+p{margin-top:1.2rem;}
+.wkintro-body em{color:var(--red);font-style:normal;}
+
+/* Gallery */
+#wkgallery{padding:0 2.5rem 7rem;border-top:1px solid var(--border);}
+.wkgallery-hdr{padding:4.5rem 0 2.5rem;}
+.wkgallery-grid{column-count:2;column-gap:.9rem;}
+.wkgallery-grid .photo-item{break-inside:avoid;margin-bottom:.9rem;overflow:hidden;position:relative;background:var(--surface);}
+.wkgallery-grid .photo-item img{width:100%;display:block;filter:brightness(.88);transition:transform .8s cubic-bezier(.16,1,.3,1),filter .5s;cursor:none;}
+.wkgallery-grid .photo-item:hover img{transform:scale(1.03);filter:brightness(1);}
+.wkgallery-wide{column-count:1;}
+
+/* Embedded video */
+#wkvideo{padding:0 2.5rem 7rem;border-top:1px solid var(--border);}
+.wkvideo-hdr{padding:4.5rem 0 2rem;}
+.wkvideo-box{position:relative;width:100%;aspect-ratio:16/9;background:var(--surface);overflow:hidden;}
+.wkvideo-box iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
+
+/* Next project */
+#wknext{padding:5rem 2.5rem 6rem;border-top:1px solid var(--border);}
+.wknext-link{
+  display:flex;justify-content:space-between;align-items:baseline;gap:2rem;
+  text-decoration:none;color:inherit;position:relative;overflow:hidden;
+  padding:1.6rem 0;border-bottom:1px solid var(--border);
+}
+.wknext-link::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(90deg,rgba(var(--red-glow),.16),rgba(var(--red-glow),.04) 45%,transparent 75%);
+  opacity:0;transition:opacity .4s ease;
+}
+.wknext-link:hover::before{opacity:1;}
+.wknext-title{position:relative;z-index:1;font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,4vw,3rem);letter-spacing:.03em;color:var(--off);}
+.wknext-lbl{position:relative;z-index:1;font-size:.5rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
+
+@media(max-width:768px){
+  #wkhero{min-height:66vh;padding-top:4rem;}
+  .wkhero-content{padding:0 1.5rem 3rem;}
+  .wkhero-meta{gap:1.4rem;}
+  #wkintro{padding:4rem 1.5rem;}
+  .wkintro-grid{grid-template-columns:1fr;gap:2rem;}
+  #wkgallery{padding:0 1.5rem 5rem;}
+  .wkgallery-grid{column-count:1;}
+  #wkvideo{padding:0 1.5rem 5rem;}
+  #wknext{padding:4rem 1.5rem 5rem;}
+}
