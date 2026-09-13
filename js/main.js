@@ -18,6 +18,50 @@ if(navLogoLink){
 function tick(){const c=document.getElementById('clock'); if(c) c.textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false,timeZone:'Asia/Kolkata'});}
 tick();setInterval(tick,1000);
 
+/* ── Hero video keep-alive ──
+   iOS pauses autoplaying video for a lot of reasons: backgrounding the tab,
+   an incoming call, another app taking the audio session, or simply scrolling
+   it out of view. Nothing restarts it on its own, so watch for the pause and
+   resume when it is on screen. Low Power Mode blocks playback outright and
+   play() just rejects, hence the attempt cap: the poster frame stands in. */
+const heroVideo=document.getElementById('heroVideo');
+if(heroVideo){
+  heroVideo.muted=true;                 /* re-assert: autoplay needs it */
+  heroVideo.setAttribute('playsinline','');
+  heroVideo.setAttribute('webkit-playsinline','');
+  heroVideo.disablePictureInPicture=true;
+
+  let inView=true, attempts=0;
+  const MAX_ATTEMPTS=30;
+
+  function resumeHero(reset){
+    if(reset) attempts=0;
+    if(!inView||document.hidden||!heroVideo.paused) return;
+    if(attempts++>MAX_ATTEMPTS) return;
+    const p=heroVideo.play();
+    if(p&&p.catch) p.catch(()=>{});
+  }
+
+  heroVideo.addEventListener('pause',()=>{ setTimeout(()=>resumeHero(false),140); });
+  heroVideo.addEventListener('playing',()=>{ attempts=0; });
+  heroVideo.addEventListener('stalled',()=>resumeHero(true));
+  heroVideo.addEventListener('suspend',()=>resumeHero(false));
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) resumeHero(true); });
+  window.addEventListener('pageshow',()=>resumeHero(true));
+  ['touchstart','pointerdown','click'].forEach(ev=>
+    window.addEventListener(ev,()=>resumeHero(true),{passive:true}));
+
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(es=>{
+      inView=es[0].isIntersecting;
+      /* pausing off screen saves battery, and the pause handler ignores it
+         because inView is already false */
+      if(inView) resumeHero(true);
+      else if(!heroVideo.paused) heroVideo.pause();
+    },{threshold:0.01}).observe(heroVideo);
+  }
+}
+
 /* ── Mobile menu ──
    The link list is the same element the desktop nav uses; on small screens
    CSS turns it into a full screen panel and this toggles it. No scroll lock:

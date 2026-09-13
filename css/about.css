@@ -79,9 +79,11 @@
   .abhero-statement{max-width:100%;}
 }
 @media(max-width:768px){
-  #abhero{min-height:88svh;padding:6rem 1.5rem 3rem;}
-  .abhero-photo{width:100%;border-radius:0;opacity:.35;}
-  .abhero-photo::after{background:linear-gradient(180deg,rgba(8,8,8,.9) 0%,rgba(8,8,8,.6) 40%,rgba(8,8,8,.95) 100%);}
+  /* Type drops to the lower half so the face reads in the clear above it */
+  #abhero{min-height:94svh;padding:6rem 1.5rem 3rem;align-items:flex-end;}
+  .abhero-photo{width:100%;border-radius:0;opacity:.8;}
+  .abhero-photo img{object-position:52% 20%;}
+  .abhero-photo::after{background:linear-gradient(180deg,rgba(8,8,8,.2) 0%,rgba(8,8,8,.1) 24%,rgba(8,8,8,.7) 56%,rgba(8,8,8,.95) 100%);}
   .abhero-lower{grid-template-columns:3rem 1fr;gap:1rem;margin-top:3rem;}
   .abhero-vlabel{top:auto;bottom:1.5rem;right:1.5rem;}
   .abhero-vlabel::before{display:none;}
