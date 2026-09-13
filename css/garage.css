@@ -180,11 +180,9 @@
   letter-spacing:.18em;text-transform:uppercase;
   padding:.24rem .42rem;border-radius:2px;white-space:nowrap;
 }
-/* Hazard strip: same language as the tape across the packshot */
+/* Solid, so it reads as a label rather than competing with the tape */
 .gbay-status.soon{
-  color:#fff;border:1px solid rgba(0,0,0,.55);
-  background:repeating-linear-gradient(45deg,#141414 0 6px,rgba(var(--red-glow),.9) 6px 12px);
-  text-shadow:0 1px 2px rgba(0,0,0,.9);
+  color:var(--off);background:var(--red);border:1px solid rgba(0,0,0,.4);
 }
 .gbay-name{
   font-family:'Bebas Neue',sans-serif;font-size:1.75rem;letter-spacing:.04em;
@@ -219,10 +217,7 @@
   background:repeating-linear-gradient(45deg,#121212 0 9px,var(--red) 9px 18px);
   border-top:2px solid #090909;border-bottom:2px solid #090909;
   box-shadow:0 10px 26px rgba(0,0,0,.62);
-  animation:tapeCrawl 1.6s linear infinite;
 }
-/* one full stripe period measured along the 45deg axis */
-@keyframes tapeCrawl{to{background-position:25.46px 0;}}
 .gx-tape b{
   font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
   letter-spacing:.24em;text-transform:uppercase;color:#fff;
@@ -230,13 +225,6 @@
   white-space:nowrap;box-shadow:0 0 0 1px rgba(237,234,226,.1);
 }
 
-/* ══ DITHER RULE ══ */
-.dither-rule{
-  display:block;width:100%;height:16px;
-  image-rendering:pixelated;image-rendering:crisp-edges;
-  position:relative;z-index:2;
-}
-.dither-rule.dr-wide{height:22px;margin-top:4.5rem;}
 
 /* ══ REQUEST STRIP ══ */
 #grequest{
@@ -270,5 +258,19 @@
 }
 @media(prefers-reduced-motion:reduce){
   .gx-box{transition:none;}
-  .gx-tape{animation:none;}
 }
+
+/* ══ NOTHING HAS SHIPPED YET ══
+   The packshots sit greyed back so the tape and the status read as the
+   live part of the card. Dimming the pieces individually rather than the
+   box keeps the tape at full strength. */
+.gx-art img{filter:grayscale(1) brightness(.5) contrast(.96);}
+.gx-arttext,.gx-brand,.gx-kind{opacity:.45;}
+.gx-app{opacity:.38;}
+.gx-spine{opacity:.45;}
+.gx-front{border-color:rgba(237,234,226,.06);}
+.gbay-name{opacity:.62;}
+.gbay-desc,.gbay-specs{opacity:.68;}
+.gbay:hover .gx-art img{filter:grayscale(.7) brightness(.62) contrast(.98);}
+.gbay:hover .gbay-name{opacity:.85;}
+.gx-art img,.gbay-name{transition:filter .45s ease,opacity .45s ease;}

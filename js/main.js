@@ -654,45 +654,6 @@ if(plexusCanvas){
   plexusLoop();
 }
 
-/* ── Dithered rules: a stipple band that thins out across its width,
-   used as a section divider. Same 4x4 matrix as everything else. ── */
-const ditherRules=document.querySelectorAll('[data-dither-rule]');
-if(ditherRules.length){
-  const DR_BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
-  const DR_BLK=2;
-  function paintRule(cv){
-    const ctx=cv.getContext&&cv.getContext('2d');
-    if(!ctx) return;
-    const r=cv.getBoundingClientRect();
-    if(!r.width||!r.height) return;
-    const W=Math.max(8,Math.round(r.width/DR_BLK));
-    const H=Math.max(2,Math.round(r.height/DR_BLK));
-    cv.width=W;cv.height=H;
-    const img=ctx.createImageData(W,H);
-    const o=img.data;
-    for(let y=0;y<H;y++){
-      for(let x=0;x<W;x++){
-        const i=(y*W+x)*4;
-        const tx=x/(W-1);
-        /* dense at the left edge, gone by roughly two thirds across */
-        let v=Math.max(0,1-tx*1.55);
-        /* and thinning toward the bottom of the band */
-        v*=1-(y/H)*0.55;
-        if(v>(DR_BAYER[y&3][x&3]+0.5)/16){
-          const hot=tx<0.06&&((x+y)&1)===0;
-          o[i]=hot?150:237;o[i+1]=hot?40:234;o[i+2]=hot?34:226;
-          o[i+3]=hot?225:185;
-        }
-      }
-    }
-    ctx.putImageData(img,0,0);
-  }
-  const paintAll=()=>ditherRules.forEach(paintRule);
-  paintAll();
-  let drT;
-  window.addEventListener('resize',()=>{clearTimeout(drT);drT=setTimeout(paintAll,180);});
-}
-
 /* ── Garage: packshots tilt toward the cursor ── */
 const tiltBoxes=document.querySelectorAll('[data-tilt]');
 if(tiltBoxes.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
