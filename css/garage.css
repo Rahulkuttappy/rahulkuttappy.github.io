@@ -85,7 +85,7 @@
 #gbays{padding:4.5rem 2.5rem 7rem;}
 .gbay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3rem 2rem;}
 .gbay{
-  display:flex;flex-direction:column;
+  display:flex;flex-direction:column;padding:0 1.2rem;
   transition:opacity .45s ease,transform .45s cubic-bezier(.16,1,.3,1);
 }
 .gbay.is-hidden{display:none;}
@@ -188,13 +188,15 @@
   font-family:'Bebas Neue',sans-serif;font-size:1.75rem;letter-spacing:.04em;
   line-height:1;color:var(--off);margin-bottom:.55rem;
 }
-.gbay-desc{font-size:.78rem;line-height:1.75;color:rgba(237,234,226,.5);margin-bottom:1rem;}
+/* two lines reserved, so the footers line up across the row */
+.gbay-desc{font-size:.78rem;line-height:1.75;color:rgba(237,234,226,.5);margin-bottom:1rem;min-height:3.5em;}
 .gbay-specs{list-style:none;margin-bottom:1.2rem;}
 .gbay-specs li{
   font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.1em;
   text-transform:uppercase;color:rgba(237,234,226,.4);
   padding:.3rem 0;border-bottom:1px solid rgba(237,234,226,.06);
 }
+.gbay-specs li:last-child{border-bottom:none;}
 .gbay-specs li::before{content:'/ ';color:var(--red);}
 .gbay-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
 .gbay-price{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.05em;color:var(--off);}
