@@ -613,6 +613,73 @@ if(plexusCanvas){
   plexusLoop();
 }
 
+/* ── Instagram feed ──
+   Reads a plain JSON feed URL from data-endpoint. Field names differ between
+   providers, so accept the common spellings rather than tie this to one.
+   Nodes are built with the DOM, never innerHTML, so a caption containing
+   markup cannot inject anything. */
+const igGrid=document.getElementById('igGrid');
+if(igGrid){
+  const IG_PROFILE='https://www.instagram.com/rahul____kuttappy/';
+  const IG_MAX=8;
+  const igEndpoint=(igGrid.dataset.endpoint||'').trim();
+
+  function igFallback(label){
+    igGrid.classList.add('ig-empty');
+    igGrid.textContent='';
+    const a=document.createElement('a');
+    a.className='ig-cta';a.href=IG_PROFILE;a.target='_blank';a.rel='noopener';
+    const l=document.createElement('span');l.className='ig-cta-lbl';l.textContent=label;
+    const g=document.createElement('span');g.className='ig-cta-go';g.textContent='Open Instagram →';
+    a.append(l,g);igGrid.appendChild(a);
+  }
+
+  function igNormalise(json){
+    const arr=Array.isArray(json)?json:(json.posts||json.data||json.media||[]);
+    if(!Array.isArray(arr)) return [];
+    return arr.slice(0,IG_MAX).map(p=>({
+      link:p.permalink||p.link||IG_PROFILE,
+      img:p.thumbnailUrl||p.thumbnail_url||p.mediaUrl||p.media_url||p.image||'',
+      type:String(p.mediaType||p.media_type||'').toUpperCase(),
+      caption:String(p.caption||p.text||'').replace(/\s+/g,' ').slice(0,110)
+    })).filter(p=>/^https:\/\//.test(p.img));
+  }
+
+  function igRender(posts){
+    igGrid.classList.remove('ig-empty');
+    igGrid.textContent='';
+    posts.forEach((p,i)=>{
+      const a=document.createElement('a');
+      a.className='ig-item';a.href=p.link;a.target='_blank';a.rel='noopener';
+      a.style.animationDelay=(i*60)+'ms';
+      const img=document.createElement('img');
+      img.src=p.img;img.loading='lazy';img.decoding='async';
+      img.alt=p.caption||'Instagram post';
+      a.appendChild(img);
+      if(p.type==='VIDEO'||p.type==='REELS'||p.type==='CAROUSEL_ALBUM'){
+        const b=document.createElement('span');
+        b.className='ig-badge';
+        b.textContent=p.type==='CAROUSEL_ALBUM'?'Album':'Reel';
+        a.appendChild(b);
+      }
+      igGrid.appendChild(a);
+    });
+    if(window.ScrollTrigger) ScrollTrigger.refresh();
+  }
+
+  if(!igEndpoint){
+    igFallback('Feed not connected yet');
+  }else{
+    fetch(igEndpoint,{mode:'cors'})
+      .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(json=>{
+        const posts=igNormalise(json);
+        posts.length ? igRender(posts) : igFallback('Nothing to show right now');
+      })
+      .catch(()=>igFallback('Feed unavailable'));
+  }
+}
+
 /* ── Casual image-lifting deterrents ──
    Scoped to media only, so right-clicking a link or text still behaves
    normally. This stops the easy save, nothing more. */

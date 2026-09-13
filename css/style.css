@@ -25,10 +25,10 @@ img,video{
 #pageFade.leaving{opacity:1;pointer-events:auto;transition:opacity .42s ease;}
 #pageFade .pf-mark{
   position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-family:'JetBrains Mono',monospace;font-size:.56rem;font-weight:700;
-  letter-spacing:.5em;text-transform:uppercase;color:var(--red);
   opacity:0;transition:opacity .3s ease;
 }
+/* Sized to the cap height of the .56rem wordmark it replaces */
+#pageFade .pf-mark img{display:block;height:15px;width:auto;}
 #pageFade.leaving .pf-mark{opacity:1;}
 
 /* ── AUDIO PLAYER / DITHERED VISUALIZER ── */
@@ -246,7 +246,13 @@ nav.scrolled{
 .n1{display:block;color:var(--off);transform:translateY(110%);}
 .n2{display:block;color:var(--red);transform:translateY(110%);}
 .hero-rule{width:2.5rem;height:2px;background:var(--red);margin:1.3rem 0;transform:scaleX(0);transform-origin:left;}
-.hero-bio{font-size:.88rem;line-height:1.82;color:rgba(237,234,226,.52);max-width:32ch;}
+/* Serif italic, bigger and brighter than the old small grey sans. Picks up
+   the same face the About page uses for emphasis. */
+.hero-bio{
+  font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;
+  font-size:clamp(1.1rem,1.6vw,1.45rem);line-height:1.55;letter-spacing:.005em;
+  color:rgba(237,234,226,.72);max-width:30ch;
+}
 .hero-scroll{
   position:absolute;bottom:3rem;right:2.5rem;z-index:2;
   display:flex;flex-direction:column;align-items:center;gap:.6rem;
@@ -367,6 +373,54 @@ nav.scrolled{
 @media(max-width:600px){
   .wgrid.lv .wc{grid-template-columns:2.4rem 1fr auto;column-gap:.7rem;}
   .wgrid.lv .wc:hover .wc-img{opacity:.18;}
+}
+
+/* ── INSTAGRAM FEED ── */
+#instagram{padding:0 2.5rem 8rem;border-top:1px solid var(--border);}
+.ig-hdr{padding:5rem 0 2.5rem;display:flex;align-items:flex-end;justify-content:space-between;gap:2rem;flex-wrap:wrap;}
+.ig-handle{
+  font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);text-decoration:none;cursor:none;
+  transition:color .3s ease;white-space:nowrap;
+}
+.ig-handle:hover{color:var(--red);}
+.ig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;}
+.ig-item{
+  position:relative;display:block;aspect-ratio:1;overflow:hidden;
+  background:var(--surface);cursor:none;
+  opacity:0;animation:igIn .65s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes igIn{to{opacity:1;}}
+.ig-item img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:brightness(.8) saturate(.95);
+  transition:transform .7s cubic-bezier(.16,1,.3,1),filter .4s ease;
+}
+.ig-item:hover img{transform:scale(1.05);filter:brightness(1) saturate(1);}
+.ig-badge{
+  position:absolute;top:.5rem;right:.55rem;
+  font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--off);
+  background:rgba(8,8,8,.55);backdrop-filter:blur(10px);
+  padding:.26rem .42rem;border-radius:2px;
+}
+/* Shown when no endpoint is set, or the fetch fails */
+.ig-grid.ig-empty{grid-template-columns:1fr;}
+.ig-cta{
+  display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;
+  padding:2.6rem 2rem;text-decoration:none;cursor:none;
+  border:1px solid var(--border);border-radius:3px;
+  background:rgba(237,234,226,.02);
+  backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);
+  transition:border-color .35s ease,background .35s ease;
+}
+.ig-cta:hover{border-color:rgba(var(--red-glow),.55);background:rgba(237,234,226,.045);}
+.ig-cta-lbl{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+.ig-cta-go{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.05em;color:var(--off);}
+@media(max-width:900px){.ig-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){
+  #instagram{padding:0 1.5rem 5rem;}
+  .ig-hdr{padding:4rem 0 2rem;}
 }
 
 /* ── MODAL / LIGHTBOX ── */

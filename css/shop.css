@@ -1,0 +1,120 @@
+.nav-links a.active-link{color:var(--off);border-bottom:1px solid var(--red);padding-bottom:2px;}
+
+/* ── SHOP HERO ── */
+#shophero{
+  position:relative;padding:9rem 2.5rem 4rem;
+  border-bottom:1px solid var(--border);
+}
+.shophero-inner{display:grid;grid-template-columns:1.1fr .9fr;gap:5rem;align-items:end;}
+.shop-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(3rem,9vw,8rem);letter-spacing:.02em;line-height:.85;color:var(--off);
+}
+.shop-sub{
+  font-family:'Instrument Serif',Georgia,serif;font-style:italic;
+  font-size:clamp(1rem,1.5vw,1.35rem);line-height:1.55;
+  color:rgba(237,234,226,.7);max-width:34ch;
+}
+.shop-note{
+  margin-top:1.6rem;font-size:.76rem;line-height:1.8;
+  color:rgba(237,234,226,.42);max-width:38ch;
+}
+
+/* ── PRODUCTS ── */
+#shopgrid{padding:5rem 2.5rem 7rem;}
+.shopgrid-hdr{padding-bottom:2.5rem;}
+.shop-items{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
+
+.shop-card{
+  position:relative;display:flex;flex-direction:column;
+  border:1px solid var(--border);border-radius:3px;overflow:hidden;
+  background:rgba(237,234,226,.02);
+  backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);
+  transition:border-color .4s ease,transform .5s cubic-bezier(.16,1,.3,1);
+}
+.shop-card:hover{border-color:rgba(var(--red-glow),.55);transform:translateY(-4px);}
+.shop-thumb{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--surface);}
+.shop-thumb img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:brightness(.78) saturate(.95);
+  transition:transform .8s cubic-bezier(.16,1,.3,1),filter .45s ease;
+}
+.shop-card:hover .shop-thumb img{transform:scale(1.05);filter:brightness(.95) saturate(1.05);}
+/* Split preview: the right half shows the graded state */
+.shop-thumb::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0 50%,rgba(var(--red-glow),.18) 50% 100%);
+  mix-blend-mode:screen;opacity:.9;
+}
+.shop-tag{
+  position:absolute;top:.7rem;left:.7rem;z-index:2;
+  font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--off);
+  background:rgba(8,8,8,.6);backdrop-filter:blur(10px);
+  padding:.3rem .5rem;border-radius:2px;
+}
+.shop-body{padding:1.5rem 1.4rem 1.6rem;display:flex;flex-direction:column;flex:1;}
+.shop-name{
+  font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;
+  line-height:1;color:var(--off);margin-bottom:.5rem;
+}
+.shop-desc{font-size:.78rem;line-height:1.75;color:rgba(237,234,226,.5);margin-bottom:1.1rem;}
+.shop-specs{list-style:none;margin-bottom:1.4rem;}
+.shop-specs li{
+  font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:.1em;
+  text-transform:uppercase;color:rgba(237,234,226,.4);
+  padding:.32rem 0;border-bottom:1px solid rgba(237,234,226,.06);
+}
+.shop-specs li::before{content:'/ ';color:var(--red);}
+.shop-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+.shop-price{
+  font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.05em;color:var(--off);
+}
+.shop-price em{font-style:normal;color:var(--red);}
+.shop-price .was{
+  font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.1em;
+  color:var(--muted);text-decoration:line-through;margin-left:.45rem;
+}
+.shop-btn{
+  font-family:'JetBrains Mono',monospace;font-size:.52rem;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;
+  color:var(--off);text-decoration:none;cursor:none;white-space:nowrap;
+  padding:.62rem .9rem;border:1px solid rgba(237,234,226,.22);border-radius:2px;
+  transition:border-color .3s ease,background .3s ease,color .3s ease;
+}
+.shop-btn:hover{border-color:var(--red);background:rgba(var(--red-glow),.16);color:var(--off);}
+.shop-btn.is-soon{opacity:.45;pointer-events:none;}
+
+/* ── HOW IT WORKS ── */
+#shophow{padding:0 2.5rem 8rem;border-top:1px solid var(--border);}
+.shophow-inner{display:grid;grid-template-columns:.8fr 1.2fr;gap:5rem;padding-top:5rem;}
+.shophow-steps{display:grid;gap:1.6rem;}
+.shophow-step{display:grid;grid-template-columns:3rem 1fr;gap:1.2rem;align-items:start;}
+.shophow-num{
+  font-family:'JetBrains Mono',monospace;font-size:.56rem;font-weight:700;
+  letter-spacing:.16em;color:var(--red);padding-top:.25rem;
+}
+.shophow-step h3{
+  font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.04em;
+  color:var(--off);margin-bottom:.35rem;
+}
+.shophow-step p{font-size:.82rem;line-height:1.8;color:rgba(237,234,226,.5);}
+
+@media(max-width:1000px){.shop-items{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){
+  #shophero{padding:7rem 1.5rem 3rem;}
+  .shophero-inner{grid-template-columns:1fr;gap:2rem;}
+  #shopgrid{padding:3.5rem 1.5rem 5rem;}
+  .shop-items{grid-template-columns:1fr;}
+  #shophow{padding:0 1.5rem 5rem;}
+  .shophow-inner{grid-template-columns:1fr;gap:2rem;padding-top:3.5rem;}
+}
+
+/* ── CONTACT CTA (shares the About page treatment) ── */
+#ab-contact{
+  padding:7rem 2.5rem 8rem;border-top:1px solid var(--border);
+  text-align:center;position:relative;overflow:hidden;
+}
+#ab-contact .contact-hed{font-size:clamp(2.6rem,8vw,7rem);}
+#ab-contact>.reveal{position:relative;z-index:1;}
+@media(max-width:768px){#ab-contact{padding:5rem 1.5rem 6rem;}}

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!-- SEO:START -->
+<meta name="description" content="LUTs and presets built on real graded projects, not on a test chart. Colour tools for DaVinci Resolve, Premiere and Lightroom by Rahul Kuttappy."/>
+<link rel="canonical" href="https://rahulkuttappy.github.io/shop.html"/>
+<meta name="robots" content="index, follow"/>
+<meta name="author" content="Rahul Kuttappy"/>
+<meta name="theme-color" content="#080808"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Rahul Kuttappy"/>
+<meta property="og:title" content="Shop · Rahul Kuttappy"/>
+<meta property="og:description" content="LUTs and presets built on real graded projects, not on a test chart. Colour tools for DaVinci Resolve, Premiere and Lightroom."/>
+<meta property="og:url" content="https://rahulkuttappy.github.io/shop.html"/>
+<meta property="og:image" content="https://rahulkuttappy.github.io/assets/images/gala/gala-03.jpg"/>
+<meta property="og:locale" content="en_IN"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Shop · Rahul Kuttappy"/>
+<meta name="twitter:description" content="LUTs and presets built on real graded projects, not on a test chart."/>
+<meta name="twitter:image" content="https://rahulkuttappy.github.io/assets/images/gala/gala-03.jpg"/>
+<link rel="icon" type="image/png" href="assets/images/favicon.png"/>
+<link rel="apple-touch-icon" href="assets/images/favicon.png"/>
+<!-- SEO:END -->
+<title>Shop · Rahul Kuttappy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/shop.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<canvas id="cursorFX" aria-hidden="true"></canvas>
+<div id="pageFade"><span class="pf-mark"><img src="assets/images/logo.png" alt=""/></span></div>
+<audio id="bgm" src="assets/audio/singularity.m4a" loop preload="auto"></audio>
+<div id="audioDock">
+  <button class="viz-btn" id="vizBtn" aria-label="Sound controls">
+    <canvas id="vizCanvas" aria-hidden="true"></canvas>
+  </button>
+  <div class="audio-panel" id="audioPanel">
+    <button class="audio-toggle" id="audioToggle" aria-label="Toggle sound">Sound Off</button>
+    <input class="audio-vol" id="audioVol" type="range" min="0" max="0.4" step="0.01" value="0.12" aria-label="Volume"/>
+  </div>
+</div>
+<div id="scrollbar" aria-hidden="true">
+  <div class="scrollbar-track"></div>
+  <div class="scrollbar-fill" id="sbFill"></div>
+  <div class="scrollbar-dot" id="sbDot"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav" style="opacity:1;">
+  <a href="index.html"><img class="nav-logo" src="assets/images/logo.png" alt="RK"/></a>
+  <ul class="nav-links">
+    <li><a href="index.html#works">Works</a></li>
+    <li><a href="index.html#photography">Photography</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="index.html#reel">Reel</a></li>
+    <li><a href="shop.html" class="active-link">Shop</a></li>
+  </ul>
+  <div class="nav-right">
+    <span id="clock">00:00:00</span>
+    <a class="nav-cta" href="index.html#contact">Let's Talk</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="shophero">
+  <div class="shophero-inner">
+    <div>
+      <p class="s-eye">Colour Tools</p>
+      <h1 class="shop-title">THE<br><span class="dither-word" data-dither>GRADE</span><br>SHOP</h1>
+    </div>
+    <div>
+      <p class="shop-sub">Every LUT here came off a real timeline. Built while grading actual work, then pulled out, cleaned up and made to behave on other people's footage.</p>
+      <p class="shop-note">Nothing here is a one click miracle. They are starting points that get you most of the way to a look, and they expect you to still set your exposure and white balance first.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="shopgrid">
+  <div class="shopgrid-hdr reveal">
+    <p class="s-eye">Downloads</p>
+    <h2 class="s-hed">PACKS</h2>
+  </div>
+  <div class="shop-items">
+
+    <article class="shop-card reveal">
+      <div class="shop-thumb">
+        <span class="shop-tag">LUT Pack</span>
+        <img src="assets/images/gala/gala-03.jpg" alt="Mixed light gala frame"/>
+      </div>
+      <div class="shop-body">
+        <h3 class="shop-name">MIXED LIGHT</h3>
+        <p class="shop-desc">The pass built for rooms that refuse to agree on a colour temperature. Tungsten wash, moving heads and phone screens, pulled into one look with skin left alone.</p>
+        <ul class="shop-specs">
+          <li>6 LUTs, .cube 33x</li>
+          <li>Rec.709 and Log variants</li>
+          <li>Resolve, Premiere, Final Cut</li>
+        </ul>
+        <div class="shop-foot">
+          <span class="shop-price"><em>Free</em></span>
+          <a class="shop-btn is-soon" href="#" data-download>Download</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="shop-card reveal">
+      <div class="shop-thumb">
+        <span class="shop-tag">LUT Pack</span>
+        <img src="assets/images/projects/ards/ards-03.jpg" alt="Hard stage lighting frame"/>
+      </div>
+      <div class="shop-body">
+        <h3 class="shop-name">STAGE / HAZE</h3>
+        <p class="shop-desc">For hard reds, hard blues and a lot of atmosphere. Holds the blacks genuinely black so the colour that survives the frame feels earned rather than lifted.</p>
+        <ul class="shop-specs">
+          <li>8 LUTs, .cube 33x</li>
+          <li>Built on stage and concert footage</li>
+          <li>Includes a halation utility</li>
+        </ul>
+        <div class="shop-foot">
+          <span class="shop-price">₹899<span class="was">₹1,299</span></span>
+          <a class="shop-btn is-soon" href="#" data-download>Buy</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="shop-card reveal">
+      <div class="shop-thumb">
+        <span class="shop-tag">Presets</span>
+        <img src="assets/images/projects/amg/amg-03.jpg" alt="Automotive frame"/>
+      </div>
+      <div class="shop-body">
+        <h3 class="shop-name">STILLS / MONO</h3>
+        <p class="shop-desc">The Lightroom side of the same thinking. Cool silver, deep neutral black, and a grain profile that survives being posted and recompressed.</p>
+        <ul class="shop-specs">
+          <li>12 presets, .xmp</li>
+          <li>Lightroom desktop and mobile</li>
+          <li>Camera Raw compatible</li>
+        </ul>
+        <div class="shop-foot">
+          <span class="shop-price">₹499</span>
+          <a class="shop-btn is-soon" href="#" data-download>Buy</a>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="shophow">
+  <div class="shophow-inner">
+    <div class="reveal">
+      <p class="s-eye">Before You Buy</p>
+      <h2 class="s-hed">HOW THESE<br>ARE MEANT<br>TO BE USED</h2>
+    </div>
+    <div class="shophow-steps reveal">
+      <div class="shophow-step">
+        <span class="shophow-num">01</span>
+        <div>
+          <h3>BALANCE FIRST</h3>
+          <p>Set exposure and white balance before the LUT goes anywhere near the clip. A LUT applied to an unbalanced shot will look wrong, and it will not be the LUT's fault.</p>
+        </div>
+      </div>
+      <div class="shophow-step">
+        <span class="shophow-num">02</span>
+        <div>
+          <h3>DROP IT ON AN ADJUSTMENT LAYER</h3>
+          <p>Keep it off the clips themselves. You want to be able to pull the whole look back by one number when the client asks for less.</p>
+        </div>
+      </div>
+      <div class="shophow-step">
+        <span class="shophow-num">03</span>
+        <div>
+          <h3>THEN DIAL IT BACK</h3>
+          <p>Most of these sit best somewhere between sixty and eighty percent. Full strength is a starting position, not the intended result.</p>
+        </div>
+      </div>
+      <div class="shophow-step">
+        <span class="shophow-num">04</span>
+        <div>
+          <h3>QUESTIONS</h3>
+          <p>If something does not behave on your footage, mail me. I would rather fix the pack than have it sitting unused in your downloads folder.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT CTA -->
+<section id="ab-contact">
+  <div class="contact-bg" aria-hidden="true">
+    <img src="assets/images/about/about-03.jpg" alt=""/>
+  </div>
+  <div class="reveal">
+    <h2 class="contact-hed">NEED A<br>CUSTOM<br><em>LOOK</em><br><span class="dither-word" data-dither>BUILT</span></h2>
+    <a class="about-more" href="index.html#contact">Get In Touch &rarr;</a>
+  </div>
+</section>
+
+<footer>
+  <canvas id="plexus" aria-hidden="true"></canvas>
+  <img class="f-logo" src="assets/images/logo.png" alt="RK"/>
+  <p>&copy; 2026 Rahul Kuttappy. All rights reserved</p>
+  <a class="f-back" href="index.html#hero">Back to home &uarr;</a>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
