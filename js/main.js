@@ -1314,3 +1314,205 @@ if(ditherWords.length){
   let dtTimer;
   window.addEventListener('resize',()=>{clearTimeout(dtTimer);dtTimer=setTimeout(refresh,180);});
 }
+
+/* ── Scale nav (next project) ──
+   The ruler slides under a fixed marker; the project under the marker is
+   shown above it. Drag or swipe with inertia, trackpad sideways scroll,
+   arrow keys, or click a tall tick. Enter or the label opens the centred
+   project through the normal page transition, since the label is a plain
+   link that the transition code already watches. Only vertical page scroll
+   is left alone, so the section never traps the page. */
+(function(){
+  const wks=document.getElementById('wknext');
+  if(!wks||!wks.classList.contains('wks')) return;
+
+  const PROJECTS=[
+    {slug:"spunk-your-creek.html",  title:"SPUNK YOUR CREEK",                  type:"Dance Battle · Showcase",   year:"2023", thumb:"assets/images/projects/eilin.jpg"},
+    {slug:"ards.html",              title:"ARDS",                              type:"Music Video",               year:"2024", thumb:"assets/images/projects/ards.jpg"},
+    {slug:"amg-sl-roadster.html",   title:"AMG SL ROADSTER",                   type:"Commercial",                year:"2023", thumb:"assets/images/projects/amg-sl-roadster.jpg"},
+    {slug:"pearl-noir.html",        title:"PEARL NOIR",                        type:"Fashion BTS",               year:"2024", thumb:"assets/images/projects/pearl-noir.jpg"},
+    {slug:"knari-ss24.html",        title:"KNARI",                             type:"Brand Promo",               year:"2024", thumb:"assets/images/projects/knari-ss24.jpg"},
+    {slug:"miles-masterclass.html", title:"MILES MASTERCLASS",                 type:"Trailer Series",            year:"2026", thumb:"assets/images/projects/miles/joe-oringel.jpg"},
+    {slug:"gala-night.html",        title:"SIGNATURE ESTATES X HARPER'S BAZAAR", type:"Event Film · Colour Grade", year:"2026", thumb:"assets/images/gala/gala-01.jpg"},
+    {slug:"hyrox.html",             title:"HYROX",                             type:"Sports · Event Coverage",   year:"2026", thumb:"assets/images/hyrox/hyrox-01.jpg"},
+    {slug:"concert.html",           title:"CONCERT",                           type:"Live Music · Photography",  year:"2026", thumb:"assets/images/projects/concert/concert-04.jpg"},
+    {slug:"brand-showreels.html",   title:"BRAND SHOWREELS",                   type:"Showreel · Edit",           year:"2026", thumb:"assets/images/projects/showreels/ffm-fashion.jpg"},
+    {slug:"wedding-films.html",     title:"WEDDING FILMS",                     type:"Wedding · Documentary",     year:"2026", thumb:"assets/images/projects/wedding/haldi-highlights.jpg"},
+    {slug:"abida-onam.html",        title:"ONAM'23 W/ABIDA",                   type:"Food Show · Episode",       year:"2023", thumb:"assets/images/projects/abida/abida-01.jpg"}
+  ];
+  const N=PROJECTS.length;
+  const MINOR=12, SPACING=MINOR*8, PAD=SPACING*24;   /* PAD a multiple of 96 keeps every tick rhythm aligned */
+  const BASE='../';
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const stage=document.getElementById('wksStage');
+  const track=document.getElementById('wksTrack');
+  const labelEl=document.getElementById('wksLabel');
+  const titleEl=document.getElementById('wksTitle');
+  const metaEl=document.getElementById('wksMeta');
+  const idxEl=document.getElementById('wksIdx');
+  const live=document.getElementById('wksLive');
+  const hint=document.getElementById('wksHint');
+  const bgImgs=wks.querySelectorAll('.wks-bg img');
+  if(!stage||!track||!labelEl) return;
+
+  if(hint && window.matchMedia('(pointer: coarse)').matches) hint.textContent='Swipe:[on]';
+
+  const here=Math.max(0,PROJECTS.findIndex(p=>p.slug===wks.dataset.current));
+  const pad2=n=>String(n).padStart(2,'0');
+  const clampIdx=v=>Math.min(N-1,Math.max(0,v));
+
+  /* build the ruler: minor and mid ticks are CSS gradients, projects are buttons */
+  track.style.width=(PAD*2+(N-1)*SPACING+1)+'px';
+  const fill=document.createElement('span');
+  fill.className='wks-fill'; fill.style.left=PAD+'px';
+  track.appendChild(fill);
+  const ticks=PROJECTS.map((p,i)=>{
+    const b=document.createElement('button');
+    b.type='button'; b.tabIndex=-1; b.dataset.i=i;
+    b.className='wks-tick'+(i===here?' is-here':'');
+    b.style.left=(PAD+i*SPACING)+'px';
+    b.setAttribute('aria-label',p.title);
+    track.appendChild(b);
+    return b;
+  });
+
+  let pos=(here+1)%N, target=pos, centred=-1, anim=0;
+
+  /* backdrop: two layers crossfade, and a stale load can never win */
+  let bgFront=0, bgShown=-1, bgTimer=0, bgToken=0;
+  function queueBg(c,delay){
+    if(!bgImgs.length) return;
+    clearTimeout(bgTimer);
+    bgTimer=setTimeout(()=>{
+      if(c===bgShown) return;
+      const token=++bgToken;
+      const next=bgImgs[1-bgFront], cur=bgImgs[bgFront];
+      const show=()=>{
+        if(token!==bgToken) return;
+        next.classList.add('is-on'); cur.classList.remove('is-on');
+        bgFront=1-bgFront; bgShown=c;
+      };
+      const src=BASE+PROJECTS[c].thumb;
+      if(next.getAttribute('src')===src && next.complete) show();
+      else { next.onload=show; next.src=src; }
+    },delay);
+  }
+
+  let liveTimer=0;
+  function setCentred(c){
+    if(centred>=0) ticks[centred].classList.remove('is-centred');
+    centred=c; ticks[c].classList.add('is-centred');
+    const p=PROJECTS[c], isHere=c===here;
+    titleEl.textContent=p.title;
+    metaEl.textContent=p.type+' · '+p.year+' · ';
+    const b=document.createElement('b'); b.textContent=isHere?'You are here':'Open →';
+    metaEl.appendChild(b);
+    labelEl.setAttribute('href',p.slug);
+    labelEl.classList.toggle('is-here',isHere);
+    labelEl.setAttribute('aria-disabled',isHere?'true':'false');
+    idxEl.textContent='Index:['+pad2(c+1)+'/'+pad2(N)+']';
+    clearTimeout(liveTimer);
+    liveTimer=setTimeout(()=>{ if(live) live.textContent=p.title+', '+(c+1)+' of '+N+(isHere?', current page':''); },300);
+    queueBg(c, dragging?170:40);
+  }
+
+  function render(){
+    const x=PAD+pos*SPACING;
+    track.style.transform='translate3d('+(stage.clientWidth/2-x).toFixed(2)+'px,0,0)';
+    fill.style.width=Math.max(0,x-PAD)+'px';
+    const c=clampIdx(Math.round(pos));
+    if(c!==centred) setCentred(c);
+  }
+
+  function animateTo(t){
+    cancelAnimationFrame(anim);
+    target=clampIdx(t);
+    if(reduce){ pos=target; render(); return; }
+    const from=pos, d=target-from;
+    if(Math.abs(d)<0.001){ pos=target; render(); return; }
+    const dur=Math.min(900,280+Math.abs(d)*90), t0=performance.now();
+    const step=now=>{
+      const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,4);
+      pos=from+d*e; render();
+      if(k<1) anim=requestAnimationFrame(step);
+    };
+    anim=requestAnimationFrame(step);
+  }
+
+  /* drag: capture only after real movement, so a plain click on the
+     label still reaches the link */
+  let dragging=false, moved=false, startX=0, startPos=0, lastX=0, lastT=0, vel=0;
+  stage.addEventListener('pointerdown',e=>{
+    if(e.button!==0) return;
+    dragging=true; moved=false;
+    startX=lastX=e.clientX; startPos=pos; lastT=performance.now(); vel=0;
+  });
+  stage.addEventListener('pointermove',e=>{
+    if(typeof fxHover!=='undefined') fxHover=true;
+    if(!dragging) return;
+    const dx=e.clientX-startX;
+    if(!moved){
+      if(Math.abs(dx)<=5) return;
+      moved=true; cancelAnimationFrame(anim);
+      stage.classList.add('is-dragging');
+      try{ stage.setPointerCapture(e.pointerId); }catch(_){}
+    }
+    let p=startPos-dx/SPACING;
+    if(p<0) p*=0.35; else if(p>N-1) p=(N-1)+(p-(N-1))*0.35;   /* rubber band past the ends */
+    const now=performance.now(), dt=Math.max(1,now-lastT);
+    vel=0.75*vel+0.25*((-(e.clientX-lastX)/SPACING)/dt*1000);
+    lastX=e.clientX; lastT=now;
+    pos=p; render();
+  });
+  const endDrag=()=>{
+    if(!dragging) return;
+    dragging=false; stage.classList.remove('is-dragging');
+    if(moved) animateTo(Math.round(pos+Math.max(-4,Math.min(4,vel*0.16))));
+  };
+  stage.addEventListener('pointerup',endDrag);
+  stage.addEventListener('pointercancel',endDrag);
+  stage.addEventListener('mouseleave',()=>{ if(typeof fxHover!=='undefined') fxHover=false; });
+
+  /* a drag must not also count as a click on the label or a tick */
+  stage.addEventListener('click',e=>{
+    if(moved){ e.preventDefault(); e.stopPropagation(); moved=false; }
+  },true);
+
+  stage.querySelector('.wks-rail').addEventListener('click',e=>{
+    const t=e.target.closest('.wks-tick');
+    if(t){ animateTo(+t.dataset.i); return; }
+    const r=stage.getBoundingClientRect();
+    animateTo(Math.round(pos+(e.clientX-(r.left+r.width/2))/SPACING));
+  });
+
+  stage.addEventListener('keydown',e=>{
+    const from=Math.round(target);
+    let t=null;
+    if(e.key==='ArrowRight') t=from+1;
+    else if(e.key==='ArrowLeft') t=from-1;
+    else if(e.key==='Home') t=0;
+    else if(e.key==='End') t=N-1;
+    else if((e.key==='Enter'||e.key===' ') && e.target===stage){
+      e.preventDefault();
+      if(centred!==here) labelEl.click();
+      return;
+    }
+    if(t!==null){ e.preventDefault(); animateTo(t); }
+  });
+
+  /* trackpad sideways scroll scrubs; vertical scroll is passed through */
+  let wheelTimer=0;
+  stage.addEventListener('wheel',e=>{
+    if(Math.abs(e.deltaX)<=Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    cancelAnimationFrame(anim);
+    pos=Math.min(N-0.7,Math.max(-0.3,pos+e.deltaX/SPACING));
+    render();
+    clearTimeout(wheelTimer);
+    wheelTimer=setTimeout(()=>animateTo(Math.round(pos)),140);
+  },{passive:false});
+
+  window.addEventListener('resize',render);
+  render();
+})();
