@@ -146,6 +146,7 @@ if(pageFade){
     const href=a.getAttribute('href');
     if(!href) return false;
     if(a.target==='_blank') return false;
+    if(a.hasAttribute('data-back')) return false;   /* handled by the back button below */
     if(href.startsWith('#')||href.startsWith('mailto:')||href.startsWith('tel:')) return false;
     if(/^https?:\/\//i.test(href)) return false;
     return /\.html?($|[?#])/i.test(href)||href.endsWith('/');
@@ -169,6 +170,35 @@ if(pageFade){
     if(e.persisted){pageFade.classList.remove('leaving');pageFade.classList.add('ready');}
   });
 }
+
+/* ── Back button ──
+   Real history when you came from another page on this site, so going
+   Films then Garage then back returns you to Films. The exception is the
+   homepage: every page here deliberately lands at the top, so history.back()
+   to home would drop you at the hero rather than where you were. The link's
+   own href covers that case, and project pages point it at #works. Shared
+   links and fresh tabs have no same-site referrer, so they use the href too. */
+document.querySelectorAll('[data-back]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    if(e.metaKey||e.ctrlKey||e.shiftKey||e.button!==0) return;
+    e.preventDefault();
+    let useHistory=false;
+    try{
+      if(document.referrer && history.length>1){
+        const ref=new URL(document.referrer);
+        const fromHome=/\/(index\.html)?$/.test(ref.pathname);
+        useHistory = ref.origin===location.origin && !fromHome && ref.href!==location.href;
+      }
+    }catch(err){}
+    const go=()=>{ useHistory ? history.back() : (window.location.href=a.getAttribute('href')); };
+    if(typeof saveAudioState==='function') saveAudioState();
+    if(pageFade){
+      pageFade.classList.remove('ready');
+      pageFade.classList.add('leaving');
+      setTimeout(go,430);
+    }else go();
+  });
+});
 
 /* ── Background music: playlist with transport ── */
 const bgm=document.getElementById('bgm');
