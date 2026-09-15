@@ -565,7 +565,7 @@ if(loaderEl){
   }else{
     const lenter=document.getElementById('lenter');
     const lpct=document.getElementById('lpct');
-    const lpctWrap=lpct.parentElement;
+    const lprog=document.getElementById('lprog');
     const loaderTextEl=document.getElementById('loaderText');
 
     /* Dithered progress bar: solid behind the head, breaking into ordered
@@ -611,8 +611,7 @@ if(loaderEl){
     const showEnter=function(){
       lpct.textContent='100';
       drawLoaderBar(1,performance.now());
-      lpctWrap.classList.add('hide');
-      if(lbar) lbar.classList.add('hide');
+      if(lprog) lprog.classList.add('hide');
       lenter.classList.add('show');
       const b1=document.getElementById('ebtn1');
       const b2=document.getElementById('ebtn2');

@@ -203,23 +203,30 @@ img,video{
 .loader-bar{
   display:block;width:min(300px,64vw);height:12px;
   image-rendering:pixelated;image-rendering:crisp-edges;
-  transition:opacity .35s ease;
 }
-.loader-bar.hide{opacity:0;}
 .loader-pct{
   font-family:'JetBrains Mono',monospace;font-size:.85rem;letter-spacing:.3em;
   color:rgba(237,234,226,.45);font-variant-numeric:tabular-nums;
   display:flex;align-items:baseline;gap:.15em;
-  transition:opacity .3s ease;
 }
 .loader-pct em{color:var(--red);font-style:normal;}
+/* One grid cell holds the progress block and the enter buttons, so when
+   loading finishes the buttons appear where the bar was. The progress block
+   is fully hidden once faded (visibility, not just opacity), so nothing of
+   it can linger behind the buttons. */
+.loader-slot{display:grid;place-items:center;}
+.loader-slot>*{grid-area:1/1;}
+.loader-prog{
+  display:flex;flex-direction:column;align-items:center;gap:1.8rem;
+  transition:opacity .35s ease,visibility 0s linear 0s;
+}
+.loader-prog.hide{opacity:0;visibility:hidden;transition:opacity .35s ease,visibility 0s linear .35s;}
 .loader-enter{
   display:flex;flex-direction:column;align-items:center;gap:.75rem;
-  opacity:0;pointer-events:none;
-  transition:opacity .7s ease;
+  opacity:0;pointer-events:none;visibility:hidden;
+  transition:opacity .7s ease,visibility 0s linear .7s;
 }
-.loader-enter.show{opacity:1;pointer-events:auto;}
-.loader-pct.hide{opacity:0;}
+.loader-enter.show{opacity:1;pointer-events:auto;visibility:visible;transition:opacity .7s ease .15s,visibility 0s linear 0s;}
 .enter-btn{
   background:none;border:none;cursor:none;
   font-family:'Inter',sans-serif;font-size:.6rem;
