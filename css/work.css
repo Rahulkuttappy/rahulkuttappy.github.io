@@ -90,6 +90,8 @@
   font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:.16em;
   text-transform:uppercase;color:var(--muted);margin:0;
 }
+/* a lone film gets the full column rather than sitting in one half of the pair */
+.trailer-grid.is-solo{grid-template-columns:1fr;}
 @media(max-width:768px){.trailer-grid{grid-template-columns:1fr;gap:2.2rem;}}
 
 /* ── SCALE NAV ──
