@@ -364,12 +364,17 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 }
 .scroll-line{width:1px;height:3rem;background:linear-gradient(to bottom,var(--red),transparent);animation:sp 2s ease-in-out infinite;}
 @keyframes sp{0%,100%{opacity:.3}50%{opacity:1}}
-/* The word breathes: a slow drift down and back, lifting a little out of the
-   grey at the bottom of it. Small enough to notice only once you look. */
-.hero-scroll span{display:inline-block;animation:scrollBob 4s ease-in-out infinite;}
+/* The word breathes on the line's own two second cycle. Opacity rather than
+   colour, so it is a composited fade instead of a repaint, and far enough to
+   travel that the steps between frames do not show. */
+.hero-scroll span{
+  display:inline-block;color:var(--muted);
+  will-change:transform,opacity;
+  animation:scrollBob 2s ease-in-out infinite;
+}
 @keyframes scrollBob{
-  0%,100%{transform:translateY(0);color:var(--muted);}
-  50%{transform:translateY(2.5px);color:rgba(237,234,226,.55);}
+  0%,100%{transform:translateY(0);opacity:.5;}
+  50%{transform:translateY(4px);opacity:1;}
 }
 @media(prefers-reduced-motion:reduce){.scroll-line,.hero-scroll span{animation:none;}}
 
