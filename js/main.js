@@ -1297,7 +1297,7 @@ if(ditherWords.length){
 
   const PROJECTS=[
     {slug:"spunk-your-creek.html",  title:"SPUNK YOUR CREEK",                  type:"Dance Battle · Showcase",   year:"2023", thumb:"assets/images/projects/eilin.jpg"},
-    {slug:"ards.html",              title:"ARDS",                              type:"Music Video",               year:"2024", thumb:"assets/images/projects/ards.jpg"},
+    {slug:"ards.html",              title:"ARDS",                              type:"Performance Film",          year:"2024", thumb:"assets/images/projects/ards.jpg"},
     {slug:"amg-sl-roadster.html",   title:"AMG SL ROADSTER",                   type:"Commercial",                year:"2023", thumb:"assets/images/projects/amg-sl-roadster.jpg"},
     {slug:"pearl-noir.html",        title:"PEARL NOIR",                        type:"Fashion BTS",               year:"2024", thumb:"assets/images/projects/pearl-noir.jpg"},
     {slug:"knari-ss24.html",        title:"KNARI",                             type:"Brand Promo",               year:"2024", thumb:"assets/images/projects/knari-ss24.jpg"},
