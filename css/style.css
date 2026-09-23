@@ -364,7 +364,19 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 }
 .scroll-line{width:1px;height:3rem;background:linear-gradient(to bottom,var(--red),transparent);animation:sp 2s ease-in-out infinite;}
 @keyframes sp{0%,100%{opacity:.3}50%{opacity:1}}
-@media(prefers-reduced-motion:reduce){.scroll-line{animation:none;}}
+/* The word drops and settles like something landing, then waits out the rest
+   of the cycle, so it nudges rather than jitters. */
+.hero-scroll span{display:inline-block;animation:scrollBob 2.4s cubic-bezier(.34,.12,.3,1) infinite;}
+@keyframes scrollBob{
+  0%{transform:translateY(0);color:var(--muted);}
+  18%{transform:translateY(6px);color:rgba(237,234,226,.75);}
+  30%{transform:translateY(0);}
+  40%{transform:translateY(3px);}
+  48%{transform:translateY(0);}
+  54%{transform:translateY(1px);}
+  60%,100%{transform:translateY(0);color:var(--muted);}
+}
+@media(prefers-reduced-motion:reduce){.scroll-line,.hero-scroll span{animation:none;}}
 
 /* ── MARQUEE ── */
 .mq-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:.75rem 0;}
