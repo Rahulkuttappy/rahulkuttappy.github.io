@@ -866,7 +866,7 @@ document.querySelectorAll('.film .film-media').forEach(btn=>{
     frame.className='film-frame';
 
     const unset=v=>!v||v==='REPLACE_ME';
-    if((type==='youtube'||type==='vimeo') ? unset(id) : unset(src)){
+    if((type==='youtube'||type==='vimeo'||type==='instagram') ? unset(id) : unset(src)){
       frame.classList.add('film-missing');
       frame.textContent='Not linked yet';
       btn.replaceWith(frame);
@@ -886,6 +886,18 @@ document.querySelectorAll('.film .film-media').forEach(btn=>{
       f.title=title;
       f.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
       f.allowFullscreen=true;
+      frame.appendChild(f);
+    }else if(type==='instagram'){
+      /* Instagram has no autoplay parameter, so this one starts on its own
+         play button. Their embed is taller than the video: the frame allows
+         for the header and footer it draws around it. */
+      frame.classList.add('film-frame-reel');
+      const f=document.createElement('iframe');
+      f.src='https://www.instagram.com/reel/'+encodeURIComponent(id)+'/embed/';
+      f.title=title;
+      f.allow='encrypted-media; picture-in-picture; web-share';
+      f.allowFullscreen=true;
+      f.setAttribute('scrolling','no');
       frame.appendChild(f);
     }else if(type==='vimeo'){
       const f=document.createElement('iframe');
