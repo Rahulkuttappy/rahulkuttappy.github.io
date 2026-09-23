@@ -233,7 +233,7 @@ img,video{
 .loader-text .lc{display:inline-block;opacity:0;transform:translateY(8px);color:var(--red);}
 .loader-text .lc.in{opacity:1;transform:translateY(0);color:var(--off);transition:opacity .25s ease,transform .25s ease,color .15s ease;}
 .loader-bar{
-  display:block;width:min(300px,64vw);height:12px;
+  display:block;width:min(300px,64vw);height:8px;
   image-rendering:pixelated;image-rendering:crisp-edges;
 }
 .loader-pct{

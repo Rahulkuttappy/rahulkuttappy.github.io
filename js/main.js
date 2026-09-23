@@ -577,7 +577,7 @@ if(loaderEl){
       lbCtx=lbar.getContext('2d');
       const r=lbar.getBoundingClientRect();
       LB_W=Math.max(24,Math.round((r.width||280)/LB_BLK));
-      LB_H=Math.max(3,Math.round((r.height||12)/LB_BLK));
+      LB_H=Math.max(3,Math.round((r.height||8)/LB_BLK));
       lbar.width=LB_W;lbar.height=LB_H;
       lbar.style.width=(LB_W*LB_BLK)+'px';
       lbar.style.height=(LB_H*LB_BLK)+'px';
