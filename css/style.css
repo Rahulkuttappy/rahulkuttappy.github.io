@@ -666,6 +666,10 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
   display:inline-block;margin-top:2rem;font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;
   color:var(--off);text-decoration:none;border-bottom:1px solid var(--red);padding-bottom:3px;
 }
+/* two of these in a row (a case study and the client's own page) */
+.about-more+.about-more{margin-left:1.8rem;}
+/* on phones the pair would run to the edge, so stack them */
+@media(max-width:768px){.about-more+.about-more{display:block;margin-left:0;margin-top:1rem;}}
 
 /* ── CLIENTS & TOOLS ── */
 #clients{padding:6rem 2.5rem;border-top:1px solid var(--border);}
