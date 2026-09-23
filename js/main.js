@@ -1315,7 +1315,7 @@ if(ditherWords.length){
     {slug:"pearl-noir.html",        title:"PEARL NOIR",                        type:"Fashion BTS",               year:"2024", thumb:"assets/images/projects/pearl-noir.jpg"},
     {slug:"knari-ss24.html",        title:"KNARI",                             type:"Brand Promo",               year:"2024", thumb:"assets/images/projects/knari-ss24.jpg"},
     {slug:"miles-masterclass.html", title:"MILES MASTERCLASS",                 type:"Trailer Series",            year:"2026", thumb:"assets/images/projects/miles/joe-oringel.jpg"},
-    {slug:"hyrox.html",             title:"HYROX",                             type:"Sports · Event Coverage",   year:"2026", thumb:"assets/images/hyrox/hyrox-01.jpg"},
+    {slug:"hyrox.html",             title:"HYROX",                             type:"Sports · Race Day",   year:"2026", thumb:"assets/images/hyrox/hyrox-01.jpg"},
     {slug:"concert.html",           title:"CONCERT",                           type:"Live Music · Photography",  year:"2026", thumb:"assets/images/projects/concert/concert-04.jpg"},
     {slug:"brand-showreels.html",   title:"BRAND SHOWREELS",                   type:"Showreel · Edit",           year:"2026", thumb:"assets/images/projects/showreels/ffm-fashion.jpg"},
     {slug:"wedding-films.html",     title:"WEDDING FILMS",                     type:"Wedding · Documentary",     year:"2026", thumb:"assets/images/projects/wedding/haldi-highlights.jpg"},
