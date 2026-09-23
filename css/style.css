@@ -364,17 +364,12 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 }
 .scroll-line{width:1px;height:3rem;background:linear-gradient(to bottom,var(--red),transparent);animation:sp 2s ease-in-out infinite;}
 @keyframes sp{0%,100%{opacity:.3}50%{opacity:1}}
-/* The word drops and settles like something landing, then waits out the rest
-   of the cycle, so it nudges rather than jitters. */
-.hero-scroll span{display:inline-block;animation:scrollBob 2.4s cubic-bezier(.34,.12,.3,1) infinite;}
+/* The word breathes: a slow drift down and back, lifting a little out of the
+   grey at the bottom of it. Small enough to notice only once you look. */
+.hero-scroll span{display:inline-block;animation:scrollBob 4s ease-in-out infinite;}
 @keyframes scrollBob{
-  0%{transform:translateY(0);color:var(--muted);}
-  18%{transform:translateY(6px);color:rgba(237,234,226,.75);}
-  30%{transform:translateY(0);}
-  40%{transform:translateY(3px);}
-  48%{transform:translateY(0);}
-  54%{transform:translateY(1px);}
-  60%,100%{transform:translateY(0);color:var(--muted);}
+  0%,100%{transform:translateY(0);color:var(--muted);}
+  50%{transform:translateY(2.5px);color:rgba(237,234,226,.55);}
 }
 @media(prefers-reduced-motion:reduce){.scroll-line,.hero-scroll span{animation:none;}}
 
