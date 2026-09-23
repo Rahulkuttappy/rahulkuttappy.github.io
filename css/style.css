@@ -23,19 +23,51 @@ img,video{
 }
 #pageFade.ready{opacity:0;}
 #pageFade.leaving{opacity:1;pointer-events:auto;transition:opacity .42s ease;}
-/* The mark is painted as a red fill masked by the logo, so it takes the site
-   red exactly and the URL resolves from this stylesheet on every page depth.
-   Sized to the cap height of the .56rem wordmark it replaces. */
+/* The mark is painted as a fill masked by the logo, so it takes the site red
+   exactly and the URL resolves from this stylesheet on every page depth.
+   Sized to the cap height of the .56rem wordmark it replaces.
+
+   While the veil is up it is alive rather than a flat red shape: it arrives
+   with a short rise, a light passes through it on a loop, and a red glow
+   breathes behind it. The gradient is wider than the mark and slides, which
+   is what reads as the light crossing the logo. */
 #pageFade .pf-mark{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  position:absolute;top:50%;left:50%;
   opacity:0;transition:opacity .3s ease;
-  height:15px;aspect-ratio:400/256;
+  height:20px;aspect-ratio:400/256;
   background-color:var(--red);
+  background-image:linear-gradient(104deg,
+    var(--red) 0 30%, #b8514a 40%, #f3f0e8 49%, #f3f0e8 53%, #b8514a 62%, var(--red) 72% 100%);
+  background-size:320% 100%;
+  background-position:135% 0;
+  background-repeat:no-repeat;
   -webkit-mask:url(../assets/images/logo.png) center/contain no-repeat;
           mask:url(../assets/images/logo.png) center/contain no-repeat;
+  transform:translate(-50%,-50%);
+  will-change:background-position,transform,filter;
 }
 #pageFade .pf-mark img{display:none;}
-#pageFade.leaving .pf-mark{opacity:1;}
+#pageFade.leaving .pf-mark{
+  opacity:1;
+  animation:pfMarkIn .42s cubic-bezier(.16,1,.3,1) both,
+            pfMarkSweep 1.5s cubic-bezier(.4,0,.2,1) .22s infinite,
+            pfMarkGlow 1.5s ease-in-out .22s infinite;
+}
+@keyframes pfMarkIn{
+  from{transform:translate(-50%,-50%) scale(.82);opacity:0;}
+  to{transform:translate(-50%,-50%) scale(1);opacity:1;}
+}
+@keyframes pfMarkSweep{
+  0%{background-position:135% 0;}
+  58%,100%{background-position:-35% 0;}
+}
+@keyframes pfMarkGlow{
+  0%,100%{filter:drop-shadow(0 0 0 rgba(var(--red-glow),0));}
+  40%{filter:drop-shadow(0 0 9px rgba(var(--red-glow),.6));}
+}
+@media(prefers-reduced-motion:reduce){
+  #pageFade.leaving .pf-mark{animation:none;background-image:none;}
+}
 
 /* ── AUDIO PLAYER / DITHERED VISUALIZER ── */
 #audioDock{
