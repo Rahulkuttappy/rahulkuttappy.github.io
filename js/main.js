@@ -1,6 +1,29 @@
-/* If the CDN is blocked or slow, nothing below should take the page down
-   with it: the veil clears on its own and the content is still there. */
-if(window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+/* ── Without GSAP ──
+   Everything below animates through GSAP, loaded from a CDN. A blocked or
+   slow CDN used to throw on this first line and take the whole file with it,
+   leaving the loader stuck at 0% behind a black veil. Now a stand-in takes
+   its place: it animates nothing, but it answers every call the file makes
+   and still fires onComplete, so the menu, the films, the music and the
+   project nav all work. The no-anim class draws the content in its finished
+   state, so the page reads as designed with the motion removed. */
+if(!window.gsap){
+  document.documentElement.classList.add('no-anim');
+  const done=v=>{ if(v&&typeof v.onComplete==='function') setTimeout(()=>{try{v.onComplete();}catch(e){}},0); };
+  const tl={to(t,v){done(v);return tl;},from(t,v){done(v);return tl;},
+            fromTo(t,f,v){done(v);return tl;},set(){return tl;},kill(){}};
+  window.gsap={
+    registerPlugin(){}, killTweensOf(){}, set(){},
+    to(t,v){done(v);return tl;}, from(t,v){done(v);return tl;}, fromTo(t,f,v){done(v);return tl;},
+    timeline(){return tl;},
+    utils:{toArray(t){
+      if(typeof t==='string') return Array.prototype.slice.call(document.querySelectorAll(t));
+      if(t&&typeof t.length==='number') return Array.prototype.slice.call(t);
+      return t?[t]:[];
+    }}
+  };
+}
+if(!window.ScrollTrigger) window.ScrollTrigger={refresh(){},create(){},update(){},getAll(){return [];}};
+gsap.registerPlugin(ScrollTrigger);
 
 /* ── A reload sends you home ──
    Asked for deliberately. Note this means refreshing a project page will
