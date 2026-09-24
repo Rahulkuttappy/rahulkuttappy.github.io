@@ -15,6 +15,18 @@ img,video{
   -webkit-touch-callout:none;
 }
 
+/* ── FAILSAFE ──
+   Set by each page's head script when main.js never finished. Content that
+   waits on an animation is shown as it would look once that animation ends,
+   so a blocked CDN or a script error costs the motion, not the page. */
+html.no-anim #loader{display:none!important;}
+html.no-anim #pageFade{opacity:0!important;visibility:hidden!important;}
+html.no-anim #nav,html.no-anim #hside,html.no-anim #hcontent,
+html.no-anim .hero-bio,html.no-anim .hero-scroll{opacity:1!important;}
+html.no-anim .n1,html.no-anim .n2{transform:none!important;}
+html.no-anim #hrule{transform:scaleX(1)!important;}
+html.no-anim .reveal{opacity:1!important;transform:none!important;filter:none!important;}
+
 /* ── PAGE TRANSITION ── */
 #pageFade{
   position:fixed;inset:0;z-index:9500;pointer-events:none;
@@ -22,6 +34,12 @@ img,video{
   transition:opacity .55s cubic-bezier(.16,1,.3,1);
 }
 #pageFade.ready{opacity:0;}
+/* Failsafe: the veil starts opaque and JavaScript lifts it a frame later. If
+   the script never runs, this clears it anyway rather than leaving a black
+   page. A real transition cancels the animation and takes over again. */
+#pageFade{animation:pfFailsafe .5s ease 2.5s forwards;}
+#pageFade.ready,#pageFade.leaving{animation:none;}
+@keyframes pfFailsafe{to{opacity:0;visibility:hidden;}}
 #pageFade.leaving{opacity:1;pointer-events:auto;transition:opacity .42s ease;}
 /* The mark is painted as a fill masked by the logo, so it takes the site red
    exactly and the URL resolves from this stylesheet on every page depth.

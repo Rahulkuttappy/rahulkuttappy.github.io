@@ -27,10 +27,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/style.css?v=20260916r"/>
-<link rel="stylesheet" href="css/about.css?v=20260916r"/>
+<link rel="stylesheet" href="css/style.css?v=20260916t"/>
+<link rel="stylesheet" href="css/about.css?v=20260916t"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+/* Failsafe: main.js marks the page ready when it finishes. If it never does,
+   because the CDN is blocked or a script errored, show everything rather than
+   leaving hidden content behind the animations. */
+setTimeout(function(){
+  var h=document.documentElement;
+  if(!h.classList.contains('js-ok')) h.classList.add('no-anim');
+},4000);
+</script>
 </head>
 <body>
 <div class="grain" aria-hidden="true"></div>
@@ -175,6 +184,6 @@
   <a class="f-back" href="index.html#hero">Back to home &uarr;</a>
 </footer>
 
-<script src="js/main.js?v=20260916r"></script>
+<script src="js/main.js?v=20260916t"></script>
 </body>
 </html>

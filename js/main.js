@@ -1,4 +1,6 @@
-gsap.registerPlugin(ScrollTrigger);
+/* If the CDN is blocked or slow, nothing below should take the page down
+   with it: the veil clears on its own and the content is still there. */
+if(window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 
 /* ── A reload sends you home ──
    Asked for deliberately. Note this means refreshing a project page will
@@ -1497,3 +1499,7 @@ if(ditherWords.length){
   window.addEventListener('resize',render);
   render();
 })();
+
+/* Everything above parsed and ran, so the failsafe in each page's head can
+   stand down and let the animations play as written. */
+document.documentElement.classList.add('js-ok');
