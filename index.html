@@ -432,9 +432,13 @@ setTimeout(function(){
     <span class="s-eye">Watch</span>
     <h2 class="s-hed">THE REEL</h2>
   </div>
-  <div class="reel-box reveal">
-    <iframe src="https://www.youtube.com/embed/PQT5-LklP4s?rel=0&modestbranding=1" allowfullscreen title="Showreel, Rahul Kuttappy"></iframe>
-  </div>
+  <!-- click to play: the file is only fetched once someone asks for it -->
+  <article class="film reveal" data-type="file" data-src="assets/video/reel.mp4">
+    <button class="film-media" aria-label="Play the showreel">
+      <img src="assets/images/reel-poster.jpg" alt="Showreel" loading="lazy"/>
+      <span class="film-play">&#9654;</span>
+    </button>
+  </article>
 </section>
 
 <!-- INSTAGRAM -->
