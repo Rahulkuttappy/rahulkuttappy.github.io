@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<!-- SEO:START -->
+<meta name="description" content="Tether turns footage into motion-seeking FUI overlays inside DaVinci Resolve. It finds a subject by key colour, motion, luminance or alpha, then draws tracking boxes, connection lines and live readouts around it."/>
+<link rel="canonical" href="https://rahulkuttappy.github.io/tether.html"/>
+<meta name="robots" content="index, follow"/>
+<meta name="author" content="Rahul Kuttappy"/>
+<meta name="theme-color" content="#080808"/>
+<meta property="og:type" content="product"/>
+<meta property="og:site_name" content="Rahul Kuttappy"/>
+<meta property="og:title" content="Tether · FUI overlays for DaVinci Resolve"/>
+<meta property="og:description" content="Motion-seeking FUI overlays inside DaVinci Resolve. Tracking boxes, connection lines and live readouts, drawn from the footage itself."/>
+<meta property="og:url" content="https://rahulkuttappy.github.io/tether.html"/>
+<meta property="og:image" content="https://rahulkuttappy.github.io/assets/images/garage/tether.jpg"/>
+<meta property="og:locale" content="en_IN"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Tether · FUI overlays for DaVinci Resolve"/>
+<meta name="twitter:description" content="Motion-seeking FUI overlays inside DaVinci Resolve. Tracking boxes, connection lines and live readouts, drawn from the footage itself."/>
+<meta name="twitter:image" content="https://rahulkuttappy.github.io/assets/images/garage/tether.jpg"/>
+<link rel="icon" type="image/png" href="assets/images/favicon.png"/>
+<link rel="apple-touch-icon" href="assets/images/favicon.png"/>
+<!-- SEO:END -->
+<title>Tether · Rahul Kuttappy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css?v=20260916u"/>
+<link rel="stylesheet" href="css/garage.css?v=20260916u"/>
+<link rel="stylesheet" href="css/tether.css?v=20260916u"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+/* Failsafe: main.js marks the page ready when it finishes. If it never does,
+   because the CDN is blocked or a script errored, show everything rather than
+   leaving hidden content behind the animations. */
+setTimeout(function(){
+  var h=document.documentElement;
+  if(!h.classList.contains('js-ok')) h.classList.add('no-anim');
+},4000);
+</script>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<canvas id="cursorFX" aria-hidden="true"></canvas>
+<div id="pageFade"><span class="pf-mark"><img src="assets/images/logo.png" alt=""/></span></div>
+<!-- preload=none: nobody should download a track they never play -->
+<audio id="bgm" preload="none"></audio>
+<div id="audioDock" data-audio-base="assets/audio/">
+  <button class="viz-btn" id="vizBtn" aria-label="Sound controls">
+    <canvas id="vizCanvas" aria-hidden="true"></canvas>
+  </button>
+  <div class="audio-panel" id="audioPanel">
+    <div class="ap-head">
+      <span class="ap-idx" id="apIdx">01/04</span>
+      <span class="ap-title" id="apTitle">Standby</span>
+    </div>
+    <div class="ap-controls">
+      <button class="ap-btn" id="apPrev" aria-label="Previous track">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14L8 12z"/><rect x="5" y="5" width="2" height="14"/></svg>
+      </button>
+      <button class="ap-btn ap-main" id="audioToggle" aria-label="Play">
+        <svg class="ap-i ap-i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z"/></svg>
+        <svg class="ap-i ap-i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button class="ap-btn" id="apNext" aria-label="Next track">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14l10-7z"/><rect x="17" y="5" width="2" height="14"/></svg>
+      </button>
+      <input class="audio-vol" id="audioVol" type="range" min="0" max="0.4" step="0.01" value="0.12" aria-label="Volume"/>
+    </div>
+  </div>
+</div>
+<div id="scrollbar" aria-hidden="true">
+  <div class="scrollbar-track"></div>
+  <div class="scrollbar-fill" id="sbFill"></div>
+  <div class="scrollbar-dot" id="sbDot"></div>
+</div>
+
+<!-- NAV -->
+<nav id="nav" style="opacity:1;">
+  <a href="index.html"><img class="nav-logo" src="assets/images/logo.png" alt="RK"/></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html#works">Works</a></li>
+    <li><a href="films.html">Films</a></li>
+    <li><a href="index.html#photography">Photography</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="garage.html" class="active-link">Garage</a></li>
+  </ul>
+  <div class="nav-right">
+    <span id="clock">00:00:00</span>
+    <a class="nav-cta" href="index.html#contact">Let's Talk</a>
+  </div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+    <span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="thero">
+  <div class="thero-bg" aria-hidden="true">
+    <img src="assets/images/garage/tether.jpg" alt=""/>
+  </div>
+  <div class="thero-inner">
+    <a class="thero-back" href="garage.html">&larr; Garage</a>
+    <p class="s-eye">Plugin &middot; DaVinci Resolve</p>
+    <h1 class="thero-title">TETHER</h1>
+    <p class="thero-line">Motion-seeking FUI overlays, drawn out of the footage itself. Tether finds what matters in a shot and builds the interface around it.</p>
+    <div class="tmeta">
+      <div class="tmeta-item"><span class="tmeta-lbl">Runs In</span><span class="tmeta-val">DaVinci Resolve</span></div>
+      <div class="tmeta-item"><span class="tmeta-lbl">Type</span><span class="tmeta-val">Fuse, Fusion page</span></div>
+      <div class="tmeta-item"><span class="tmeta-lbl">Looks</span><span class="tmeta-val">10 built in</span></div>
+      <div class="tmeta-item"><span class="tmeta-lbl">Status</span><span class="tmeta-val soon">Coming soon</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- BRIEF -->
+<section id="tintro">
+  <div class="tintro-grid">
+    <div class="reveal">
+      <p class="s-eye">What It Does</p>
+      <h2 class="s-hed">IT WATCHES,<br/>THEN IT DRAWS</h2>
+    </div>
+    <div class="tintro-body reveal">
+      <p>Point Tether at a shot and it goes looking. It picks its subject out by key colour, by motion, by luminance or by alpha, then draws the overlay around whatever it found and keeps it there as the shot moves.</p>
+      <p>Everything it draws is tied to the frame underneath: boxes that hold onto the subject, lines that run between them, readouts that change as the numbers change.</p>
+      <p><em>No keyframing an interface by hand.</em> The footage does the tracking, and you spend your time on how it looks instead of where it sits.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE KIT -->
+<section id="tkit">
+  <div class="wkgallery-hdr reveal">
+    <p class="s-eye">Inside</p>
+    <h2 class="s-hed">THE KIT</h2>
+  </div>
+  <div class="tkit-grid">
+
+    <article class="tpanel reveal">
+      <span class="tpanel-num">01</span>
+      <h3 class="tpanel-name">DETECTION</h3>
+      <p class="tpanel-note">Four ways to tell Tether what to hold onto.</p>
+      <ul class="tlist">
+        <li>Key colour</li><li>Motion</li><li>Luminance</li><li>Alpha</li>
+      </ul>
+    </article>
+
+    <article class="tpanel reveal">
+      <span class="tpanel-num">02</span>
+      <h3 class="tpanel-name">BOXES</h3>
+      <p class="tpanel-note">Drawn whole or as corner brackets, in four shapes.</p>
+      <ul class="tlist">
+        <li>Rectangle</li><li>Square</li><li>Ellipse</li><li>Circle</li>
+        <li>Full</li><li>Corner brackets</li>
+      </ul>
+    </article>
+
+    <article class="tpanel reveal">
+      <span class="tpanel-num">03</span>
+      <h3 class="tpanel-name">FILLS</h3>
+      <p class="tpanel-note">What happens to the frame inside a box.</p>
+      <ul class="tlist">
+        <li>Hatch</li><li>Invert</li><li>X-ray</li><li>Duotone</li><li>Glitch</li><li>Mosaic</li>
+      </ul>
+    </article>
+
+    <article class="tpanel reveal">
+      <span class="tpanel-num">04</span>
+      <h3 class="tpanel-name">CONNECTIONS</h3>
+      <p class="tpanel-note">Lines between the pieces, plus markers, rulers and a grid.</p>
+      <ul class="tlist">
+        <li>Straight</li><li>Spline</li><li>PCB traces</li><li>Smooth bends</li><li>Step bends</li>
+        <li>Markers</li><li>Rulers</li><li>Cartesian grid</li>
+      </ul>
+    </article>
+
+    <article class="tpanel reveal">
+      <span class="tpanel-num">05</span>
+      <h3 class="tpanel-name">LABELS</h3>
+      <p class="tpanel-note">Live readouts that update with the shot, set in any font on your system.</p>
+      <ul class="tlist">
+        <li>Coordinates</li><li>Size</li><li>Area</li><li>ID</li>
+        <li>Hex colour</li><li>Percent</li><li>Matrix</li><li>Custom text</li>
+      </ul>
+    </article>
+
+    <article class="tpanel reveal">
+      <span class="tpanel-num">06</span>
+      <h3 class="tpanel-name">LOOKS</h3>
+      <p class="tpanel-note">Ten of them ready to go, and room for your own.</p>
+      <ul class="tlist">
+        <li>10 built in</li><li>Save your own</li><li>Kept in the plugin</li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+
+<!-- PRESETS -->
+<section id="tpresets">
+  <div class="tpresets-inner reveal">
+    <div>
+      <h2>BUILD ONE, KEEP IT</h2>
+      <p>Start from one of the ten looks or from nothing at all. Once a setup does what you want, it saves as a preset inside the plugin, ready on the next shot and the next job.</p>
+    </div>
+    <p class="tcount">10<span>Looks included</span></p>
+  </div>
+</section>
+
+<!-- GET IT -->
+<section id="tbuy">
+  <div class="tbuy-inner reveal">
+    <h2>NOT OUT YET</h2>
+    <p>Tether is still being finished. Leave your email and you will hear the day it is ready, with nothing else sent in between.</p>
+    <a class="gbay-btn" href="mailto:rahulkuttappy805@gmail.com?subject=Tell%20me%20when%20Tether%20drops">Notify Me</a>
+  </div>
+</section>
+
+<footer>
+  <canvas id="plexus" aria-hidden="true"></canvas>
+  <img class="f-logo" src="assets/images/logo.png" alt="RK"/>
+  <p>&copy; 2026 Rahul Kuttappy. All rights reserved</p>
+  <a class="f-back" href="garage.html">Back to the garage &uarr;</a>
+</footer>
+
+<script src="js/main.js?v=20260916u"></script>
+</body>
+</html>

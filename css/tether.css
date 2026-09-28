@@ -1,0 +1,120 @@
+/* ── TETHER PRODUCT PAGE ──
+   Built from the same parts as the project pages: a full bleed hero, a brief,
+   then blocks of plain lists. The overlay look of the plugin itself shows up
+   as corner brackets on the panels and mono readouts above them. */
+
+#thero{
+  position:relative;min-height:78vh;display:flex;align-items:flex-end;
+  padding:7rem 2.5rem 3rem;overflow:hidden;border-bottom:1px solid var(--border);
+}
+.thero-bg{position:absolute;inset:0;z-index:0;}
+.thero-bg img{width:100%;height:100%;object-fit:cover;filter:brightness(.5) saturate(.85);}
+.thero-bg::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(8,8,8,.96) 8%,rgba(8,8,8,.55) 55%,rgba(8,8,8,.75));
+}
+.thero-inner{position:relative;z-index:1;width:100%;}
+.thero-back{
+  display:inline-block;margin-bottom:2rem;font-size:.5rem;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s;
+}
+.thero-back:hover{color:var(--red);}
+.thero-title{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,16vw,13rem);
+  line-height:.85;letter-spacing:.02em;color:var(--off);margin:.4rem 0 1rem;
+}
+.thero-line{
+  max-width:46ch;font-size:clamp(.78rem,1.1vw,.92rem);line-height:1.8;
+  color:rgba(237,234,226,.72);
+}
+.tmeta{
+  display:flex;flex-wrap:wrap;gap:2.5rem;margin-top:2.2rem;
+  padding-top:1.5rem;border-top:1px solid var(--border);
+}
+.tmeta-item{display:flex;flex-direction:column;gap:.35rem;}
+.tmeta-lbl{font-size:.46rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
+.tmeta-val{font-size:.82rem;color:rgba(237,234,226,.82);}
+.tmeta-val.soon{color:var(--red);}
+
+/* Brief */
+#tintro{padding:5.5rem 2.5rem;border-bottom:1px solid var(--border);}
+.tintro-grid{display:grid;grid-template-columns:1fr 1.25fr;gap:4rem;max-width:1400px;margin:0 auto;}
+.tintro-body p{
+  font-size:clamp(.78rem,1vw,.9rem);line-height:2;color:rgba(237,234,226,.7);
+  margin-bottom:1.3rem;max-width:62ch;
+}
+.tintro-body em{color:var(--off);font-style:normal;}
+
+/* Panels of plain lists */
+#tkit{padding:5.5rem 2.5rem 6rem;}
+.tkit-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem;
+  max-width:1400px;margin:2.5rem auto 0;
+}
+.tpanel{
+  position:relative;padding:2rem 1.8rem 2.2rem;
+  background:rgba(237,234,226,.022);border:1px solid var(--border);
+}
+/* corner brackets, the way the plugin draws them */
+.tpanel::before,.tpanel::after{
+  content:'';position:absolute;width:14px;height:14px;pointer-events:none;
+  border-color:rgba(var(--red-glow),.55);border-style:solid;
+}
+.tpanel::before{top:-1px;left:-1px;border-width:1px 0 0 1px;}
+.tpanel::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0;}
+.tpanel-num{
+  font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
+  letter-spacing:.24em;color:var(--red);
+}
+.tpanel-name{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.3rem,2.4vw,1.9rem);
+  letter-spacing:.04em;line-height:1;color:var(--off);margin:.5rem 0 .7rem;
+}
+.tpanel-note{font-size:.72rem;line-height:1.85;color:rgba(237,234,226,.6);margin-bottom:1.1rem;}
+.tlist{list-style:none;display:flex;flex-wrap:wrap;gap:.45rem;}
+.tlist li{
+  font-family:'JetBrains Mono',monospace;font-size:.5rem;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(237,234,226,.62);
+  padding:.42rem .6rem;border:1px solid var(--border);background:rgba(8,8,8,.4);
+  transition:color .3s ease,border-color .3s ease;
+}
+.tpanel:hover .tlist li{border-color:rgba(237,234,226,.18);color:rgba(237,234,226,.78);}
+
+/* Presets strip */
+#tpresets{padding:0 2.5rem 6rem;}
+.tpresets-inner{
+  max-width:1400px;margin:0 auto;padding:2.6rem 2rem;
+  border:1px solid var(--border);background:rgba(237,234,226,.022);
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2rem;
+}
+.tpresets-inner h2{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,3.4vw,2.6rem);
+  letter-spacing:.03em;line-height:1;color:var(--off);
+}
+.tpresets-inner p{max-width:50ch;font-size:.75rem;line-height:1.9;color:rgba(237,234,226,.62);margin-top:.7rem;}
+.tcount{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,6rem);line-height:.85;color:var(--red);}
+.tcount span{display:block;font-family:'JetBrains Mono',monospace;font-size:.46rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-top:.6rem;}
+
+/* Get it */
+#tbuy{padding:0 2.5rem 7rem;}
+.tbuy-inner{
+  max-width:1400px;margin:0 auto;padding:3.2rem 2rem;text-align:center;
+  border:1px solid var(--border);background:rgba(var(--red-glow),.05);
+}
+.tbuy-inner h2{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,5vw,3.6rem);
+  letter-spacing:.03em;line-height:.95;color:var(--off);margin-bottom:.9rem;
+}
+.tbuy-inner p{max-width:52ch;margin:0 auto 1.8rem;font-size:.78rem;line-height:1.9;color:rgba(237,234,226,.65);}
+
+@media(max-width:900px){
+  .tkit-grid{grid-template-columns:1fr;}
+  .tintro-grid{grid-template-columns:1fr;gap:2rem;}
+}
+@media(max-width:768px){
+  #thero{padding:5.5rem 1.5rem 2.5rem;min-height:70vh;}
+  .tmeta{gap:1.4rem;}
+  #tintro,#tkit{padding-left:1.5rem;padding-right:1.5rem;}
+  #tpresets,#tbuy{padding-left:1.5rem;padding-right:1.5rem;}
+  .tpresets-inner,.tbuy-inner{padding:2rem 1.4rem;}
+}
