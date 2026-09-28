@@ -107,117 +107,62 @@
 .gbay .gbay-foot{position:relative;z-index:4;}
 .gbay.is-hidden{display:none;}
 
-/* 3D packshot */
-.gx-stage{
-  position:relative;
-  perspective:1500px;padding:1rem 0 2rem;
-  display:flex;justify-content:center;
+/* ══ PRODUCT PANEL ══
+   A readout rather than a box on a shelf: a bay strip across the top, the
+   art in a bracketed window, the name and the formats under it, and the
+   status sitting on the bottom edge. The whole panel lifts on hover, with
+   the white pool now thrown as a shadow behind it. */
+.gx-panel{
+  position:relative;margin-bottom:1.3rem;
+  border:1px solid var(--border);background:rgba(237,234,226,.022);
+  transition:border-color .5s ease,box-shadow .6s ease,transform .6s cubic-bezier(.16,1,.3,1);
 }
-/* A pool of light behind the packshot, lit only on hover. It sits in the
-   stage rather than on the box, so it stays flat while the box turns. */
-.gx-stage::before{
-  content:'';position:absolute;z-index:0;pointer-events:none;
-  left:50%;top:50%;transform:translate(-50%,-50%);
-  width:58%;height:68%;border-radius:50%;
-  background:radial-gradient(50% 50% at 50% 50%,
-    rgba(237,234,226,.42) 0%,rgba(237,234,226,.16) 42%,transparent 70%);
-  filter:blur(30px);
-  opacity:0;transition:opacity .5s ease;
+.gbay:hover .gx-panel{
+  border-color:rgba(237,234,226,.17);
+  box-shadow:0 18px 60px rgba(0,0,0,.5),0 0 44px rgba(237,234,226,.09);
+  transform:translateY(-5px);
 }
-.gbay:hover .gx-stage::before{opacity:1;}
-/* Positive rotateY turns the box so its LEFT side faces the viewer, which is
-   where the spine lives. Depth is 52px, so the front sits at +26 and the
-   spine spans -26 to +26. */
-.gx-box{
-  position:relative;z-index:1;width:66%;aspect-ratio:3/4;
-  transform-style:preserve-3d;
-  transform:rotateX(var(--rx,2deg)) rotateY(var(--ry,20deg));
-  transition:transform .6s cubic-bezier(.16,1,.3,1);
+.gx-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  padding:.62rem .8rem;border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
 }
-.gbay:hover .gx-box{transition:transform .12s ease-out;}
-.gx-face{position:absolute;top:0;height:100%;}
-.gx-front{
-  left:0;width:100%;
-  transform:translateZ(26px);
-  background:linear-gradient(158deg,#161616 0%,#0b0b0b 58%,#070707 100%);
-  border:1px solid rgba(237,234,226,.1);
-  display:flex;flex-direction:column;overflow:hidden;
-  box-shadow:0 40px 70px rgba(0,0,0,.62);
-}
-.gx-spine{
-  left:0;width:52px;
-  transform-origin:left center;
-  transform:translateZ(-26px) rotateY(-90deg);
-  background:linear-gradient(180deg,#111 0%,#060606 100%);
-  border:1px solid rgba(237,234,226,.07);
-  display:flex;align-items:center;justify-content:center;
-}
-.gx-spine span{
-  font-family:'JetBrains Mono',monospace;font-size:.4rem;font-weight:700;
-  letter-spacing:.24em;text-transform:uppercase;color:rgba(237,234,226,.55);
-  white-space:nowrap;transform:rotate(-90deg);
-}
-/* Sheen that shifts as the box turns */
-.gx-front::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(118deg,rgba(237,234,226,.11) 0%,transparent 34%,transparent 68%,rgba(237,234,226,.05) 100%);
-}
-.gx-brand{
-  padding:1.1rem 0 .9rem;text-align:center;
-  font-family:'JetBrains Mono',monospace;font-size:.38rem;font-weight:700;
-  letter-spacing:.36em;text-transform:uppercase;color:rgba(237,234,226,.55);
-}
-.gx-art{position:relative;flex:1;overflow:hidden;background:#0b0b0b;}
-.gx-art img{
-  width:100%;height:100%;object-fit:cover;display:block;
-  filter:brightness(.68) saturate(.85);
-}
+.gx-bar-kind{color:var(--red);}
+.gx-art{position:relative;aspect-ratio:4/3;overflow:hidden;background:#0b0b0b;}
+.gx-art img{width:100%;height:100%;object-fit:cover;display:block;}
 .gx-art::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(6,6,6,.82) 0%,transparent 55%);
+  background:linear-gradient(to top,rgba(6,6,6,.72) 0%,transparent 62%);
 }
-.gx-arttext{
-  position:absolute;left:0;right:0;bottom:.8rem;z-index:2;text-align:center;
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(1.1rem,1.8vw,1.6rem);letter-spacing:.07em;color:var(--off);
-  text-shadow:0 2px 18px rgba(0,0,0,.85);padding:0 .6rem;
+/* brackets on the window, the way Tether draws them */
+.gx-corners{position:absolute;inset:.55rem;z-index:2;pointer-events:none;}
+.gx-corners::before,.gx-corners::after{
+  content:'';position:absolute;width:13px;height:13px;
+  border-color:rgba(237,234,226,.45);border-style:solid;
+  transition:border-color .5s ease;
 }
-.gx-foot{
-  padding:.85rem 1rem 1.1rem;display:flex;align-items:flex-end;justify-content:space-between;gap:.6rem;
+.gx-corners::before{top:0;left:0;border-width:1px 0 0 1px;}
+.gx-corners::after{bottom:0;right:0;border-width:0 1px 1px 0;}
+.gbay:hover .gx-corners::before,.gbay:hover .gx-corners::after{border-color:var(--red);}
+.gx-id{padding:.9rem .8rem 1rem;}
+.gx-name{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.3rem,2.2vw,1.75rem);
+  letter-spacing:.05em;line-height:1;color:var(--off);
+  transition:opacity .5s ease;
 }
-.gx-kind{
-  font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.08em;
-  color:var(--off);line-height:1;
+.gx-line{
+  margin-top:.42rem;font-family:'JetBrains Mono',monospace;font-size:.44rem;
+  letter-spacing:.2em;text-transform:uppercase;color:rgba(237,234,226,.42);
 }
-.gx-apps{
-  display:flex;gap:.3rem;
-}
-.gx-app{
-  font-family:'JetBrains Mono',monospace;font-size:.4rem;font-weight:700;
-  letter-spacing:.06em;text-transform:uppercase;color:rgba(237,234,226,.62);
-  border:1px solid rgba(237,234,226,.18);border-radius:2px;
-  padding:.2rem .3rem;line-height:1;
-}
-
-/* Bay details under the box */
-.gbay-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.55rem;}
-.gbay-num{
-  font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
-  letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
-}
-.gbay-status{
+.gx-status{
+  display:flex;align-items:center;justify-content:flex-end;gap:.45rem;
+  padding:.5rem .8rem;border-top:1px solid var(--border);
   font-family:'JetBrains Mono',monospace;font-size:.42rem;font-weight:700;
-  letter-spacing:.18em;text-transform:uppercase;
-  padding:.24rem .42rem;border-radius:2px;white-space:nowrap;
+  letter-spacing:.2em;text-transform:uppercase;color:rgba(237,234,226,.55);
 }
-/* Solid, so it reads as a label rather than competing with the tape */
-.gbay-status.soon{
-  color:var(--off);background:var(--red);border:1px solid rgba(0,0,0,.4);
-}
-.gbay-name{
-  font-family:'Bebas Neue',sans-serif;font-size:1.75rem;letter-spacing:.04em;
-  line-height:1;color:var(--off);margin-bottom:.55rem;
-}
+.gx-status::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--red);}
+
 /* two lines reserved, so the footers line up across the row */
 .gbay-desc{font-size:.78rem;line-height:1.75;color:rgba(237,234,226,.5);margin-bottom:1rem;min-height:3.5em;}
 .gbay-specs{list-style:none;margin-bottom:1.2rem;}
@@ -240,23 +185,6 @@
 }
 .gbay-btn:hover{border-color:var(--red);background:rgba(var(--red-glow),.18);}
 .gbay-btn.wide{flex:1;text-align:center;}
-
-/* ══ COMING SOON TAPE ══ */
-.gx-tape{
-  position:absolute;left:-16%;right:-16%;top:43%;height:30px;z-index:4;
-  transform:rotate(-11deg);
-  display:flex;align-items:center;justify-content:center;
-  background:repeating-linear-gradient(45deg,#121212 0 9px,var(--red) 9px 18px);
-  border-top:2px solid #090909;border-bottom:2px solid #090909;
-  box-shadow:0 10px 26px rgba(0,0,0,.62);
-}
-.gx-tape b{
-  font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
-  letter-spacing:.24em;text-transform:uppercase;color:#fff;
-  background:#0a0a0a;padding:.3rem .65rem;border-radius:2px;
-  white-space:nowrap;box-shadow:0 0 0 1px rgba(237,234,226,.1);
-}
-
 
 /* ══ REQUEST STRIP ══ */
 #grequest{
@@ -285,12 +213,11 @@
   #ghero{padding-bottom:2rem;}
   #gbays{padding:3rem 1.5rem 5rem;}
   .gbay-grid{grid-template-columns:1fr;gap:2.5rem;}
-  .gx-box{width:58%;}
   #grequest{padding:0 1.5rem 5rem;}
   .grequest-inner{grid-template-columns:1fr;gap:1.6rem;padding:2.2rem 1.5rem;}
 }
 @media(prefers-reduced-motion:reduce){
-  .gx-box{transition:none;}
+  .gbay:hover .gx-panel{transform:none;}
 }
 
 /* ══ NOTHING HAS SHIPPED YET ══
@@ -298,13 +225,9 @@
    live part of the card. Dimming the pieces individually rather than the
    box keeps the tape at full strength. */
 .gx-art img{filter:grayscale(1) brightness(.5) saturate(1) contrast(.96);}
-.gx-arttext,.gx-brand,.gx-kind{opacity:.45;}
-.gx-app{opacity:.38;}
-.gx-spine{opacity:.45;}
-.gx-front{border-color:rgba(237,234,226,.06);}
-.gbay-name{opacity:.62;}
+.gx-name{opacity:.78;}
 .gbay-desc,.gbay-specs{opacity:.68;}
 /* Hovering brings the art all the way back: full colour, full strength */
 .gbay:hover .gx-art img{filter:grayscale(0) brightness(1) saturate(1.12) contrast(1);}
-.gbay:hover .gbay-name{opacity:.85;}
-.gx-art img,.gbay-name{transition:filter .6s cubic-bezier(.33,0,.2,1),opacity .6s ease;}
+.gbay:hover .gx-name{opacity:.95;}
+.gx-art img,.gx-name{transition:filter .6s cubic-bezier(.33,0,.2,1),opacity .6s ease;}
