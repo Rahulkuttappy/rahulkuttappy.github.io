@@ -1534,6 +1534,26 @@ document.querySelectorAll('.tpanel').forEach(panel=>{
   });
 });
 
+/* ── Garage hero: attach the loop only where it is wanted ──
+   The markup carries no src, because a video with one downloads whether or
+   not it is on screen, and 4.7MB is not a fair ask of a phone. Wide screens
+   get the file; phones and anyone asking for less motion keep the poster. */
+(function(){
+  const v=document.getElementById('garageLoop');
+  if(!v||!v.dataset.src) return;
+  const wide=window.matchMedia('(min-width:769px)');
+  const calm=window.matchMedia('(prefers-reduced-motion: reduce)');
+  function attach(){
+    if(v.src||!wide.matches||calm.matches) return;
+    v.src=v.dataset.src;
+    v.play().catch(()=>{});   /* refused autoplay just leaves the poster up */
+  }
+  attach();
+  /* a phone turned landscape, or a window dragged wider, still gets it */
+  if(wide.addEventListener) wide.addEventListener('change',attach);
+  else if(wide.addListener) wide.addListener(attach);
+})();
+
 /* Everything above parsed and ran, so the failsafe in each page's head can
    stand down and let the animations play as written. */
 document.documentElement.classList.add('js-ok');
