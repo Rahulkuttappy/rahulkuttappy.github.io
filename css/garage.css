@@ -100,9 +100,22 @@
 
 /* 3D packshot */
 .gx-stage{
+  position:relative;
   perspective:1500px;padding:1rem 0 2rem;
   display:flex;justify-content:center;
 }
+/* A pool of light behind the packshot, lit only on hover. It sits in the
+   stage rather than on the box, so it stays flat while the box turns. */
+.gx-stage::before{
+  content:'';position:absolute;z-index:0;pointer-events:none;
+  left:50%;top:48%;transform:translate(-50%,-50%);
+  width:72%;height:58%;border-radius:50%;
+  background:radial-gradient(50% 50% at 50% 50%,
+    rgba(237,234,226,.32) 0%,rgba(237,234,226,.1) 46%,transparent 72%);
+  filter:blur(22px);
+  opacity:0;transition:opacity .5s ease;
+}
+.gbay:hover .gx-stage::before{opacity:1;}
 /* Positive rotateY turns the box so its LEFT side faces the viewer, which is
    where the spine lives. Depth is 52px, so the front sits at +26 and the
    spine spans -26 to +26. */
@@ -282,6 +295,7 @@
 .gx-front{border-color:rgba(237,234,226,.06);}
 .gbay-name{opacity:.62;}
 .gbay-desc,.gbay-specs{opacity:.68;}
-.gbay:hover .gx-art img{filter:grayscale(.7) brightness(.62) contrast(.98);}
+/* Hovering brings the art all the way back: full colour, full strength */
+.gbay:hover .gx-art img{filter:grayscale(0) brightness(1) saturate(1.12) contrast(1);}
 .gbay:hover .gbay-name{opacity:.85;}
 .gx-art img,.gbay-name{transition:filter .45s ease,opacity .45s ease;}
