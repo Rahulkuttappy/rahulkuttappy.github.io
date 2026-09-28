@@ -107,61 +107,117 @@
 .gbay .gbay-foot{position:relative;z-index:4;}
 .gbay.is-hidden{display:none;}
 
-/* ══ PRODUCT PANEL ══
-   A readout rather than a box on a shelf: a bay strip across the top, the
-   art in a bracketed window, the name and the formats under it, and the
-   status sitting on the bottom edge. The whole panel lifts on hover, with
-   the white pool now thrown as a shadow behind it. */
-.gx-panel{
-  position:relative;margin-bottom:1.3rem;
-  border:1px solid var(--border);background:rgba(237,234,226,.022);
-  transition:border-color .5s ease,box-shadow .6s ease,transform .6s cubic-bezier(.16,1,.3,1);
+/* ══ THE BOX ══
+   A slim case standing on a shelf. Every face starts centred on the box,
+   rotates into its plane, then pushes out by half the dimension it faces
+   along: the only construction whose seams hold at every angle. Perspective
+   is kept near the size of the box, so it reads as a short lens rather than
+   an isometric drawing. */
+.gx-stage{
+  position:relative;
+  perspective:760px;perspective-origin:50% 42%;
+  display:flex;justify-content:center;align-items:center;
+  padding:1.6rem 0 2.6rem;
 }
-.gbay:hover .gx-panel{
-  border-color:rgba(237,234,226,.17);
-  box-shadow:0 18px 60px rgba(0,0,0,.5),0 0 44px rgba(237,234,226,.09);
-  transform:translateY(-5px);
+/* pool of light behind, lit on hover; flat, so it does not turn with the box */
+.gx-stage::before{
+  content:'';position:absolute;z-index:0;pointer-events:none;
+  left:50%;top:44%;transform:translate(-50%,-50%);
+  width:52%;height:62%;border-radius:50%;
+  background:radial-gradient(50% 50% at 50% 50%,
+    rgba(237,234,226,.4) 0%,rgba(237,234,226,.14) 44%,transparent 70%);
+  filter:blur(30px);opacity:0;transition:opacity .5s ease;
 }
-.gx-bar{
-  display:flex;align-items:center;justify-content:space-between;gap:1rem;
-  padding:.62rem .8rem;border-bottom:1px solid var(--border);
-  font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
-  letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+.gbay:hover .gx-stage::before{opacity:1;}
+/* contact shadow on the floor, drawing in as the box lifts */
+.gx-stage::after{
+  content:'';position:absolute;z-index:0;pointer-events:none;
+  left:50%;bottom:1.6rem;transform:translateX(-50%);
+  width:44%;height:20px;border-radius:50%;
+  background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.9),transparent 72%);
+  filter:blur(10px);transition:width .6s ease,opacity .6s ease;
 }
-.gx-bar-kind{color:var(--red);}
-.gx-art{position:relative;aspect-ratio:4/3;overflow:hidden;background:#0b0b0b;}
+.gbay:hover .gx-stage::after{width:36%;opacity:.78;}
+
+.gx-box{
+  position:relative;z-index:1;
+  --w:clamp(148px,14vw,186px);--h:calc(var(--w) * 1.42);--d:34px;
+  width:var(--w);height:var(--h);
+  transform-style:preserve-3d;
+  transform:rotateX(var(--rx,4deg)) rotateY(var(--ry,-34deg));
+  transition:transform .7s cubic-bezier(.16,1,.3,1);
+}
+.gbay:hover .gx-box{transition:transform .14s ease-out;}
+.gx-face{position:absolute;left:50%;top:50%;transform-style:preserve-3d;}
+.gx-front{
+  width:var(--w);height:var(--h);
+  margin-left:calc(var(--w) / -2);margin-top:calc(var(--h) / -2);
+  transform:translateZ(calc(var(--d) / 2));
+  background:#0c0c0c;border:1px solid rgba(237,234,226,.12);
+  box-shadow:0 30px 54px rgba(0,0,0,.6);overflow:hidden;
+}
+/* red edge where it opens */
+.gx-front::after{content:'';position:absolute;top:0;bottom:0;right:0;width:2px;background:var(--red);z-index:5;}
+/* the spine: moulded ribbing, with the mark above the name */
+.gx-side{
+  width:var(--d);height:var(--h);
+  margin-left:calc(var(--d) / -2);margin-top:calc(var(--h) / -2);
+  transform:rotateY(-90deg) translateZ(calc(var(--w) / 2));
+  background:
+    repeating-linear-gradient(to bottom,
+      rgba(237,234,226,.11) 0 1px,transparent 1px 5px),
+    linear-gradient(180deg,#151515,#070707);
+  border:1px solid rgba(237,234,226,.08);
+  display:flex;flex-direction:column;align-items:center;padding:.6rem 0;overflow:hidden;
+}
+.gx-side span{
+  margin:auto 0;
+  font-family:'JetBrains Mono',monospace;font-size:.36rem;font-weight:700;letter-spacing:.22em;
+  text-transform:uppercase;color:rgba(237,234,226,.55);white-space:nowrap;transform:rotate(-90deg);
+}
+.gx-top{
+  width:var(--w);height:var(--d);
+  margin-left:calc(var(--w) / -2);margin-top:calc(var(--d) / -2);
+  transform:rotateX(90deg) translateZ(calc(var(--h) / 2));
+  background:linear-gradient(90deg,#1a1a1a,#0a0a0a);border:1px solid rgba(237,234,226,.07);
+}
+.gx-art{position:absolute;inset:0;overflow:hidden;}
 .gx-art img{width:100%;height:100%;object-fit:cover;display:block;}
-.gx-art::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(6,6,6,.72) 0%,transparent 62%);
+/* the mark, painted as a fill masked by the logo like the page transition */
+.gx-mark{
+  display:block;flex:none;aspect-ratio:400/256;background-color:var(--off);
+  -webkit-mask:url(../assets/images/logo.png) center/contain no-repeat;
+          mask:url(../assets/images/logo.png) center/contain no-repeat;
 }
-/* brackets on the window, the way Tether draws them */
-.gx-corners{position:absolute;inset:.55rem;z-index:2;pointer-events:none;}
-.gx-corners::before,.gx-corners::after{
-  content:'';position:absolute;width:13px;height:13px;
-  border-color:rgba(237,234,226,.45);border-style:solid;
-  transition:border-color .5s ease;
+.gx-side .gx-mark{height:10px;width:16px;opacity:.7;}
+.gx-lockup{
+  position:absolute;top:.7rem;left:.75rem;z-index:4;
+  display:flex;align-items:center;gap:.4rem;
 }
-.gx-corners::before{top:0;left:0;border-width:1px 0 0 1px;}
-.gx-corners::after{bottom:0;right:0;border-width:0 1px 1px 0;}
-.gbay:hover .gx-corners::before,.gbay:hover .gx-corners::after{border-color:var(--red);}
-.gx-id{padding:.9rem .8rem 1rem;}
-.gx-name{
-  font-family:'Bebas Neue',sans-serif;font-size:clamp(1.3rem,2.2vw,1.75rem);
-  letter-spacing:.05em;line-height:1;color:var(--off);
-  transition:opacity .5s ease;
+.gx-lockup .gx-mark{height:13px;}
+.gx-lockup span{
+  font-family:'JetBrains Mono',monospace;font-size:.32rem;font-weight:700;
+  letter-spacing:.24em;text-transform:uppercase;color:rgba(237,234,226,.62);
 }
-.gx-line{
-  margin-top:.42rem;font-family:'JetBrains Mono',monospace;font-size:.44rem;
-  letter-spacing:.2em;text-transform:uppercase;color:rgba(237,234,226,.42);
+.gx-cap{
+  position:absolute;left:0;right:0;bottom:0;z-index:3;padding:.8rem .75rem;
+  background:linear-gradient(to top,rgba(6,6,6,.92),transparent);
 }
-.gx-status{
-  display:flex;align-items:center;justify-content:flex-end;gap:.45rem;
-  padding:.5rem .8rem;border-top:1px solid var(--border);
+.gx-cap b{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.05em;color:var(--off);}
+.gx-cap span{font-family:'JetBrains Mono',monospace;font-size:.36rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,234,226,.5);}
+
+/* Bay line under the box */
+.gbay-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.55rem;}
+.gbay-num{
+  font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+}
+.gbay-status{
   font-family:'JetBrains Mono',monospace;font-size:.42rem;font-weight:700;
-  letter-spacing:.2em;text-transform:uppercase;color:rgba(237,234,226,.55);
+  letter-spacing:.18em;text-transform:uppercase;
+  padding:.24rem .42rem;border-radius:2px;white-space:nowrap;
 }
-.gx-status::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--red);}
+.gbay-status.soon{color:var(--off);background:var(--red);border:1px solid rgba(0,0,0,.4);}
 
 /* two lines reserved, so the footers line up across the row */
 .gbay-desc{font-size:.78rem;line-height:1.75;color:rgba(237,234,226,.5);margin-bottom:1rem;min-height:3.5em;}
@@ -217,17 +273,16 @@
   .grequest-inner{grid-template-columns:1fr;gap:1.6rem;padding:2.2rem 1.5rem;}
 }
 @media(prefers-reduced-motion:reduce){
-  .gbay:hover .gx-panel{transform:none;}
+  .gx-box{transition:none;}
 }
 
 /* ══ NOTHING HAS SHIPPED YET ══
-   The packshots sit greyed back so the tape and the status read as the
-   live part of the card. Dimming the pieces individually rather than the
-   box keeps the tape at full strength. */
+   The art sits greyed back until the cursor arrives, so the status chip
+   under the box reads as the live part of the card. */
 .gx-art img{filter:grayscale(1) brightness(.5) saturate(1) contrast(.96);}
-.gx-name{opacity:.78;}
+.gx-cap b{opacity:.8;}
 .gbay-desc,.gbay-specs{opacity:.68;}
 /* Hovering brings the art all the way back: full colour, full strength */
 .gbay:hover .gx-art img{filter:grayscale(0) brightness(1) saturate(1.12) contrast(1);}
-.gbay:hover .gx-name{opacity:.95;}
-.gx-art img,.gx-name{transition:filter .6s cubic-bezier(.33,0,.2,1),opacity .6s ease;}
+.gbay:hover .gx-cap b{opacity:1;}
+.gx-art img,.gx-cap b{transition:filter .6s cubic-bezier(.33,0,.2,1),opacity .6s ease;}

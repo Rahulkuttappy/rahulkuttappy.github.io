@@ -955,16 +955,17 @@ const tiltBoxes=document.querySelectorAll('[data-tilt]');
 if(tiltBoxes.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   tiltBoxes.forEach(box=>{
     const bay=box.closest('.gbay')||box.parentElement;
-    const REST_Y=20, REST_X=2;
+    /* The box rests turned to its left, so the ribbed spine is on show.
+       Negative rotateY opens that side; cursor right closes it toward flat. */
+    const REST_Y=-34, REST_X=4;
     let raf=0,tx=REST_Y,ty=REST_X;
-    const apply=()=>{ raf=0; box.style.setProperty('--ry',tx+'deg'); box.style.setProperty('--rx',ty+'deg'); };
+    const apply=()=>{ raf=0; box.style.setProperty('--ry',tx.toFixed(2)+'deg'); box.style.setProperty('--rx',ty.toFixed(2)+'deg'); };
     bay.addEventListener('pointermove',e=>{
       const r=bay.getBoundingClientRect();
       const px=(e.clientX-r.left)/r.width-0.5;   /* -0.5 … 0.5 */
       const py=(e.clientY-r.top)/r.height-0.5;
-      /* Cursor right closes the box toward flat, cursor left opens the spine */
-      tx=REST_Y-px*26;
-      ty=REST_X-py*14;
+      tx=REST_Y+px*34;
+      ty=REST_X-py*18;
       if(!raf) raf=requestAnimationFrame(apply);
     });
     bay.addEventListener('pointerleave',()=>{
