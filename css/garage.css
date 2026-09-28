@@ -232,6 +232,13 @@
 }
 .gbay-status.soon{color:var(--off);background:var(--red);border:1px solid rgba(0,0,0,.4);}
 
+.gbay-name{
+  font-family:'Bebas Neue',sans-serif;font-size:1.75rem;letter-spacing:.04em;
+  line-height:1;color:var(--off);margin-bottom:.55rem;
+  opacity:.9;transition:opacity .5s ease;
+}
+.gbay:hover .gbay-name{opacity:1;}
+
 /* two lines reserved, so the footers line up across the row */
 .gbay-desc{font-size:.78rem;line-height:1.75;color:rgba(237,234,226,.5);margin-bottom:1rem;min-height:3.5em;}
 .gbay-specs{list-style:none;margin-bottom:1.2rem;}
