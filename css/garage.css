@@ -7,10 +7,14 @@
   padding:5rem 2.5rem 2.75rem;
 }
 .ghero-bg{position:absolute;inset:0;z-index:0;}
-.ghero-bg img{
+.ghero-bg img,.ghero-bg video{
   width:100%;height:100%;object-fit:cover;object-position:center 58%;
   filter:brightness(.58) saturate(.74) contrast(1.04);
 }
+/* The clip covers the still rather than replacing it, so a browser that will
+   not autoplay simply shows the frame underneath. */
+.ghero-bg video{position:absolute;inset:0;object-position:center center;}
+@media(prefers-reduced-motion:reduce){.ghero-bg video{display:none;}}
 /* Floor light pooling up from the bottom, like a lamp under the bonnet */
 .ghero-bg::after{
   content:'';position:absolute;inset:0;
