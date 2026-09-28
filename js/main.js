@@ -486,10 +486,10 @@ function cursorLoop(now){
   const dt=Math.min((now-fxLast)/1000,0.05); fxLast=now;
   const ease=r=>1-Math.pow(1-r,dt*60);
 
-  const k=ease(0.16);
+  const k=ease(0.27);
   fxSx+=(fxMx-fxSx)*k;
   fxSy+=(fxMy-fxSy)*k;
-  fxR+=((fxHover?15:9)-fxR)*ease(0.12);
+  fxR+=((fxHover?15:9)-fxR)*ease(0.2);
 
   trail.push({x:fxSx,y:fxSy});
   if(trail.length>TRAIL_MAX) trail.shift();
