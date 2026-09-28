@@ -1523,6 +1523,17 @@ if(ditherWords.length){
   render();
 })();
 
+/* ── Tether panels: the glow follows the cursor ──
+   The pool is a gradient positioned by two custom properties; hover state
+   itself is CSS, so this only moves the light, never switches it on. */
+document.querySelectorAll('.tpanel').forEach(panel=>{
+  panel.addEventListener('pointermove',e=>{
+    const r=panel.getBoundingClientRect();
+    panel.style.setProperty('--mx',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
+    panel.style.setProperty('--my',((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
+  });
+});
+
 /* Everything above parsed and ran, so the failsafe in each page's head can
    stand down and let the animations play as written. */
 document.documentElement.classList.add('js-ok');
