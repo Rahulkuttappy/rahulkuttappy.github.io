@@ -144,7 +144,10 @@
   --w:clamp(148px,14vw,186px);--h:calc(var(--w) * 1.42);--d:34px;
   width:var(--w);height:var(--h);
   transform-style:preserve-3d;
-  transform:rotateX(var(--rx,4deg)) rotateY(var(--ry,-34deg));
+  /* POSITIVE rotateY swings the left hand face forward, and the left face is
+     where the spine lives. Negative hides it behind the front, which leaves
+     only the top edge and the red opening edge to carry the depth. */
+  transform:rotateX(var(--rx,4deg)) rotateY(var(--ry,34deg));
   transition:transform .7s cubic-bezier(.16,1,.3,1);
 }
 .gbay:hover .gx-box{transition:transform .14s ease-out;}

@@ -955,16 +955,16 @@ const tiltBoxes=document.querySelectorAll('[data-tilt]');
 if(tiltBoxes.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   tiltBoxes.forEach(box=>{
     const bay=box.closest('.gbay')||box.parentElement;
-    /* The box rests turned to its left, so the ribbed spine is on show.
-       Negative rotateY opens that side; cursor right closes it toward flat. */
-    const REST_Y=-34, REST_X=4;
+    /* The box rests turned so the ribbed spine is on show. Positive rotateY
+       brings that left hand face forward; cursor right closes it to flat. */
+    const REST_Y=34, REST_X=4;
     let raf=0,tx=REST_Y,ty=REST_X;
     const apply=()=>{ raf=0; box.style.setProperty('--ry',tx.toFixed(2)+'deg'); box.style.setProperty('--rx',ty.toFixed(2)+'deg'); };
     bay.addEventListener('pointermove',e=>{
       const r=bay.getBoundingClientRect();
       const px=(e.clientX-r.left)/r.width-0.5;   /* -0.5 … 0.5 */
       const py=(e.clientY-r.top)/r.height-0.5;
-      tx=REST_Y+px*34;
+      tx=REST_Y-px*34;
       ty=REST_X-py*18;
       if(!raf) raf=requestAnimationFrame(apply);
     });
