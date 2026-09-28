@@ -202,12 +202,22 @@
   font-family:'JetBrains Mono',monospace;font-size:.32rem;font-weight:700;
   letter-spacing:.24em;text-transform:uppercase;color:rgba(237,234,226,.62);
 }
+/* The name sits on whatever the art happens to be doing down there, so the
+   fade under it is deep and starts well above the text rather than hugging
+   it. Shadows on top of that, for the frames that are bright at the foot. */
 .gx-cap{
-  position:absolute;left:0;right:0;bottom:0;z-index:3;padding:.8rem .75rem;
-  background:linear-gradient(to top,rgba(6,6,6,.92),transparent);
+  position:absolute;left:0;right:0;bottom:0;z-index:3;padding:2rem .75rem .8rem;
+  background:linear-gradient(to top,
+    rgba(5,5,5,.97) 0%,rgba(5,5,5,.9) 38%,rgba(5,5,5,.5) 70%,transparent 100%);
 }
-.gx-cap b{display:block;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.05em;color:var(--off);}
-.gx-cap span{font-family:'JetBrains Mono',monospace;font-size:.36rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,234,226,.5);}
+.gx-cap b{
+  display:block;font-family:'Bebas Neue',sans-serif;font-size:1.28rem;
+  letter-spacing:.05em;color:var(--off);text-shadow:0 2px 12px rgba(0,0,0,.9);
+}
+.gx-cap span{
+  font-family:'JetBrains Mono',monospace;font-size:.36rem;letter-spacing:.2em;
+  text-transform:uppercase;color:rgba(237,234,226,.62);text-shadow:0 1px 8px rgba(0,0,0,.95);
+}
 
 /* Bay line under the box */
 .gbay-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.55rem;}
@@ -283,7 +293,7 @@
    The art sits greyed back until the cursor arrives, so the status chip
    under the box reads as the live part of the card. */
 .gx-art img{filter:grayscale(1) brightness(.5) saturate(1) contrast(.96);}
-.gx-cap b{opacity:.8;}
+.gx-cap b{opacity:.94;}
 .gbay-desc,.gbay-specs{opacity:.68;}
 /* Hovering brings the art all the way back: full colour, full strength */
 .gbay:hover .gx-art img{filter:grayscale(0) brightness(1) saturate(1.12) contrast(1);}
