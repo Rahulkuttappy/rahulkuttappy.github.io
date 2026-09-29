@@ -773,21 +773,50 @@ function revealHero(){
   gsap.set('.n1,.n2',{y:'0%'});
   gsap.set(['.hero-stamp','.hero-bio','.hero-disc'],{opacity:1});
 
-  /* A short comet tail behind each dot, the same idea as the cursor: ghosts
-     read a few frames of history, so they only show while the dot is moving. */
-  const TRAILS = 5, LAG = 2;
-  const ghosts = dots.map(()=>{
-    const a = [];
-    for(let k=0;k<TRAILS;k++){
-      const g = document.createElement('span');
-      g.className = 'hg-ghost';
-      grid.appendChild(g);
-      a.push(g);
-    }
-    return a;
-  });
+  /* A comet tail behind each orb. This was a row of ghost dots reading back
+     through the orb's own history, but an orb crosses about thirty-five pixels
+     in a frame at full tilt, so the ghosts landed that far apart and read as
+     beads rather than a streak -- and no sane number of them closes a gap that
+     is set by the frame rate. So the tail is stroked instead: the history is
+     the path the orb actually took, and drawing along it is continuous at any
+     speed. One canvas under the orbs, thrown away when the move ends. */
+  const TRAIL_LEN = 12;
   const hist = dots.map(()=>[]);
   let tracking = false;
+
+  const tcv = document.createElement('canvas');
+  tcv.className = 'hg-trail';
+  grid.insertBefore(tcv, grid.firstChild);      /* under the lines and orbs */
+  const tx = tcv.getContext('2d');
+  const tdpr = Math.min(window.devicePixelRatio || 1, 2);
+  tcv.width = Math.round(W*tdpr); tcv.height = Math.round(H*tdpr);
+  tx.setTransform(tdpr,0,0,tdpr,0,0);
+  tx.lineCap = 'round'; tx.lineJoin = 'round';
+  tx.strokeStyle = 'rgb(237,234,226)';
+
+  function drawTrails(){
+    tx.clearRect(0,0,W,H);
+    for(let i=0;i<hist.length;i++){
+      const h = hist[i];
+      if(h.length < 2) continue;
+      /* the tail belongs to the motion, so it dies out as the orb settles */
+      const sp = Math.sqrt(Math.pow(h[0].x-h[1].x,2) + Math.pow(h[0].y-h[1].y,2));
+      const lit = Math.min(1, sp/7);
+      if(lit <= .01) continue;
+      for(let k=0; k<h.length-1; k++){
+        const f = 1 - k/(h.length-1);         /* 1 at the orb, 0 at the tip */
+        const seg = Math.sqrt(Math.pow(h[k].x-h[k+1].x,2) + Math.pow(h[k].y-h[k+1].y,2));
+        if(seg < .4) continue;                /* no round caps piling up at rest */
+        tx.globalAlpha = .42 * lit * f * f;
+        tx.lineWidth = Math.max(.4, 4.4 * f);
+        tx.beginPath();
+        tx.moveTo(h[k].x, h[k].y);
+        tx.lineTo(h[k+1].x, h[k+1].y);
+        tx.stroke();
+      }
+    }
+    tx.globalAlpha = 1;
+  }
 
   /* ext carries each side on past the two dots it joins, out to the edges of
      the hero, so the frame ends up as crossed full-bleed lines with an orb
@@ -812,20 +841,12 @@ function revealHero(){
       gsap.set(lines[i], o);
     });
     if(!tracking) return;
-    pts.forEach((p,i)=>{
+    for(let i=0;i<pts.length;i++){
       const h = hist[i];
-      h.unshift(p);
-      if(h.length > TRAILS*LAG + 2) h.pop();
-      const sp  = h[1] ? Math.sqrt(Math.pow(p.x-h[1].x,2)+Math.pow(p.y-h[1].y,2)) : 0;
-      const lit = Math.min(1, sp/9);
-      ghosts[i].forEach((g,k)=>{
-        const q = h[(k+1)*LAG];
-        if(!q){ g.style.opacity = 0; return; }
-        const f = 1 - (k+1)/(TRAILS+1);
-        g.style.transform = 'translate3d('+q.x+'px,'+q.y+'px,0) scale('+(.35+f*.65).toFixed(3)+')';
-        g.style.opacity   = (lit*f*.6).toFixed(3);
-      });
-    });
+      h.unshift(pts[i]);
+      if(h.length > TRAIL_LEN) h.pop();
+    }
+    drawTrails();
   }
 
   /* On the way in each dot leaves on its own beat and takes the same share of
@@ -893,7 +914,7 @@ function revealHero(){
     /* the sides do not stop at the corners: they carry on to the edges while
        the orbs are still flying out, and keep going after they land */
     .to(st, {ext:1, duration:.95, ease:'power2.out', onUpdate:step}, '-=.5')
-    .add(()=>{ tracking = false; ghosts.forEach(a=>a.forEach(g=>g.remove())); })
+    .add(()=>{ tracking = false; tcv.remove(); })
     /* the box is simply there once its corners are, and the words resolve
        out of noise. One reveal, not a sweep and then a decode. */
     .to('#hcontent', {opacity:1, duration:.35, ease:'power2.out'}, '-=.45')
