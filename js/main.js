@@ -835,7 +835,7 @@ function revealHero(){
      decay and no run-up: an orb is at its fastest the instant it leaves its
      corner, then eases down into the centre. */
   const IN = [0, .22, .30, .11], SPAN = .70;
-  const ez = (gsap.parseEase && gsap.parseEase('power3.out')) || (x=>x);
+  const ez = (gsap.parseEase && gsap.parseEase('power2.out')) || (x=>x);
   const lerp = (a,b,k)=>a+(b-a)*k;
   const from = [{x:0,y:0},{x:W,y:0},{x:0,y:H},{x:W,y:H}];
   const to   = [{x:box.l,y:box.t},{x:box.r,y:box.t},{x:box.l,y:box.b},{x:box.r,y:box.b}];
@@ -863,12 +863,13 @@ function revealHero(){
     .to('#hdust', {opacity:1, duration:1.6, ease:'power1.out'}, 0)
     .add(()=>{ tracking = true; })
     /* linear here: the stagger and the per-orb ease both live inside step() */
-    .to(st, {p:1, duration:1.05, ease:'none',         onUpdate:step}, '-=.14')
-    /* The pause is the point: every orb is at the centre, and the frame is a
-       single dot, before anything opens back out. It is kept short because a
-       decaying ease already parks each orb for the tail of its own window --
-       the stillness the eye sees is longer than the gap written here. */
-    .to(st, {p:2, duration:1.15, ease:'power2.inOut', onUpdate:step}, '+=.14')
+    .to(st, {p:1, duration:.95, ease:'none',       onUpdate:step}, '-=.14')
+    /* The pause is a beat, not a stop. Three things used to stretch it: a
+       steep decay parked each orb for the last quarter of its own window, the
+       gap sat on top of that, and an ease-in start meant the opening move was
+       imperceptible for its first tenth of a second. So the decay is gentler,
+       the gap is small, and the frame leaves the centre at speed. */
+    .to(st, {p:2, duration:1.05, ease:'power2.out', onUpdate:step}, '+=.09')
     /* the sides do not stop at the corners: they carry on to the edges while
        the orbs are still flying out, and keep going after they land */
     .to(st, {ext:1, duration:.95, ease:'power2.out', onUpdate:step}, '-=.5')
