@@ -135,8 +135,26 @@ if(heroVideo){
       setTimeout(()=>{ if(active===next && !prev.paused) prev.pause(); },1100);
     }
 
-    heroVideo.addEventListener('ended',()=>handOver(heroVideo2,heroVideo,true));
-    heroVideo2.addEventListener('ended',()=>handOver(heroVideo,heroVideo2,false));
+    /* The fade is armed a little before a clip runs out rather than at its
+       end. Handing over on 'ended' means the outgoing clip is frozen on its
+       last frame for the whole crossfade -- unnoticeable across twenty-four
+       seconds, but a quarter of a four second clip. Armed early, both
+       pictures are still moving as they cross. 'ended' stays as the backstop
+       for a clip whose duration never resolves. */
+    const FADE_LEAD = 0.9;
+    function armHandOver(v, next, fadeIn){
+      let fired = false;
+      const go = () => { if(fired) return; fired = true; handOver(next, v, fadeIn); };
+      v.addEventListener('timeupdate',()=>{
+        if(fired || v !== active) return;
+        if(v.duration && v.duration - v.currentTime <= FADE_LEAD) go();
+      });
+      v.addEventListener('ended', go);
+      /* rearmed each time this clip comes back round */
+      v.addEventListener('play',()=>{ if(v.currentTime < .2) fired = false; });
+    }
+    armHandOver(heroVideo,  heroVideo2, true);
+    armHandOver(heroVideo2, heroVideo,  false);
   }else{
     heroVideo.loop=true;
   }
