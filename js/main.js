@@ -753,7 +753,8 @@ if(sbFill&&sbDot){
 }
 
 /* Hero parallax — foreground, background and overlay move at different rates */
-gsap.to('#hcontent',{yPercent:-16,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1}});
+/* the words drift, the panel holding them does not: it is pinned to the grid */
+gsap.to('.hero-inner',{yPercent:-16,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1}});
 gsap.to('.hero-bg img, .hero-bg video',{yPercent:14,scale:1.14,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1}});
 gsap.to('#hside',{yPercent:-28,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1}});
 

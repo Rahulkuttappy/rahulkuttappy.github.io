@@ -388,14 +388,18 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 
 /* The panel. No blur and no flat tint: the footage stays sharp, and the words
    get a fade under them instead of the whole frame being greyed. */
+/* The panel is a window fixed to its hairlines. Its contents drift on scroll,
+   not the panel itself: parallaxing the box would slide its fade out past the
+   lines, which is what the old #hcontent parallax started doing once the box
+   gained a background. */
 .hero-content{
-  position:absolute;z-index:2;
+  position:absolute;z-index:2;overflow:hidden;
   left:var(--px);right:var(--px);top:var(--pt);bottom:var(--pb);
-  display:flex;flex-direction:column;justify-content:center;
   padding:2rem 2.4rem;max-width:none;opacity:0;
   background:linear-gradient(105deg,
     rgba(6,6,6,.72) 0%,rgba(6,6,6,.5) 42%,rgba(6,6,6,.12) 78%,transparent 100%);
 }
+.hero-inner{display:flex;flex-direction:column;justify-content:center;height:100%;}
 .hero-stamp{
   font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
   letter-spacing:.24em;text-transform:uppercase;color:rgba(237,234,226,.5);
