@@ -587,15 +587,17 @@ function revealHero(){
   const tl=gsap.timeline();
   tl.to('#hside',    {opacity:1,duration:.6,ease:'power2.out'})
     .to('#hcontent', {opacity:1,duration:.01}, '<')
+    .to('.hero-stamp',{opacity:1,duration:.5,ease:'power2.out'}, '<')
     .to('.n1',       {y:'0%',duration:.9,ease:'power4.out'},   '<.1')
     .to('.n2',       {y:'0%',duration:.9,ease:'power4.out'},   '<.12')
     .to('#hrule',    {scaleX:1,duration:.5,ease:'power3.out'}, '-=.3')
     .to('.hero-bio', {opacity:1,duration:.6,ease:'power3.out'}, '-=.2')
+    .to('.hero-disc',{opacity:1,duration:.6,ease:'power2.out'},  '-=.35')
     .to('#hscroll',  {opacity:1,duration:.5},                   '-=.2');
 }
 
 function showHeroInstantly(){
-  gsap.set(['#hside','#hcontent','.hero-bio','#hscroll'],{opacity:1});
+  gsap.set(['#hside','#hcontent','.hero-bio','#hscroll','.hero-stamp','.hero-disc'],{opacity:1});
   gsap.set(['.n1','.n2'],{y:'0%'});
   gsap.set('#hrule',{scaleX:1});
 }

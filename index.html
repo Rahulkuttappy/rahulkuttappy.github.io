@@ -46,8 +46,8 @@
 <title>Rahul Kuttappy · Filmmaker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/style.css?v=20260929j"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css?v=20260929k"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"></script>
@@ -154,14 +154,24 @@ setTimeout(function(){
     <div class="hero-side-bar"></div>
     <p class="hero-side-txt">DONT THINK JUST DO</p>
   </div>
+  <!-- Hairlines cross the frame and meet at the panel's corners, with a dot at
+       each join. One set of custom properties drives both, so the lines and the
+       panel cannot drift apart at any width. -->
+  <div class="hero-grid" aria-hidden="true">
+    <i class="hg-l"></i><i class="hg-r"></i><i class="hg-t"></i><i class="hg-b"></i>
+    <span class="hg-dot hg-tl"></span><span class="hg-dot hg-tr"></span>
+    <span class="hg-dot hg-bl"></span><span class="hg-dot hg-br"></span>
+  </div>
+  <div class="hero-grain" aria-hidden="true"></div>
   <div class="hero-content" id="hcontent">
-    <p class="hero-pre"><span>&bull;</span>&nbsp; Aspiring Filmmaker · Visual Storyteller</p>
+    <p class="hero-stamp">(Aspiring Filmmaker &mdash; Visual Storyteller)</p>
     <div class="hero-name">
       <span class="n1">RAHUL</span>
       <span class="n2">KUTTAPPY</span>
     </div>
     <div class="hero-rule" id="hrule"></div>
-    <p class="hero-bio">I chase the moment just before something breaks, and hold it still long enough to feel it.</p>
+    <p class="hero-bio">I chase the moment <b>just before something breaks</b>, and hold it still long enough to <b>feel it</b>.</p>
+    <p class="hero-disc">Film <i>/</i> Edit <i>/</i> Colour <i>/</i> Stills</p>
   </div>
   <div class="hero-scroll" id="hscroll">
     <div class="scroll-line"></div>
@@ -485,6 +495,6 @@ setTimeout(function(){
   <a class="f-back" href="#hero">Back to top ↑</a>
 </footer>
 
-<script src="js/main.js?v=20260929j"></script>
+<script src="js/main.js?v=20260929k"></script>
 </body>
 </html>

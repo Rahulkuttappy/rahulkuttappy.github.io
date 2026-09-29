@@ -22,7 +22,8 @@ img,video{
 html.no-anim #loader{display:none!important;}
 html.no-anim #pageFade{opacity:0!important;visibility:hidden!important;}
 html.no-anim #nav,html.no-anim #hside,html.no-anim #hcontent,
-html.no-anim .hero-bio,html.no-anim .hero-scroll{opacity:1!important;}
+html.no-anim .hero-bio,html.no-anim .hero-scroll,
+html.no-anim .hero-stamp,html.no-anim .hero-disc{opacity:1!important;}
 html.no-anim .n1,html.no-anim .n2{transform:none!important;}
 html.no-anim #hrule{transform:scaleX(1)!important;}
 html.no-anim .reveal{opacity:1!important;transform:none!important;filter:none!important;}
@@ -329,14 +330,14 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 /* ── HERO ── */
 #hero{min-height:100svh;position:relative;overflow:hidden;display:flex;align-items:flex-end;}
 .hero-bg{position:absolute;inset:0;z-index:0;}
-.hero-bg img,.hero-bg video{width:100%;height:100%;object-fit:cover;object-position:60% center;filter:brightness(.72);display:block;}
+.hero-bg img,.hero-bg video{width:100%;height:100%;object-fit:cover;object-position:60% center;filter:brightness(.82);display:block;}
 /* Second clip sits on top of the first and crossfades in at the handover */
 .hero-bg video{position:absolute;inset:0;}
 #heroVideo2{opacity:0;transition:opacity 1s ease;}
 #heroVideo2.is-on{opacity:1;}
 .hero-bg::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(to right,rgba(8,8,8,.88) 0%,rgba(8,8,8,.55) 45%,rgba(8,8,8,.1) 100%);
+  background:linear-gradient(to right,rgba(8,8,8,.72) 0%,rgba(8,8,8,.3) 48%,rgba(8,8,8,.12) 100%);
 }
 .hero-side{
   position:absolute;left:1.8rem;top:50%;transform:translateY(-50%);
@@ -348,21 +349,68 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
   font-size:.44rem;letter-spacing:.3em;text-transform:uppercase;
   color:var(--red);writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;
 }
+/* One set of measurements for the panel and the hairlines that meet at its
+   corners, so they cannot drift apart at any width. */
+#hero{--px:16%;--pt:24%;--pb:18%;}
+.hero-grid{position:absolute;inset:0;z-index:4;pointer-events:none;}
+.hero-grid i{position:absolute;background:rgba(237,234,226,.13);}
+.hg-l{top:0;bottom:0;width:1px;left:var(--px);}
+.hg-r{top:0;bottom:0;width:1px;right:var(--px);}
+.hg-t{left:0;right:0;height:1px;top:var(--pt);}
+.hg-b{left:0;right:0;height:1px;bottom:var(--pb);}
+.hg-dot{
+  position:absolute;width:5px;height:5px;border-radius:50%;
+  background:var(--off);transform:translate(-50%,-50%);
+  box-shadow:0 0 0 3px rgba(8,8,8,.55);   /* reads against any frame behind it */
+}
+.hg-tl{left:var(--px);top:var(--pt);}
+.hg-tr{right:var(--px);top:var(--pt);transform:translate(50%,-50%);}
+.hg-bl{left:var(--px);bottom:var(--pb);transform:translate(-50%,50%);}
+.hg-br{right:var(--px);bottom:var(--pb);transform:translate(50%,50%);}
+
+/* Film grain over the hero: the noise field is replaced eleven times a second
+   rather than slid, which is what reads as grain instead of texture. */
+.hero-grain{
+  position:absolute;inset:0;z-index:3;pointer-events:none;opacity:.085;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:170px 170px;
+  animation:grainJump .9s steps(1) infinite;
+}
+@keyframes grainJump{
+  0%{background-position:0 0;}        10%{background-position:-12% -8%;}
+  20%{background-position:8% -18%;}   30%{background-position:-16% 12%;}
+  40%{background-position:14% 6%;}    50%{background-position:-6% -14%;}
+  60%{background-position:18% 10%;}   70%{background-position:-14% 16%;}
+  80%{background-position:6% -10%;}   90%{background-position:-10% 4%;}
+  100%{background-position:0 0;}
+}
+@media(prefers-reduced-motion:reduce){.hero-grain{animation:none;}}
+
+/* The panel. No blur and no flat tint: the footage stays sharp, and the words
+   get a fade under them instead of the whole frame being greyed. */
 .hero-content{
-  position:relative;z-index:2;
-  padding:0 3rem 4.5rem 4rem;
-  max-width:56%;opacity:0;
+  position:absolute;z-index:2;
+  left:var(--px);right:var(--px);top:var(--pt);bottom:var(--pb);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:2rem 2.4rem;max-width:none;opacity:0;
+  background:linear-gradient(105deg,
+    rgba(6,6,6,.72) 0%,rgba(6,6,6,.5) 42%,rgba(6,6,6,.12) 78%,transparent 100%);
 }
-.hero-pre{
-  font-size:.56rem;font-weight:500;letter-spacing:.26em;text-transform:uppercase;
-  color:rgba(237,234,226,.6);margin-bottom:1.1rem;
-  display:flex;align-items:center;gap:.8rem;
+.hero-stamp{
+  font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
+  letter-spacing:.24em;text-transform:uppercase;color:rgba(237,234,226,.5);
+  margin-bottom:.9rem;opacity:0;
 }
-.hero-pre span{color:var(--red);}
+.hero-disc{
+  margin-top:auto;padding-top:1.6rem;
+  font-family:'Geist',sans-serif;font-weight:500;letter-spacing:-.01em;
+  font-size:clamp(.8rem,1.5vw,1.1rem);color:rgba(237,234,226,.8);opacity:0;
+}
+.hero-disc i{color:rgba(237,234,226,.28);font-style:normal;margin:0 .5rem;}
 .hero-name{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(4.5rem,9.5vw,11rem);
-  line-height:.88;letter-spacing:.01em;overflow:hidden;
+  font-family:'Geist',sans-serif;font-weight:600;
+  font-size:clamp(2.6rem,7.4vw,7.2rem);
+  line-height:.88;letter-spacing:-0.052em;overflow:hidden;
 }
 .n1{display:block;color:var(--off);transform:translateY(110%);}
 .n2{display:block;color:var(--red);transform:translateY(110%);}
@@ -371,9 +419,10 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
    face as the eyebrows, clock and loader. */
 .hero-bio{
   font-family:'JetBrains Mono',monospace;font-weight:400;
-  font-size:clamp(.72rem,.9vw,.84rem);line-height:2;letter-spacing:.01em;
-  color:rgba(237,234,226,.62);max-width:42ch;
+  font-size:clamp(.66rem,.82vw,.78rem);line-height:1.95;letter-spacing:.08em;
+  text-transform:uppercase;color:rgba(237,234,226,.42);max-width:44ch;
 }
+.hero-bio b{color:rgba(237,234,226,.85);font-weight:400;}
 .hero-scroll{
   position:absolute;bottom:3rem;right:2.5rem;z-index:2;
   display:flex;flex-direction:column;align-items:center;gap:.6rem;
@@ -870,7 +919,9 @@ footer p{font-size:.5rem;letter-spacing:.1em;color:var(--muted);}
   }
   .nav-links a.active-link{color:var(--red);border-bottom:none;padding-bottom:1.15rem;}
   .hero-side{display:none;}
-  .hero-content{max-width:100%;padding:0 1.5rem 4rem;}
+  #hero{--px:5%;--pt:20%;--pb:14%;}
+  .hero-content{padding:1.2rem 1rem;}
+  .hero-disc{padding-top:1rem;font-size:.82rem;}
   #works{padding:5rem 1.5rem 0;}
   .wgrid{grid-template-columns:1fr;}
   #about{grid-template-columns:1fr;gap:3rem;padding:5rem 1.5rem;}
