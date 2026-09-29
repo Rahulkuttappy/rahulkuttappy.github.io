@@ -371,7 +371,7 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
    entrance can own transform outright and fly them across the frame. */
 .hg-dot{
   position:absolute;width:5px;height:5px;border-radius:50%;opacity:0;
-  background:var(--off);box-shadow:0 0 0 3px rgba(8,8,8,.55);
+  background:var(--off);
 }
 .hg-tl{left:var(--px);top:var(--pt);margin:-2.5px 0 0 -2.5px;}
 .hg-tr{right:var(--px);top:var(--pt);margin:-2.5px -2.5px 0 0;}
