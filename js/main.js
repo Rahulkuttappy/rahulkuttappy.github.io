@@ -590,30 +590,38 @@ const LOADER_SEEN_KEY='rk_seen_loader';
    then opens out to the corners of the title box. Only then do the words
    resolve out of noise. */
 
-/* Decodes an element in place, keeping any markup inside it: each text run
-   becomes characters, and characters inside <b> stay inside it. */
-function decodeText(el, opts){
+/* Wrapping and scrambling are two steps, deliberately. The wrap happens while
+   the panel is still invisible, so the words are never legible in their
+   finished form first; the scramble is all the timeline triggers later. */
+function prepareText(el){
   if(!el || el.dataset.decoded) return;
-  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!<>/[]{}#*';
-  const stagger = (opts && opts.stagger) || 22;
-  const speed   = (opts && opts.speed)   || 26;
   const cells = [];
-
+  /* Characters are inline-block so each can be moved on its own, which makes
+     every gap between two of them somewhere the line may break. So words are
+     kept whole in a wrapper of their own and the spaces between them are real
+     breakable spaces -- otherwise the line breaks mid-word and never at a
+     space, which is exactly what it did. */
   const wrap = (text, parent) => {
-    [...text].forEach(ch=>{
-      const s = document.createElement('span');
-      s.className = 'lc';
-      s.textContent = ch === ' ' ? '\u00a0' : ch;
-      parent.appendChild(s);
-      if(ch.trim()) cells.push([s, ch]); else s.classList.add('in');
+    text.split(/(\s+)/).forEach(part=>{
+      if(!part) return;
+      if(/^\s+$/.test(part)){ parent.appendChild(document.createTextNode(' ')); return; }
+      const word = document.createElement('span');
+      word.className = 'lw';
+      [...part].forEach(ch=>{
+        const s = document.createElement('span');
+        s.className = 'lc';
+        s.textContent = ch;
+        word.appendChild(s);
+        cells.push([s, ch]);
+      });
+      parent.appendChild(word);
     });
   };
-
   const src = [...el.childNodes];
   el.textContent = '';
   src.forEach(node=>{
     if(node.nodeType === 3){ wrap(node.textContent, el); }
-    else{
+    else{                                   /* keeps <b> runs intact */
       const clone = document.createElement(node.tagName);
       clone.className = node.className;
       wrap(node.textContent, clone);
@@ -621,7 +629,16 @@ function decodeText(el, opts){
     }
   });
   el.dataset.decoded = '1';
+  el._cells = cells;
+}
 
+function playText(el, opts){
+  const cells = el && el._cells;
+  if(!cells || el.dataset.played) return;
+  el.dataset.played = '1';
+  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!<>/[]{}#*';
+  const stagger = (opts && opts.stagger) || 22;
+  const speed   = (opts && opts.speed)   || 26;
   cells.forEach(([span, ch], i)=>{
     let n = 0, max = 5 + Math.floor(Math.random()*5);
     setTimeout(()=>{
@@ -634,6 +651,86 @@ function decodeText(el, opts){
         }
       }, speed);
     }, i*stagger);
+  });
+}
+
+function decodeText(el, opts){ prepareText(el); playText(el, opts); }
+
+/* ── DUST ──
+   A hundred and twenty motes drifting up across the hero and wrapping round,
+   the one piece of the old lens rig worth keeping. One canvas rather than a
+   hundred and twenty elements, and the loop stops dead whenever the hero is
+   off screen. Depth drives size, brightness and speed together, so the near
+   ones read as near. */
+let dustOn = false;
+function startHeroDust(){
+  const cv = document.getElementById('hdust'), hero = document.getElementById('hero');
+  if(dustOn || !cv || !hero || !cv.getContext) return;
+  dustOn = true;
+  const ctx = cv.getContext('2d');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const N = 80;
+  let W = 0, H = 0, motes = [], run = true, raf = 0;
+
+  function size(){
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = hero.clientWidth; H = hero.clientHeight;
+    cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.fillStyle = 'rgb(237,234,226)';
+  }
+  function seed(){
+    motes = [];
+    for(let i=0;i<N;i++){
+      const d = .35 + Math.random()*.65;        /* how near the front it sits */
+      motes.push({
+        x:Math.random()*W, y:Math.random()*H, d,
+        r:.4 + d*.55,
+        v:(.10 + (i%5)*.025) * d,               /* upward, as the rig had it */
+        sway:Math.random()*Math.PI*2,
+        rate:.004 + Math.random()*.006
+      });
+    }
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=0;i<motes.length;i++){
+      const m = motes[i];
+      if(!reduced){
+        m.y -= m.v;
+        m.sway += m.rate;
+        if(m.y < -4){ m.y = H+4; m.x = Math.random()*W; }
+      }
+      /* barely there on purpose: this is meant to read as air in front of the
+         lens, not as weather. Bright enough to catch on the dark half of the
+         frame, faint enough to disappear behind the words. */
+      ctx.globalAlpha = .035 + m.d*.11;
+      ctx.beginPath();
+      ctx.arc(m.x + Math.sin(m.sway)*6*m.d, m.y, m.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  const loop = () => { draw(); if(run && !reduced) raf = requestAnimationFrame(loop); };
+
+  size(); seed(); draw();
+  if(!reduced) raf = requestAnimationFrame(loop);
+
+  /* nothing drifts while the hero is scrolled away */
+  if(window.IntersectionObserver){
+    new IntersectionObserver(es=>{
+      const on = es[0].isIntersecting;
+      if(on === run) return;
+      run = on;
+      if(run && !reduced) raf = requestAnimationFrame(loop);
+      else cancelAnimationFrame(raf);
+    },{threshold:0}).observe(hero);
+  }
+
+  let rt;
+  window.addEventListener('resize', ()=>{
+    clearTimeout(rt);
+    rt = setTimeout(()=>{ size(); seed(); draw(); }, 180);
   });
 }
 
@@ -663,6 +760,21 @@ function revealHero(){
   }));
   const ENDS = [[0,1],[1,3],[2,3],[0,2]];       /* top, right, bottom, left */
 
+  /* Wrap the words now. The panel is still at zero opacity, so nothing has
+     been readable yet; by the time it fades up every character is already a
+     hidden cell waiting for its scramble. Before this, the finished words sat
+     visible for four hundred milliseconds and were then torn apart. */
+  const WORDS = [
+    ['.hero-stamp', {stagger:12, speed:22}],
+    ['.n1',         {stagger:50, speed:30}],
+    ['.n2',         {stagger:50, speed:30}],
+    ['.hero-bio',   {stagger:7,  speed:18}],
+    ['.hero-disc',  {stagger:16, speed:22}]
+  ].map(w=>[document.querySelector(w[0]), w[1]]);
+  WORDS.forEach(w=>prepareText(w[0]));
+  gsap.set('.n1,.n2',{y:'0%'});
+  gsap.set(['.hero-stamp','.hero-bio','.hero-disc'],{opacity:1});
+
   /* A short comet tail behind each dot, the same idea as the cursor: ghosts
      read a few frames of history, so they only show while the dot is moving. */
   const TRAILS = 5, LAG = 2;
@@ -679,17 +791,25 @@ function revealHero(){
   const hist = dots.map(()=>[]);
   let tracking = false;
 
-  function paint(pts){
+  /* ext carries each side on past the two dots it joins, out to the edges of
+     the hero, so the frame ends up as crossed full-bleed lines with an orb
+     sitting on each crossing. At ext 1 a side is exactly its own layout box
+     again, which is what the stylesheet and the failsafe already draw. */
+  function paint(pts, ext){
     pts.forEach((p,i)=>gsap.set(dots[i],{x:p.x-home[i].x, y:p.y-home[i].y}));
     ENDS.forEach(([a,b],i)=>{
       const A = pts[a], B = pts[b], bs = base[i];
       const dx = B.x-A.x, dy = B.y-A.y;
-      const len = Math.sqrt(dx*dx+dy*dy);
-      const o = {
-        x:(A.x+B.x)/2 - bs.cx,
-        y:(A.y+B.y)/2 - bs.cy,
-        rotation: Math.atan2(dy,dx)*180/Math.PI - (bs.vert ? 90 : 0)
-      };
+      let len = Math.sqrt(dx*dx+dy*dy);
+      let mx = (A.x+B.x)/2, my = (A.y+B.y)/2;
+      let rot = Math.atan2(dy,dx)*180/Math.PI - (bs.vert ? 90 : 0);
+      if(ext){
+        mx  = mx + ((bs.vert ? mx  : W/2) - mx ) * ext;
+        my  = my + ((bs.vert ? H/2 : my ) - my ) * ext;
+        len = len + (bs.len - len) * ext;
+        rot = rot - rot * ext;
+      }
+      const o = {x:mx - bs.cx, y:my - bs.cy, rotation:rot};
       o[bs.vert ? 'scaleY' : 'scaleX'] = len/bs.len;
       gsap.set(lines[i], o);
     });
@@ -711,14 +831,16 @@ function revealHero(){
   }
 
   /* On the way in each dot leaves on its own beat and takes the same share of
-     the window, so they reach the middle one after another. */
+     the window, so they reach the middle one after another. The ease is all
+     decay and no run-up: an orb is at its fastest the instant it leaves its
+     corner, then eases down into the centre. */
   const IN = [0, .22, .30, .11], SPAN = .70;
-  const ez = (gsap.parseEase && gsap.parseEase('power2.inOut')) || (x=>x);
+  const ez = (gsap.parseEase && gsap.parseEase('power3.out')) || (x=>x);
   const lerp = (a,b,k)=>a+(b-a)*k;
   const from = [{x:0,y:0},{x:W,y:0},{x:0,y:H},{x:W,y:H}];
   const to   = [{x:box.l,y:box.t},{x:box.r,y:box.t},{x:box.l,y:box.b},{x:box.r,y:box.b}];
 
-  const st = {p:0};
+  const st = {p:0, ext:0};
   const step = () => {
     const p = st.p;
     paint(dots.map((_,i)=>{
@@ -728,38 +850,41 @@ function revealHero(){
       }
       const k = p-1;
       return {x:lerp(cx,to[i].x,k), y:lerp(cy,to[i].y,k)};
-    }));
+    }), st.ext);
   };
 
   step();
   gsap.set(dots, {scale:0, opacity:1});
 
+  startHeroDust();
+
   const tl = gsap.timeline();
   tl.to(dots, {scale:1, duration:.3, ease:'back.out(3)', stagger:.05})
+    .to('#hdust', {opacity:1, duration:1.6, ease:'power1.out'}, 0)
     .add(()=>{ tracking = true; })
-    /* linear here: the stagger and the easing both live inside step() */
-    .to(st, {p:1, duration:1.15, ease:'none',        onUpdate:step}, '-=.08')
-    .to(st, {p:2, duration:1.0,  ease:'power3.inOut', onUpdate:step}, '+=.1')
+    /* linear here: the stagger and the per-orb ease both live inside step() */
+    .to(st, {p:1, duration:1.05, ease:'none',         onUpdate:step}, '-=.14')
+    /* The pause is the point: every orb is at the centre, and the frame is a
+       single dot, before anything opens back out. It is kept short because a
+       decaying ease already parks each orb for the tail of its own window --
+       the stillness the eye sees is longer than the gap written here. */
+    .to(st, {p:2, duration:1.15, ease:'power2.inOut', onUpdate:step}, '+=.14')
+    /* the sides do not stop at the corners: they carry on to the edges while
+       the orbs are still flying out, and keep going after they land */
+    .to(st, {ext:1, duration:.95, ease:'power2.out', onUpdate:step}, '-=.5')
     .add(()=>{ tracking = false; ghosts.forEach(a=>a.forEach(g=>g.remove())); })
     /* the box is simply there once its corners are, and the words resolve
        out of noise. One reveal, not a sweep and then a decode. */
-    .to('#hcontent', {opacity:1, duration:.35, ease:'power2.out'}, '-=.28')
+    .to('#hcontent', {opacity:1, duration:.35, ease:'power2.out'}, '-=.45')
     .to('#hside',    {opacity:1, duration:.6,  ease:'power2.out'}, '<')
-    .add(()=>{
-      gsap.set('.n1,.n2',{y:'0%'});
-      gsap.set(['.hero-stamp','.hero-bio','.hero-disc'],{opacity:1});
-      decodeText(document.querySelector('.hero-stamp'), {stagger:12, speed:22});
-      decodeText(document.querySelector('.n1'),         {stagger:50, speed:30});
-      decodeText(document.querySelector('.n2'),         {stagger:50, speed:30});
-      decodeText(document.querySelector('.hero-bio'),   {stagger:7,  speed:18});
-      decodeText(document.querySelector('.hero-disc'),  {stagger:16, speed:22});
-    }, '-=.15')
+    .add(()=>{ WORDS.forEach(w=>playText(w[0], w[1])); }, '-=.15')
     .to('#hrule',   {scaleX:1,duration:.5,ease:'power3.out'},'<.35')
     .to('#hscroll', {opacity:1,duration:.5},'<.3');
 }
 
 function showHeroInstantly(){
-  gsap.set(['#hside','#hcontent','.hero-bio','#hscroll','.hero-stamp','.hero-disc'],{opacity:1});
+  startHeroDust();
+  gsap.set(['#hside','#hcontent','.hero-bio','#hscroll','.hero-stamp','.hero-disc','#hdust'],{opacity:1});
   gsap.set('.hg-l,.hg-r',{x:0,y:0,rotation:0,scaleY:1});
   gsap.set('.hg-t,.hg-b',{x:0,y:0,rotation:0,scaleX:1});
   gsap.set('.hg-dot',{x:0,y:0,scale:1,opacity:1});
