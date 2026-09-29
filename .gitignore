@@ -7,3 +7,7 @@ Dump/
 # macOS
 .DS_Store
 **/.DS_Store
+
+# Agent skills installed with `npx skills add` — local tooling, like .claude/
+.agents/
+skills-lock.json
