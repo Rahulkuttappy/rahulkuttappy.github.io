@@ -1590,6 +1590,39 @@ document.querySelectorAll('.tpanel').forEach(panel=>{
   else if(wide.addListener) wide.addListener(attach);
 })();
 
+/* ── Hero lens: loaded last, and only where it belongs ──
+   Three is 170KB over the wire, so it is fetched after this file has finished
+   and the page has already marked itself ready. Phones, coarse pointers,
+   reduced motion and anything without WebGL never request it at all, and the
+   hero stays exactly as it is without them. */
+(function(){
+  const canvas = document.getElementById('hero3d');
+  if(!canvas) return;
+  const wide  = window.matchMedia('(min-width:1024px)').matches;
+  const fine  = window.matchMedia('(pointer:fine)').matches;
+  const calm  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!wide || !fine || calm) return;
+  try{                                  /* a context we throw away immediately */
+    const probe = document.createElement('canvas');
+    if(!(probe.getContext('webgl2') || probe.getContext('webgl'))) return;
+  }catch(e){ return; }
+
+  const add = (src, then) => {
+    const s = document.createElement('script');
+    s.src = src; s.async = true;
+    s.onload = then;
+    s.onerror = () => {};              /* blocked CDN: the hero carries on */
+    document.head.appendChild(s);
+  };
+  const go = () => add(
+    'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.min.js',
+    () => add('js/hero3d.js?v=20260929n')
+  );
+  /* never in front of first paint */
+  if('requestIdleCallback' in window) requestIdleCallback(go, {timeout:2500});
+  else setTimeout(go, 1200);
+})();
+
 /* Everything above parsed and ran, so the failsafe in each page's head can
    stand down and let the animations play as written. */
 document.documentElement.classList.add('js-ok');
