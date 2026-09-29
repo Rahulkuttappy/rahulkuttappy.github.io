@@ -25,6 +25,27 @@ if(!window.gsap){
 if(!window.ScrollTrigger) window.ScrollTrigger={refresh(){},create(){},update(){},getAll(){return [];}};
 gsap.registerPlugin(ScrollTrigger);
 
+/* ── Smooth scroll ──
+   Lenis animates the real scroll position rather than faking one, so the
+   scrollbar, the reveals and anything listening for scroll all keep working.
+   Guarded like GSAP: if its CDN fails, the page is simply back to native
+   scrolling. It respects prefers-reduced-motion on its own, and leaves touch
+   alone, so phones keep the scrolling they already had. */
+let lenis=null;
+if(window.Lenis){
+  lenis=new Lenis({lerp:0.085, anchors:true});
+  if(window.gsap && gsap.ticker && window.ScrollTrigger && ScrollTrigger.update){
+    /* one clock for both, or the reveals lag a frame behind the scroll */
+    lenis.on('scroll',ScrollTrigger.update);
+    gsap.ticker.add(t=>lenis.raf(t*1000));
+    gsap.ticker.lagSmoothing(0);
+  }else{
+    const lrf=t=>{ lenis.raf(t); requestAnimationFrame(lrf); };
+    requestAnimationFrame(lrf);
+  }
+  if(!location.hash) lenis.scrollTo(0,{immediate:true});
+}
+
 /* ── A reload sends you home ──
    Asked for deliberately. Note this means refreshing a project page will
    not show you that page again, which is worth remembering while editing.
@@ -52,7 +73,7 @@ const navLogoLink=document.getElementById('navLogoLink');
 if(navLogoLink){
   navLogoLink.addEventListener('click',e=>{
     e.preventDefault();
-    window.scrollTo({top:0,behavior:'smooth'});
+    if(lenis) lenis.scrollTo(0); else window.scrollTo({top:0,behavior:'smooth'});
   });
 }
 
@@ -588,6 +609,7 @@ if(loaderEl){
     gsap.set('#nav',{opacity:1});
     showHeroInstantly();
   }else{
+    if(lenis) lenis.stop();          /* nothing scrolls behind the loader */
     const lenter=document.getElementById('lenter');
     const lpct=document.getElementById('lpct');
     const lprog=document.getElementById('lprog');
@@ -659,6 +681,7 @@ if(loaderEl){
 
     function enterSite(withSound){
       try{ sessionStorage.setItem(LOADER_SEEN_KEY,'1'); }catch(e){}
+      if(lenis) lenis.start();
       if(withSound) playAudio();
       if(audioDock) setTimeout(()=>audioDock.classList.add('show'),900);
       gsap.to('#loader',{opacity:0,duration:.65,ease:'power2.inOut',onComplete:()=>loaderEl.remove()});
@@ -747,8 +770,14 @@ const milesFrame=document.getElementById('milesFrame');
 const milesTrigger=document.getElementById('wc-miles');
 const milesThumbs=document.querySelectorAll('.modal-thumb');
 
-function openOverlay(el){el.classList.add('open');el.setAttribute('aria-hidden','false');}
-function closeOverlay(el){el.classList.remove('open');el.setAttribute('aria-hidden','true');}
+function openOverlay(el){
+  el.classList.add('open');el.setAttribute('aria-hidden','false');
+  if(lenis) lenis.stop();          /* the page must not drift behind it */
+}
+function closeOverlay(el){
+  el.classList.remove('open');el.setAttribute('aria-hidden','true');
+  if(lenis) lenis.start();
+}
 
 if(milesTrigger&&milesModal&&milesFrame){
   milesTrigger.addEventListener('click',e=>{
@@ -889,6 +918,9 @@ document.querySelectorAll('.film .film-media').forEach(btn=>{
 
     const frame=document.createElement('div');
     frame.className='film-frame';
+    /* Lenis cannot forward wheel events into an iframe, so scrolling over a
+       player would stick. This hands those events back to the browser. */
+    frame.setAttribute('data-lenis-prevent','');
 
     const unset=v=>!v||v==='REPLACE_ME';
     if((type==='youtube'||type==='vimeo'||type==='instagram') ? unset(id) : unset(src)){
