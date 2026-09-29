@@ -583,37 +583,81 @@ function scrambleReveal(el,finalText,opts={}){
 const loaderEl=document.getElementById('loader');
 const LOADER_SEEN_KEY='rk_seen_loader';
 
-/* The frame builds itself before anything is said: verticals draw down, the
-   horizontals run out to meet them, the corners land, then the panel wipes
-   open under a single pass of light and the words follow in order. */
+/* The entrance, in four beats: four dots drop in at the corners of the
+   screen and run to the middle; they carry the lines back out to the corners
+   of the title box, which draws the frame; the panel wipes open under one
+   pass of light; and the words inside decode into place. */
+function decodeLine(el, opts){
+  if(!el) return;
+  const text = el.textContent.trim();
+  if(text) scrambleReveal(el, text, opts);
+}
+
 function revealHero(){
-  const tl=gsap.timeline();
-  tl.fromTo('.hg-l,.hg-r',{scaleY:0},{scaleY:1,duration:.75,ease:'power3.inOut',stagger:.1})
-    .fromTo('.hg-t,.hg-b',{scaleX:0},{scaleX:1,duration:.75,ease:'power3.inOut',stagger:.1},'-=.5')
-    .to('.hg-dot',   {'--s':1,duration:.4,ease:'back.out(2.6)',stagger:.055},'-=.25')
-    .to('#hcontent', {opacity:1,duration:.01},'-=.1')
-    .to('#hcontent', {clipPath:'inset(0 0% 0 0)',duration:.8,ease:'power3.inOut'},'<')
+  const hero = document.getElementById('hero');
+  const dots = [...document.querySelectorAll('.hg-dot')];
+  if(!hero || !dots.length) return;
+
+  /* where each dot rests, and the two places it has to travel through */
+  const hr = hero.getBoundingClientRect();
+  const home = dots.map(d=>{
+    const b = d.getBoundingClientRect();
+    return { x:b.left - hr.left + b.width/2, y:b.top - hr.top + b.height/2 };
+  });
+  const corner = [               /* matches the DOM order: tl, tr, bl, br */
+    {x:0,        y:0},
+    {x:hr.width, y:0},
+    {x:0,        y:hr.height},
+    {x:hr.width, y:hr.height}
+  ];
+  const cx = hr.width/2, cy = hr.height/2;
+
+  dots.forEach((d,i)=>gsap.set(d,{
+    x:corner[i].x - home[i].x, y:corner[i].y - home[i].y, scale:0, opacity:1
+  }));
+
+  const tl = gsap.timeline();
+  tl.to(dots, {scale:1, duration:.32, ease:'back.out(3)', stagger:.055})
+    /* in to the middle */
+    .to(dots, {x:(i)=>cx-home[i].x, y:(i)=>cy-home[i].y,
+               duration:.8, ease:'power3.inOut'}, '-=.12')
+    /* and back out to the corners of the box, drawing the lines with them */
+    .to(dots, {x:0, y:0, duration:.9, ease:'power3.inOut'}, '+=.1')
+    .fromTo('.hg-l,.hg-r',{scaleY:0},{scaleY:1,duration:.9,ease:'power3.inOut'},'<')
+    .fromTo('.hg-t,.hg-b',{scaleX:0},{scaleX:1,duration:.9,ease:'power3.inOut'},'<')
+    /* the box opens */
+    .to('#hcontent', {opacity:1,duration:.01},'-=.12')
+    .to('#hcontent', {clipPath:'inset(0 0% 0 0)',duration:.75,ease:'power3.inOut'},'<')
     /* immediateRender:false, or fromTo lights the scan the moment the
        timeline is built rather than when the wipe reaches it */
     .fromTo('.hero-scan',{top:'0%',opacity:.95},
-                         {top:'100%',opacity:0,duration:.85,ease:'power2.in',
+                         {top:'100%',opacity:0,duration:.8,ease:'power2.in',
                           immediateRender:false},'<.05')
-    .to('#hside',    {opacity:1,duration:.6,ease:'power2.out'},'-=.55')
-    .to('.hero-stamp',{opacity:1,duration:.5,ease:'power2.out'},'-=.5')
-    .to('.n1',       {y:'0%',duration:.9,ease:'power4.out'},   '-=.35')
-    .to('.n2',       {y:'0%',duration:.9,ease:'power4.out'},   '<.12')
-    .to('#hrule',    {scaleX:1,duration:.5,ease:'power3.out'}, '-=.3')
-    .to('.hero-bio', {opacity:1,duration:.6,ease:'power3.out'}, '-=.2')
-    .to('.hero-disc',{opacity:1,duration:.6,ease:'power2.out'},  '-=.35')
-    .to('#hscroll',  {opacity:1,duration:.5},                   '-=.2');
+    /* and the words resolve out of noise */
+    .add(()=>{
+      gsap.set('.n1,.n2',{y:'0%'});
+      decodeLine(document.querySelector('.hero-stamp'), {stagger:14, speed:24});
+      decodeLine(document.querySelector('.n1'),         {stagger:52, speed:30});
+      decodeLine(document.querySelector('.n2'),         {stagger:52, speed:30});
+      decodeLine(document.querySelector('.hero-disc'),  {stagger:18, speed:24});
+    }, '-=.35')
+    .to('#hside',   {opacity:1,duration:.6,ease:'power2.out'},'<')
+    .to('.hero-stamp',{opacity:1,duration:.3},'<')
+    .to('#hrule',   {scaleX:1,duration:.5,ease:'power3.out'},'<.5')
+    .fromTo('.hero-bio',{clipPath:'inset(0 100% 0 0)'},
+                        {clipPath:'inset(0 0% 0 0)',opacity:1,duration:.7,
+                         ease:'power2.out',immediateRender:false},'<.1')
+    .to('.hero-disc',{opacity:1,duration:.4},'<.15')
+    .to('#hscroll', {opacity:1,duration:.5},'-=.2');
 }
 
 function showHeroInstantly(){
   gsap.set(['#hside','#hcontent','.hero-bio','#hscroll','.hero-stamp','.hero-disc'],{opacity:1});
   gsap.set('#hcontent',{clipPath:'none'});
+  gsap.set('.hero-bio',{clipPath:'none'});
   gsap.set('.hg-l,.hg-r',{scaleY:1});
   gsap.set('.hg-t,.hg-b',{scaleX:1});
-  gsap.set('.hg-dot',{'--s':1});
+  gsap.set('.hg-dot',{x:0,y:0,scale:1,opacity:1});
   gsap.set(['.n1','.n2'],{y:'0%'});
   gsap.set('#hrule',{scaleX:1});
 }
