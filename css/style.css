@@ -25,8 +25,8 @@ html.no-anim #nav,html.no-anim #hside,html.no-anim #hcontent,
 html.no-anim .hero-bio,html.no-anim .hero-scroll,
 html.no-anim .hero-stamp,html.no-anim .hero-disc{opacity:1!important;}
 html.no-anim .n1,html.no-anim .n2{transform:none!important;}
-html.no-anim .hg-l,html.no-anim .hg-r{transform:scaleY(1)!important;}
-html.no-anim .hg-t,html.no-anim .hg-b{transform:scaleX(1)!important;}
+html.no-anim .hg-l,html.no-anim .hg-r{transform:rotate(0deg) scaleY(1)!important;}
+html.no-anim .hg-t,html.no-anim .hg-b{transform:rotate(0deg) scaleX(1)!important;}
 html.no-anim .hg-dot{opacity:1;}
 
 html.no-anim #hrule{transform:scaleX(1)!important;}
@@ -373,6 +373,10 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
   position:absolute;width:5px;height:5px;border-radius:50%;opacity:0;
   background:var(--off);
 }
+.hg-ghost{
+  position:absolute;left:0;top:0;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;
+  border-radius:50%;background:var(--off);opacity:0;will-change:transform,opacity;
+}
 .hg-tl{left:var(--px);top:var(--pt);margin:-2.5px 0 0 -2.5px;}
 .hg-tr{right:var(--px);top:var(--pt);margin:-2.5px -2.5px 0 0;}
 .hg-bl{left:var(--px);bottom:var(--pb);margin:0 0 -2.5px -2.5px;}
@@ -410,7 +414,6 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
     rgba(6,6,6,.72) 0%,rgba(6,6,6,.5) 42%,rgba(6,6,6,.12) 78%,transparent 100%);
 }
 .hero-inner{display:flex;flex-direction:column;justify-content:center;height:100%;}
-/* One pass of light down the panel as it opens, then gone */
 /* Characters mid-decode: they land from red into whatever colour the line
    they belong to already uses, so the name keeps its off-white and red. */
 .hero-inner .lc{
@@ -418,11 +421,6 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
   transition:opacity .2s ease,transform .28s cubic-bezier(.16,1,.3,1),color .18s ease;
 }
 .hero-inner .lc.in{opacity:1;transform:none;color:inherit;}
-.hero-scan{
-  position:absolute;left:0;right:0;top:0;height:2px;z-index:3;pointer-events:none;opacity:0;
-  background:linear-gradient(90deg,transparent,rgba(237,234,226,.65) 45%,rgba(var(--red-glow),.9) 62%,transparent);
-  box-shadow:0 0 14px rgba(237,234,226,.35);
-}
 .hero-stamp{
   font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
   letter-spacing:.24em;text-transform:uppercase;color:rgba(237,234,226,.5);

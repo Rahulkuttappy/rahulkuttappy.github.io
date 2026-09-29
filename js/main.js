@@ -639,60 +639,112 @@ function decodeText(el, opts){
 
 function revealHero(){
   const hero = document.getElementById('hero');
-  const dots = [...document.querySelectorAll('.hg-dot')];
-  const lineL = document.querySelector('.hg-l'), lineR = document.querySelector('.hg-r');
-  const lineT = document.querySelector('.hg-t'), lineB = document.querySelector('.hg-b');
-  if(!hero || dots.length < 4 || !lineL) return;
+  const grid = document.querySelector('.hero-grid');
+  const dots = [...document.querySelectorAll('.hg-dot')];          /* tl tr bl br */
+  const lines = ['.hg-t','.hg-r','.hg-b','.hg-l'].map(s=>document.querySelector(s));
+  if(!hero || !grid || dots.length < 4 || !lines[3]) return;
 
   const W = hero.clientWidth, H = hero.clientHeight;
-  const hr = hero.getBoundingClientRect();
-  const home = dots.map(d=>{                    /* tl, tr, bl, br */
-    const b = d.getBoundingClientRect();
-    return { x:b.left - hr.left + b.width/2, y:b.top - hr.top + b.height/2 };
-  });
-  const box = { l:home[0].x, r:home[1].x, t:home[0].y, b:home[2].y };
+  /* offset* rather than getBoundingClientRect: it reports the resting layout
+     and ignores the transforms this function is about to write. */
+  const home = dots.map(d=>({x:d.offsetLeft+d.offsetWidth/2, y:d.offsetTop+d.offsetHeight/2}));
+  const box = {l:home[0].x, r:home[1].x, t:home[0].y, b:home[2].y};
   const cx = W/2, cy = H/2;
-  const lerp = (a,b,k)=>a+(b-a)*k;
 
-  /* draw the rectangle the dots currently describe */
-  function paint(l, r, t, b){
-    gsap.set(dots[0], {x:l-home[0].x, y:t-home[0].y});
-    gsap.set(dots[1], {x:r-home[1].x, y:t-home[1].y});
-    gsap.set(dots[2], {x:l-home[2].x, y:b-home[2].y});
-    gsap.set(dots[3], {x:r-home[3].x, y:b-home[3].y});
-    const sy = Math.max(0,(b-t))/H, sx = Math.max(0,(r-l))/W;
-    const midY = (t+b)/2 - H/2, midX = (l+r)/2 - W/2;
-    gsap.set(lineL, {x:l-box.l, y:midY, scaleY:sy});
-    gsap.set(lineR, {x:r-box.r, y:midY, scaleY:sy});
-    gsap.set(lineT, {y:t-box.t, x:midX, scaleX:sx});
-    gsap.set(lineB, {y:b-box.b, x:midX, scaleX:sx});
+  /* Each hairline is measured once and then treated as a segment that can be
+     rotated as well as stretched. The dots travel out of step, so the shape
+     they describe is a leaning quadrilateral for most of the move, not a
+     rectangle, and the sides have to be able to follow it. */
+  const base = lines.map((el,i)=>({
+    cx:  el.offsetLeft + el.offsetWidth/2,
+    cy:  el.offsetTop  + el.offsetHeight/2,
+    len: (i%2) ? el.offsetHeight : el.offsetWidth,
+    vert:!!(i%2)
+  }));
+  const ENDS = [[0,1],[1,3],[2,3],[0,2]];       /* top, right, bottom, left */
+
+  /* A short comet tail behind each dot, the same idea as the cursor: ghosts
+     read a few frames of history, so they only show while the dot is moving. */
+  const TRAILS = 5, LAG = 2;
+  const ghosts = dots.map(()=>{
+    const a = [];
+    for(let k=0;k<TRAILS;k++){
+      const g = document.createElement('span');
+      g.className = 'hg-ghost';
+      grid.appendChild(g);
+      a.push(g);
+    }
+    return a;
+  });
+  const hist = dots.map(()=>[]);
+  let tracking = false;
+
+  function paint(pts){
+    pts.forEach((p,i)=>gsap.set(dots[i],{x:p.x-home[i].x, y:p.y-home[i].y}));
+    ENDS.forEach(([a,b],i)=>{
+      const A = pts[a], B = pts[b], bs = base[i];
+      const dx = B.x-A.x, dy = B.y-A.y;
+      const len = Math.sqrt(dx*dx+dy*dy);
+      const o = {
+        x:(A.x+B.x)/2 - bs.cx,
+        y:(A.y+B.y)/2 - bs.cy,
+        rotation: Math.atan2(dy,dx)*180/Math.PI - (bs.vert ? 90 : 0)
+      };
+      o[bs.vert ? 'scaleY' : 'scaleX'] = len/bs.len;
+      gsap.set(lines[i], o);
+    });
+    if(!tracking) return;
+    pts.forEach((p,i)=>{
+      const h = hist[i];
+      h.unshift(p);
+      if(h.length > TRAILS*LAG + 2) h.pop();
+      const sp  = h[1] ? Math.sqrt(Math.pow(p.x-h[1].x,2)+Math.pow(p.y-h[1].y,2)) : 0;
+      const lit = Math.min(1, sp/9);
+      ghosts[i].forEach((g,k)=>{
+        const q = h[(k+1)*LAG];
+        if(!q){ g.style.opacity = 0; return; }
+        const f = 1 - (k+1)/(TRAILS+1);
+        g.style.transform = 'translate3d('+q.x+'px,'+q.y+'px,0) scale('+(.35+f*.65).toFixed(3)+')';
+        g.style.opacity   = (lit*f*.6).toFixed(3);
+      });
+    });
   }
+
+  /* On the way in each dot leaves on its own beat and takes the same share of
+     the window, so they reach the middle one after another. */
+  const IN = [0, .22, .30, .11], SPAN = .70;
+  const ez = (gsap.parseEase && gsap.parseEase('power2.inOut')) || (x=>x);
+  const lerp = (a,b,k)=>a+(b-a)*k;
+  const from = [{x:0,y:0},{x:W,y:0},{x:0,y:H},{x:W,y:H}];
+  const to   = [{x:box.l,y:box.t},{x:box.r,y:box.t},{x:box.l,y:box.b},{x:box.r,y:box.b}];
 
   const st = {p:0};
   const step = () => {
     const p = st.p;
-    if(p <= 1){
-      paint(lerp(0,cx,p), lerp(W,cx,p), lerp(0,cy,p), lerp(H,cy,p));
-    }else{
+    paint(dots.map((_,i)=>{
+      if(p <= 1){
+        const k = ez(Math.min(1, Math.max(0, (p-IN[i])/SPAN)));
+        return {x:lerp(from[i].x,cx,k), y:lerp(from[i].y,cy,k)};
+      }
       const k = p-1;
-      paint(lerp(cx,box.l,k), lerp(cx,box.r,k), lerp(cy,box.t,k), lerp(cy,box.b,k));
-    }
+      return {x:lerp(cx,to[i].x,k), y:lerp(cy,to[i].y,k)};
+    }));
   };
 
-  paint(0, W, 0, H);
+  step();
   gsap.set(dots, {scale:0, opacity:1});
 
   const tl = gsap.timeline();
   tl.to(dots, {scale:1, duration:.3, ease:'back.out(3)', stagger:.05})
-    /* the whole frame closes to a point, then opens onto the box: one move */
-    .to(st, {p:1, duration:.9,  ease:'power2.inOut', onUpdate:step}, '-=.08')
-    .to(st, {p:2, duration:1.0, ease:'power3.inOut', onUpdate:step}, '+=.1')
-    /* the box is simply there once its corners are */
+    .add(()=>{ tracking = true; })
+    /* linear here: the stagger and the easing both live inside step() */
+    .to(st, {p:1, duration:1.15, ease:'none',        onUpdate:step}, '-=.08')
+    .to(st, {p:2, duration:1.0,  ease:'power3.inOut', onUpdate:step}, '+=.1')
+    .add(()=>{ tracking = false; ghosts.forEach(a=>a.forEach(g=>g.remove())); })
+    /* the box is simply there once its corners are, and the words resolve
+       out of noise. One reveal, not a sweep and then a decode. */
     .to('#hcontent', {opacity:1, duration:.35, ease:'power2.out'}, '-=.28')
-    .fromTo('.hero-scan',{top:'0%',opacity:.9},
-                         {top:'100%',opacity:0,duration:.75,ease:'power2.in',
-                          immediateRender:false},'<')
-    .to('#hside',   {opacity:1,duration:.6,ease:'power2.out'},'<')
+    .to('#hside',    {opacity:1, duration:.6,  ease:'power2.out'}, '<')
     .add(()=>{
       gsap.set('.n1,.n2',{y:'0%'});
       gsap.set(['.hero-stamp','.hero-bio','.hero-disc'],{opacity:1});
@@ -708,8 +760,8 @@ function revealHero(){
 
 function showHeroInstantly(){
   gsap.set(['#hside','#hcontent','.hero-bio','#hscroll','.hero-stamp','.hero-disc'],{opacity:1});
-  gsap.set('.hg-l,.hg-r',{x:0,y:0,scaleY:1});
-  gsap.set('.hg-t,.hg-b',{x:0,y:0,scaleX:1});
+  gsap.set('.hg-l,.hg-r',{x:0,y:0,rotation:0,scaleY:1});
+  gsap.set('.hg-t,.hg-b',{x:0,y:0,rotation:0,scaleX:1});
   gsap.set('.hg-dot',{x:0,y:0,scale:1,opacity:1});
   gsap.set(['.n1','.n2'],{y:'0%'});
   gsap.set('#hrule',{scaleX:1});
