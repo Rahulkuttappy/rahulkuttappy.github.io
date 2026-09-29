@@ -250,8 +250,7 @@
 .gbay-specs li:last-child{border-bottom:none;}
 .gbay-specs li::before{content:'/ ';color:var(--red);}
 .gbay-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
-.gbay-price{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.05em;color:var(--off);}
-.gbay-price em{font-style:normal;color:var(--red);}
+
 .gbay-btn{
   font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
   letter-spacing:.18em;text-transform:uppercase;

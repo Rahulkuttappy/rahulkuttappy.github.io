@@ -654,8 +654,6 @@ function playText(el, opts){
   });
 }
 
-function decodeText(el, opts){ prepareText(el); playText(el, opts); }
-
 /* ── DUST ──
    A hundred and twenty motes drifting up across the hero and wrapping round,
    the one piece of the old lens rig worth keeping. One canvas rather than a
@@ -834,23 +832,36 @@ function revealHero(){
      the window, so they reach the middle one after another. The ease is all
      decay and no run-up: an orb is at its fastest the instant it leaves its
      corner, then eases down into the centre. */
-  const IN = [0, .22, .30, .11], SPAN = .70;
-  const ez = (gsap.parseEase && gsap.parseEase('power2.out')) || (x=>x);
+  const SPAN = .70;
+  const ez = (gsap.parseEase && gsap.parseEase('power1.out')) || (x=>x);
   const lerp = (a,b,k)=>a+(b-a)*k;
-  const from = [{x:0,y:0},{x:W,y:0},{x:0,y:H},{x:W,y:H}];
   const to   = [{x:box.l,y:box.t},{x:box.r,y:box.t},{x:box.l,y:box.b},{x:box.r,y:box.b}];
 
-  const st = {p:0, ext:0};
+  /* Each orb starts somewhere new every visit, and from off the edge as often
+     as not. It keeps to its own quarter of the frame though: the hairlines
+     join the orbs in a fixed order, so an orb wandering into another's quarter
+     would have the sides of the frame crossing each other. */
+  const from = to.map((_,i)=>({
+    x: cx + ((i===1||i===3) ? 1 : -1) * (.55 + Math.random()*.7) * (W/2),
+    y: ((i===2||i===3) ? 1 : -1) * (.55 + Math.random()*.7) * (H/2) + cy
+  }));
+  /* and they do not always set off in the same order either */
+  const IN = [0, .11, .22, .30].sort(()=>Math.random()-.5);
+
+  const st = {in:0, out:0, ext:0};
+  const inbound = i => {
+    const k = ez(Math.min(1, Math.max(0, (st.in-IN[i])/SPAN)));
+    return {x:lerp(from[i].x,cx,k), y:lerp(from[i].y,cy,k)};
+  };
+  /* Where each orb actually was the instant the frame began to open. The two
+     halves of the move overlap, so without this the outward leg would start
+     from the centre and the orbs would jump there to meet it. */
+  let outFrom = null;
   const step = () => {
-    const p = st.p;
-    paint(dots.map((_,i)=>{
-      if(p <= 1){
-        const k = ez(Math.min(1, Math.max(0, (p-IN[i])/SPAN)));
-        return {x:lerp(from[i].x,cx,k), y:lerp(from[i].y,cy,k)};
-      }
-      const k = p-1;
-      return {x:lerp(cx,to[i].x,k), y:lerp(cy,to[i].y,k)};
-    }), st.ext);
+    paint(dots.map((_,i)=> (st.out > 0 && outFrom)
+      ? {x:lerp(outFrom[i].x,to[i].x,st.out), y:lerp(outFrom[i].y,to[i].y,st.out)}
+      : inbound(i)
+    ), st.ext);
   };
 
   step();
@@ -859,17 +870,20 @@ function revealHero(){
   startHeroDust();
 
   const tl = gsap.timeline();
-  tl.to(dots, {scale:1, duration:.3, ease:'back.out(3)', stagger:.05})
+  /* The orbs swell into view while they are already travelling, rather than
+     appearing first and setting off afterwards: on a refresh that wait was
+     most of the delay before anything happened. */
+  tl.to(dots, {scale:1, duration:.24, ease:'back.out(3)', stagger:.03})
     .to('#hdust', {opacity:1, duration:1.6, ease:'power1.out'}, 0)
     .add(()=>{ tracking = true; })
     /* linear here: the stagger and the per-orb ease both live inside step() */
-    .to(st, {p:1, duration:.95, ease:'none',       onUpdate:step}, '-=.14')
-    /* The pause is a beat, not a stop. Three things used to stretch it: a
-       steep decay parked each orb for the last quarter of its own window, the
-       gap sat on top of that, and an ease-in start meant the opening move was
-       imperceptible for its first tenth of a second. So the decay is gentler,
-       the gap is small, and the frame leaves the centre at speed. */
-    .to(st, {p:2, duration:1.05, ease:'power2.out', onUpdate:step}, '+=.09')
+    .to(st, {in:1, duration:.9, ease:'none', onUpdate:step}, '-=.26')
+    /* No gap at all: the frame starts opening while the last orb is still
+       closing the final few pixels, so there is nothing to wait through. A
+       decaying ease spends a surprising amount of its time covering almost no
+       distance, and queueing the two legs meant sitting through all of it. */
+    .to(st, {out:1, duration:1.05, ease:'power2.out', onUpdate:step,
+             onStart(){ outFrom = dots.map((_,i)=>inbound(i)); }}, '-=.06')
     /* the sides do not stop at the corners: they carry on to the edges while
        the orbs are still flying out, and keep going after they land */
     .to(st, {ext:1, duration:.95, ease:'power2.out', onUpdate:step}, '-=.5')
@@ -1062,12 +1076,9 @@ document.querySelectorAll('.nav-cta,.f-back').forEach(el=>{
   el.addEventListener('mouseleave',()=>gsap.to(el,{x:0,y:0,duration:.6,ease:'elastic.out(1,.4)'}));
 });
 
-/* ── MILES Masterclass modal (no autoplay) — index.html only ── */
-const milesModal=document.getElementById('milesModal');
-const milesFrame=document.getElementById('milesFrame');
-const milesTrigger=document.getElementById('wc-miles');
-const milesThumbs=document.querySelectorAll('.modal-thumb');
-
+/* Shared by the lightbox. There used to be a second overlay alongside it, a
+   video modal with a thumbnail strip; its markup was removed and the wiring
+   for it sat here doing nothing, so it has gone too. */
 function openOverlay(el){
   el.classList.add('open');el.setAttribute('aria-hidden','false');
   if(lenis) lenis.stop();          /* the page must not drift behind it */
@@ -1075,21 +1086,6 @@ function openOverlay(el){
 function closeOverlay(el){
   el.classList.remove('open');el.setAttribute('aria-hidden','true');
   if(lenis) lenis.start();
-}
-
-if(milesTrigger&&milesModal&&milesFrame){
-  milesTrigger.addEventListener('click',e=>{
-    e.preventDefault();
-    milesFrame.src='https://www.youtube.com/embed/WOD94SZI0lo?rel=0';
-    openOverlay(milesModal);
-  });
-  milesThumbs.forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      milesThumbs.forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      milesFrame.src=`https://www.youtube.com/embed/${btn.dataset.video}?rel=0`;
-    });
-  });
 }
 
 /* ── Lightbox: generalized for multiple image galleries ── */
@@ -1132,7 +1128,6 @@ if(lightbox){
 
 /* Shared close/escape handling */
 function closeAllOverlays(){
-  if(milesModal){closeOverlay(milesModal); if(milesFrame) milesFrame.src='';}
   if(lightbox) closeOverlay(lightbox);
 }
 document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',closeAllOverlays));
