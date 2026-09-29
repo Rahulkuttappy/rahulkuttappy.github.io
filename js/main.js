@@ -837,14 +837,21 @@ function revealHero(){
   const lerp = (a,b,k)=>a+(b-a)*k;
   const to   = [{x:box.l,y:box.t},{x:box.r,y:box.t},{x:box.l,y:box.b},{x:box.r,y:box.b}];
 
-  /* Each orb starts somewhere new every visit, and from off the edge as often
-     as not. It keeps to its own quarter of the frame though: the hairlines
-     join the orbs in a fixed order, so an orb wandering into another's quarter
-     would have the sides of the frame crossing each other. */
-  const from = to.map((_,i)=>({
-    x: cx + ((i===1||i===3) ? 1 : -1) * (.55 + Math.random()*.7) * (W/2),
-    y: ((i===2||i===3) ? 1 : -1) * (.55 + Math.random()*.7) * (H/2) + cy
-  }));
+  /* Each orb starts somewhere new every visit, and always outside the section:
+     one of its two axes is always past the edge, while the other is free. That
+     is what varies whether an orb flies in from a side, from above or below,
+     or across a corner. It still keeps to its own quarter, because the
+     hairlines join the orbs in a fixed order and an orb wandering into
+     another's quarter would have the sides of the frame crossing over. */
+  const from = to.map((_,i)=>{
+    const past = () => 1.15 + Math.random()*.5;     /* clear of the edge */
+    const free = () =>  .20 + Math.random()*1.25;   /* anywhere on that axis */
+    const sideways = Math.random() < .5;
+    return {
+      x: cx + ((i===1||i===3) ? 1 : -1) * (sideways ? past() : free()) * (W/2),
+      y: cy + ((i===2||i===3) ? 1 : -1) * (sideways ? free() : past()) * (H/2)
+    };
+  });
   /* and they do not always set off in the same order either */
   const IN = [0, .11, .22, .30].sort(()=>Math.random()-.5);
 
@@ -874,8 +881,7 @@ function revealHero(){
      appearing first and setting off afterwards: on a refresh that wait was
      most of the delay before anything happened. */
   tl.to(dots, {scale:1, duration:.24, ease:'back.out(3)', stagger:.03})
-    .to('#hdust', {opacity:1, duration:1.6, ease:'power1.out'}, 0)
-    .add(()=>{ tracking = true; })
+    .add(()=>{ tracking = true; }, 0)
     /* linear here: the stagger and the per-orb ease both live inside step() */
     .to(st, {in:1, duration:.9, ease:'none', onUpdate:step}, '-=.26')
     /* No gap at all: the frame starts opening while the last orb is still
@@ -894,7 +900,14 @@ function revealHero(){
     .to('#hside',    {opacity:1, duration:.6,  ease:'power2.out'}, '<')
     .add(()=>{ WORDS.forEach(w=>playText(w[0], w[1])); }, '-=.15')
     .to('#hrule',   {scaleX:1,duration:.5,ease:'power3.out'},'<.35')
-    .to('#hscroll', {opacity:1,duration:.5},'<.3');
+    .to('#hscroll', {opacity:1,duration:.5},'<.3')
+    /* Added last and played first. It sits at an absolute zero, but a tween is
+       still measured into the timeline's length wherever it is written, and
+       this one is long: put it any earlier and every '-=' position after it
+       would be counted back from the end of the dust instead of the end of the
+       move -- which held the orbs at their marks for over a second and left
+       the trails switched off for the whole flight. */
+    .to('#hdust', {opacity:1, duration:1.6, ease:'power1.out'}, 0);
 }
 
 function showHeroInstantly(){
