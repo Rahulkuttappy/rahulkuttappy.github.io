@@ -625,7 +625,11 @@ if(loaderEl){
   if(alreadySeen){
     loaderEl.remove();
     gsap.set('#nav',{opacity:1});
-    showHeroInstantly();
+    /* The loading screen is a once-a-session thing, but the frame drawing
+       itself is the first thing anyone sees here, so it plays on every visit,
+       refreshes included. Only a reduced-motion visitor gets it finished. */
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) showHeroInstantly();
+    else revealHero();
   }else{
     if(lenis) lenis.stop();          /* nothing scrolls behind the loader */
     const lenter=document.getElementById('lenter');
