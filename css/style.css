@@ -28,7 +28,7 @@ html.no-anim .n1,html.no-anim .n2{transform:none!important;}
 html.no-anim .hg-l,html.no-anim .hg-r{transform:scaleY(1)!important;}
 html.no-anim .hg-t,html.no-anim .hg-b{transform:scaleX(1)!important;}
 html.no-anim .hg-dot{opacity:1;}
-html.no-anim #hcontent{clip-path:none!important;}
+
 html.no-anim #hrule{transform:scaleX(1)!important;}
 html.no-anim .reveal{opacity:1!important;transform:none!important;filter:none!important;}
 
@@ -406,7 +406,6 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
   position:absolute;z-index:2;overflow:hidden;
   left:var(--px);right:var(--px);top:var(--pt);bottom:var(--pb);
   padding:2rem 2.4rem;max-width:none;opacity:0;
-  clip-path:inset(0 100% 0 0);          /* wipes open once the frame is drawn */
   background:linear-gradient(105deg,
     rgba(6,6,6,.72) 0%,rgba(6,6,6,.5) 42%,rgba(6,6,6,.12) 78%,transparent 100%);
 }

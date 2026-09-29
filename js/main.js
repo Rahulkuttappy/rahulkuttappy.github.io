@@ -583,80 +583,133 @@ function scrambleReveal(el,finalText,opts={}){
 const loaderEl=document.getElementById('loader');
 const LOADER_SEEN_KEY='rk_seen_loader';
 
-/* The entrance, in four beats: four dots drop in at the corners of the
-   screen and run to the middle; they carry the lines back out to the corners
-   of the title box, which draws the frame; the panel wipes open under one
-   pass of light; and the words inside decode into place. */
-function decodeLine(el, opts){
-  if(!el) return;
-  const text = el.textContent.trim();
-  if(text) scrambleReveal(el, text, opts);
+/* The entrance is one continuous move. The four dots are the corners of a
+   rectangle and the four hairlines are its sides, so the lines are never
+   drawn separately: they are simply whatever the dots currently span. The
+   rectangle starts as the whole screen, collapses to a point in the middle,
+   then opens out to the corners of the title box. Only then do the words
+   resolve out of noise. */
+
+/* Decodes an element in place, keeping any markup inside it: each text run
+   becomes characters, and characters inside <b> stay inside it. */
+function decodeText(el, opts){
+  if(!el || el.dataset.decoded) return;
+  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!<>/[]{}#*';
+  const stagger = (opts && opts.stagger) || 22;
+  const speed   = (opts && opts.speed)   || 26;
+  const cells = [];
+
+  const wrap = (text, parent) => {
+    [...text].forEach(ch=>{
+      const s = document.createElement('span');
+      s.className = 'lc';
+      s.textContent = ch === ' ' ? '\u00a0' : ch;
+      parent.appendChild(s);
+      if(ch.trim()) cells.push([s, ch]); else s.classList.add('in');
+    });
+  };
+
+  const src = [...el.childNodes];
+  el.textContent = '';
+  src.forEach(node=>{
+    if(node.nodeType === 3){ wrap(node.textContent, el); }
+    else{
+      const clone = document.createElement(node.tagName);
+      clone.className = node.className;
+      wrap(node.textContent, clone);
+      el.appendChild(clone);
+    }
+  });
+  el.dataset.decoded = '1';
+
+  cells.forEach(([span, ch], i)=>{
+    let n = 0, max = 5 + Math.floor(Math.random()*5);
+    setTimeout(()=>{
+      const iv = setInterval(()=>{
+        span.textContent = CHARS[Math.floor(Math.random()*CHARS.length)];
+        if(++n >= max){
+          clearInterval(iv);
+          span.textContent = ch;
+          span.classList.add('in');
+        }
+      }, speed);
+    }, i*stagger);
+  });
 }
 
 function revealHero(){
   const hero = document.getElementById('hero');
   const dots = [...document.querySelectorAll('.hg-dot')];
-  if(!hero || !dots.length) return;
+  const lineL = document.querySelector('.hg-l'), lineR = document.querySelector('.hg-r');
+  const lineT = document.querySelector('.hg-t'), lineB = document.querySelector('.hg-b');
+  if(!hero || dots.length < 4 || !lineL) return;
 
-  /* where each dot rests, and the two places it has to travel through */
+  const W = hero.clientWidth, H = hero.clientHeight;
   const hr = hero.getBoundingClientRect();
-  const home = dots.map(d=>{
+  const home = dots.map(d=>{                    /* tl, tr, bl, br */
     const b = d.getBoundingClientRect();
     return { x:b.left - hr.left + b.width/2, y:b.top - hr.top + b.height/2 };
   });
-  const corner = [               /* matches the DOM order: tl, tr, bl, br */
-    {x:0,        y:0},
-    {x:hr.width, y:0},
-    {x:0,        y:hr.height},
-    {x:hr.width, y:hr.height}
-  ];
-  const cx = hr.width/2, cy = hr.height/2;
+  const box = { l:home[0].x, r:home[1].x, t:home[0].y, b:home[2].y };
+  const cx = W/2, cy = H/2;
+  const lerp = (a,b,k)=>a+(b-a)*k;
 
-  dots.forEach((d,i)=>gsap.set(d,{
-    x:corner[i].x - home[i].x, y:corner[i].y - home[i].y, scale:0, opacity:1
-  }));
+  /* draw the rectangle the dots currently describe */
+  function paint(l, r, t, b){
+    gsap.set(dots[0], {x:l-home[0].x, y:t-home[0].y});
+    gsap.set(dots[1], {x:r-home[1].x, y:t-home[1].y});
+    gsap.set(dots[2], {x:l-home[2].x, y:b-home[2].y});
+    gsap.set(dots[3], {x:r-home[3].x, y:b-home[3].y});
+    const sy = Math.max(0,(b-t))/H, sx = Math.max(0,(r-l))/W;
+    const midY = (t+b)/2 - H/2, midX = (l+r)/2 - W/2;
+    gsap.set(lineL, {x:l-box.l, y:midY, scaleY:sy});
+    gsap.set(lineR, {x:r-box.r, y:midY, scaleY:sy});
+    gsap.set(lineT, {y:t-box.t, x:midX, scaleX:sx});
+    gsap.set(lineB, {y:b-box.b, x:midX, scaleX:sx});
+  }
+
+  const st = {p:0};
+  const step = () => {
+    const p = st.p;
+    if(p <= 1){
+      paint(lerp(0,cx,p), lerp(W,cx,p), lerp(0,cy,p), lerp(H,cy,p));
+    }else{
+      const k = p-1;
+      paint(lerp(cx,box.l,k), lerp(cx,box.r,k), lerp(cy,box.t,k), lerp(cy,box.b,k));
+    }
+  };
+
+  paint(0, W, 0, H);
+  gsap.set(dots, {scale:0, opacity:1});
 
   const tl = gsap.timeline();
-  tl.to(dots, {scale:1, duration:.32, ease:'back.out(3)', stagger:.055})
-    /* in to the middle */
-    .to(dots, {x:(i)=>cx-home[i].x, y:(i)=>cy-home[i].y,
-               duration:.8, ease:'power3.inOut'}, '-=.12')
-    /* and back out to the corners of the box, drawing the lines with them */
-    .to(dots, {x:0, y:0, duration:.9, ease:'power3.inOut'}, '+=.1')
-    .fromTo('.hg-l,.hg-r',{scaleY:0},{scaleY:1,duration:.9,ease:'power3.inOut'},'<')
-    .fromTo('.hg-t,.hg-b',{scaleX:0},{scaleX:1,duration:.9,ease:'power3.inOut'},'<')
-    /* the box opens */
-    .to('#hcontent', {opacity:1,duration:.01},'-=.12')
-    .to('#hcontent', {clipPath:'inset(0 0% 0 0)',duration:.75,ease:'power3.inOut'},'<')
-    /* immediateRender:false, or fromTo lights the scan the moment the
-       timeline is built rather than when the wipe reaches it */
-    .fromTo('.hero-scan',{top:'0%',opacity:.95},
-                         {top:'100%',opacity:0,duration:.8,ease:'power2.in',
-                          immediateRender:false},'<.05')
-    /* and the words resolve out of noise */
+  tl.to(dots, {scale:1, duration:.3, ease:'back.out(3)', stagger:.05})
+    /* the whole frame closes to a point, then opens onto the box: one move */
+    .to(st, {p:1, duration:.9,  ease:'power2.inOut', onUpdate:step}, '-=.08')
+    .to(st, {p:2, duration:1.0, ease:'power3.inOut', onUpdate:step}, '+=.1')
+    /* the box is simply there once its corners are */
+    .to('#hcontent', {opacity:1, duration:.35, ease:'power2.out'}, '-=.28')
+    .fromTo('.hero-scan',{top:'0%',opacity:.9},
+                         {top:'100%',opacity:0,duration:.75,ease:'power2.in',
+                          immediateRender:false},'<')
+    .to('#hside',   {opacity:1,duration:.6,ease:'power2.out'},'<')
     .add(()=>{
       gsap.set('.n1,.n2',{y:'0%'});
-      decodeLine(document.querySelector('.hero-stamp'), {stagger:14, speed:24});
-      decodeLine(document.querySelector('.n1'),         {stagger:52, speed:30});
-      decodeLine(document.querySelector('.n2'),         {stagger:52, speed:30});
-      decodeLine(document.querySelector('.hero-disc'),  {stagger:18, speed:24});
-    }, '-=.35')
-    .to('#hside',   {opacity:1,duration:.6,ease:'power2.out'},'<')
-    .to('.hero-stamp',{opacity:1,duration:.3},'<')
-    .to('#hrule',   {scaleX:1,duration:.5,ease:'power3.out'},'<.5')
-    .fromTo('.hero-bio',{clipPath:'inset(0 100% 0 0)'},
-                        {clipPath:'inset(0 0% 0 0)',opacity:1,duration:.7,
-                         ease:'power2.out',immediateRender:false},'<.1')
-    .to('.hero-disc',{opacity:1,duration:.4},'<.15')
-    .to('#hscroll', {opacity:1,duration:.5},'-=.2');
+      gsap.set(['.hero-stamp','.hero-bio','.hero-disc'],{opacity:1});
+      decodeText(document.querySelector('.hero-stamp'), {stagger:12, speed:22});
+      decodeText(document.querySelector('.n1'),         {stagger:50, speed:30});
+      decodeText(document.querySelector('.n2'),         {stagger:50, speed:30});
+      decodeText(document.querySelector('.hero-bio'),   {stagger:7,  speed:18});
+      decodeText(document.querySelector('.hero-disc'),  {stagger:16, speed:22});
+    }, '-=.15')
+    .to('#hrule',   {scaleX:1,duration:.5,ease:'power3.out'},'<.35')
+    .to('#hscroll', {opacity:1,duration:.5},'<.3');
 }
 
 function showHeroInstantly(){
   gsap.set(['#hside','#hcontent','.hero-bio','#hscroll','.hero-stamp','.hero-disc'],{opacity:1});
-  gsap.set('#hcontent',{clipPath:'none'});
-  gsap.set('.hero-bio',{clipPath:'none'});
-  gsap.set('.hg-l,.hg-r',{scaleY:1});
-  gsap.set('.hg-t,.hg-b',{scaleX:1});
+  gsap.set('.hg-l,.hg-r',{x:0,y:0,scaleY:1});
+  gsap.set('.hg-t,.hg-b',{x:0,y:0,scaleX:1});
   gsap.set('.hg-dot',{x:0,y:0,scale:1,opacity:1});
   gsap.set(['.n1','.n2'],{y:'0%'});
   gsap.set('#hrule',{scaleX:1});
