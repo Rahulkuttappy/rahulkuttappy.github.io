@@ -25,6 +25,10 @@ html.no-anim #nav,html.no-anim #hside,html.no-anim #hcontent,
 html.no-anim .hero-bio,html.no-anim .hero-scroll,
 html.no-anim .hero-stamp,html.no-anim .hero-disc{opacity:1!important;}
 html.no-anim .n1,html.no-anim .n2{transform:none!important;}
+html.no-anim .hg-l,html.no-anim .hg-r{transform:scaleY(1)!important;}
+html.no-anim .hg-t,html.no-anim .hg-b{transform:scaleX(1)!important;}
+html.no-anim .hg-dot{--s:1;}
+html.no-anim #hcontent{clip-path:none!important;}
 html.no-anim #hrule{transform:scaleX(1)!important;}
 html.no-anim .reveal{opacity:1!important;transform:none!important;filter:none!important;}
 
@@ -352,34 +356,29 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 /* One set of measurements for the panel and the hairlines that meet at its
    corners, so they cannot drift apart at any width. */
 #hero{--px:16%;--pt:24%;--pb:18%;}
-/* The lens sits above the footage and below the panel, and never takes a
-   click: the nav, the links and text selection are untouched by it. */
-#hero3d{
-  position:absolute;inset:0;z-index:1;pointer-events:none;
-  /* An absolutely positioned canvas takes its size from the width and height
-     attributes, not from the insets, so the drawing buffer would otherwise
-     spill past the hero. These pin the CSS box; the buffer stays at DPR. */
-  width:100%;height:100%;display:block;
-  opacity:0;transition:opacity 1.1s ease;
-}
-#hero3d.is-live{opacity:1;}
-@media(max-width:1023px){#hero3d{display:none;}}
-
 .hero-grid{position:absolute;inset:0;z-index:4;pointer-events:none;}
+/* The lines draw themselves on load: verticals down, horizontals out, then
+   the dots land where they cross. Scale rather than width, so it is one
+   composited property per line. */
 .hero-grid i{position:absolute;background:rgba(237,234,226,.13);}
+.hg-l,.hg-r{transform:scaleY(0);transform-origin:top center;}
+.hg-t{transform:scaleX(0);transform-origin:left center;}
+.hg-b{transform:scaleX(0);transform-origin:right center;}
 .hg-l{top:0;bottom:0;width:1px;left:var(--px);}
 .hg-r{top:0;bottom:0;width:1px;right:var(--px);}
 .hg-t{left:0;right:0;height:1px;top:var(--pt);}
 .hg-b{left:0;right:0;height:1px;bottom:var(--pb);}
+/* --s carries the pop, so the centring translate in each corner's own rule
+   is never overwritten by the animation. */
 .hg-dot{
-  position:absolute;width:5px;height:5px;border-radius:50%;
-  background:var(--off);transform:translate(-50%,-50%);
+  position:absolute;width:5px;height:5px;border-radius:50%;--s:0;
+  background:var(--off);transform:translate(-50%,-50%) scale(var(--s));
   box-shadow:0 0 0 3px rgba(8,8,8,.55);   /* reads against any frame behind it */
 }
 .hg-tl{left:var(--px);top:var(--pt);}
-.hg-tr{right:var(--px);top:var(--pt);transform:translate(50%,-50%);}
-.hg-bl{left:var(--px);bottom:var(--pb);transform:translate(-50%,50%);}
-.hg-br{right:var(--px);bottom:var(--pb);transform:translate(50%,50%);}
+.hg-tr{right:var(--px);top:var(--pt);transform:translate(50%,-50%) scale(var(--s));}
+.hg-bl{left:var(--px);bottom:var(--pb);transform:translate(-50%,50%) scale(var(--s));}
+.hg-br{right:var(--px);bottom:var(--pb);transform:translate(50%,50%) scale(var(--s));}
 
 /* Film grain over the hero: the noise field is replaced eleven times a second
    rather than slid, which is what reads as grain instead of texture. */
@@ -409,10 +408,17 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
   position:absolute;z-index:2;overflow:hidden;
   left:var(--px);right:var(--px);top:var(--pt);bottom:var(--pb);
   padding:2rem 2.4rem;max-width:none;opacity:0;
+  clip-path:inset(0 100% 0 0);          /* wipes open once the frame is drawn */
   background:linear-gradient(105deg,
     rgba(6,6,6,.72) 0%,rgba(6,6,6,.5) 42%,rgba(6,6,6,.12) 78%,transparent 100%);
 }
 .hero-inner{display:flex;flex-direction:column;justify-content:center;height:100%;}
+/* One pass of light down the panel as it opens, then gone */
+.hero-scan{
+  position:absolute;left:0;right:0;top:0;height:2px;z-index:3;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(237,234,226,.65) 45%,rgba(var(--red-glow),.9) 62%,transparent);
+  box-shadow:0 0 14px rgba(237,234,226,.35);
+}
 .hero-stamp{
   font-family:'JetBrains Mono',monospace;font-size:.46rem;font-weight:700;
   letter-spacing:.24em;text-transform:uppercase;color:rgba(237,234,226,.5);

@@ -583,12 +583,24 @@ function scrambleReveal(el,finalText,opts={}){
 const loaderEl=document.getElementById('loader');
 const LOADER_SEEN_KEY='rk_seen_loader';
 
+/* The frame builds itself before anything is said: verticals draw down, the
+   horizontals run out to meet them, the corners land, then the panel wipes
+   open under a single pass of light and the words follow in order. */
 function revealHero(){
   const tl=gsap.timeline();
-  tl.to('#hside',    {opacity:1,duration:.6,ease:'power2.out'})
-    .to('#hcontent', {opacity:1,duration:.01}, '<')
-    .to('.hero-stamp',{opacity:1,duration:.5,ease:'power2.out'}, '<')
-    .to('.n1',       {y:'0%',duration:.9,ease:'power4.out'},   '<.1')
+  tl.fromTo('.hg-l,.hg-r',{scaleY:0},{scaleY:1,duration:.75,ease:'power3.inOut',stagger:.1})
+    .fromTo('.hg-t,.hg-b',{scaleX:0},{scaleX:1,duration:.75,ease:'power3.inOut',stagger:.1},'-=.5')
+    .to('.hg-dot',   {'--s':1,duration:.4,ease:'back.out(2.6)',stagger:.055},'-=.25')
+    .to('#hcontent', {opacity:1,duration:.01},'-=.1')
+    .to('#hcontent', {clipPath:'inset(0 0% 0 0)',duration:.8,ease:'power3.inOut'},'<')
+    /* immediateRender:false, or fromTo lights the scan the moment the
+       timeline is built rather than when the wipe reaches it */
+    .fromTo('.hero-scan',{top:'0%',opacity:.95},
+                         {top:'100%',opacity:0,duration:.85,ease:'power2.in',
+                          immediateRender:false},'<.05')
+    .to('#hside',    {opacity:1,duration:.6,ease:'power2.out'},'-=.55')
+    .to('.hero-stamp',{opacity:1,duration:.5,ease:'power2.out'},'-=.5')
+    .to('.n1',       {y:'0%',duration:.9,ease:'power4.out'},   '-=.35')
     .to('.n2',       {y:'0%',duration:.9,ease:'power4.out'},   '<.12')
     .to('#hrule',    {scaleX:1,duration:.5,ease:'power3.out'}, '-=.3')
     .to('.hero-bio', {opacity:1,duration:.6,ease:'power3.out'}, '-=.2')
@@ -598,6 +610,10 @@ function revealHero(){
 
 function showHeroInstantly(){
   gsap.set(['#hside','#hcontent','.hero-bio','#hscroll','.hero-stamp','.hero-disc'],{opacity:1});
+  gsap.set('#hcontent',{clipPath:'none'});
+  gsap.set('.hg-l,.hg-r',{scaleY:1});
+  gsap.set('.hg-t,.hg-b',{scaleX:1});
+  gsap.set('.hg-dot',{'--s':1});
   gsap.set(['.n1','.n2'],{y:'0%'});
   gsap.set('#hrule',{scaleX:1});
 }
@@ -1588,39 +1604,6 @@ document.querySelectorAll('.tpanel').forEach(panel=>{
   /* a phone turned landscape, or a window dragged wider, still gets it */
   if(wide.addEventListener) wide.addEventListener('change',attach);
   else if(wide.addListener) wide.addListener(attach);
-})();
-
-/* ── Hero lens: loaded last, and only where it belongs ──
-   Three is 170KB over the wire, so it is fetched after this file has finished
-   and the page has already marked itself ready. Phones, coarse pointers,
-   reduced motion and anything without WebGL never request it at all, and the
-   hero stays exactly as it is without them. */
-(function(){
-  const canvas = document.getElementById('hero3d');
-  if(!canvas) return;
-  const wide  = window.matchMedia('(min-width:1024px)').matches;
-  const fine  = window.matchMedia('(pointer:fine)').matches;
-  const calm  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(!wide || !fine || calm) return;
-  try{                                  /* a context we throw away immediately */
-    const probe = document.createElement('canvas');
-    if(!(probe.getContext('webgl2') || probe.getContext('webgl'))) return;
-  }catch(e){ return; }
-
-  const add = (src, then) => {
-    const s = document.createElement('script');
-    s.src = src; s.async = true;
-    s.onload = then;
-    s.onerror = () => {};              /* blocked CDN: the hero carries on */
-    document.head.appendChild(s);
-  };
-  const go = () => add(
-    'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.1/three.min.js',
-    () => add('js/hero3d.js?v=20260929n')
-  );
-  /* never in front of first paint */
-  if('requestIdleCallback' in window) requestIdleCallback(go, {timeout:2500});
-  else setTimeout(go, 1200);
 })();
 
 /* Everything above parsed and ran, so the failsafe in each page's head can
