@@ -278,6 +278,15 @@ function apply(p){
   const cx = W/2, cy = H/2;
   fctx.clearRect(0,0,W,H);
 
+  /* The canvas covers the whole viewport while the works layer is clipped to
+     the frame, so without this the drawing spills past the mask and dots and
+     half-drawn lines appear out over the hero. Everything below is clipped to
+     the same rectangle the clip-path uses. */
+  fctx.save();
+  fctx.beginPath();
+  fctx.rect(l, t, r - l, b - t);
+  fctx.clip();
+
   const leave = clamp01((p - .82) / .18);
 
   /* Every line is carried by two dots that live on the frame itself and
@@ -332,18 +341,21 @@ function apply(p){
 
   fctx.fillStyle = 'rgb(237,234,226)';
 
-  /* the dots on the frame: two per line, always on an edge */
+  /* The dots on the frame: two per line, always on an edge. Sat one radius
+     inside it rather than centred on it, so the clip above leaves them whole
+     instead of shaving them in half. */
+  const R = 2;
   hLines.forEach(ln=>{
     if(ln.on <= .01) return;
     fctx.globalAlpha = ln.on;
-    fctx.beginPath(); fctx.arc(l, ln.py, 2, 0, Math.PI*2); fctx.fill();
-    fctx.beginPath(); fctx.arc(r, ln.py, 2, 0, Math.PI*2); fctx.fill();
+    fctx.beginPath(); fctx.arc(l + R, ln.py, R, 0, Math.PI*2); fctx.fill();
+    fctx.beginPath(); fctx.arc(r - R, ln.py, R, 0, Math.PI*2); fctx.fill();
   });
   vLines.forEach(ln=>{
     if(ln.on <= .01) return;
     fctx.globalAlpha = ln.on;
-    fctx.beginPath(); fctx.arc(ln.px, t, 2, 0, Math.PI*2); fctx.fill();
-    fctx.beginPath(); fctx.arc(ln.px, b, 2, 0, Math.PI*2); fctx.fill();
+    fctx.beginPath(); fctx.arc(ln.px, t + R, R, 0, Math.PI*2); fctx.fill();
+    fctx.beginPath(); fctx.arc(ln.px, b - R, R, 0, Math.PI*2); fctx.fill();
   });
 
   /* and the crossings, which only exist once both lines have joined */
@@ -358,6 +370,7 @@ function apply(p){
     });
   });
   fctx.globalAlpha = 1;
+  fctx.restore();
 
   const spent = clamp01((p - .1) / .5);
   gsap.set(lines, {opacity: 1 - spent*.92});
