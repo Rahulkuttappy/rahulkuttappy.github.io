@@ -74,7 +74,11 @@
   .w-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1.4rem;}
   .w-hed{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,4vw,3rem);
          letter-spacing:.03em;margin:0;}
+  .w-toggle{opacity:0;}
   .w-hed em{color:var(--red);font-style:normal;}
+  #wTitle .ch{display:inline-block;white-space:pre;color:var(--red);opacity:0;
+              transform:translateY(.12em);}
+  #wTitle .ch.on{color:inherit;opacity:1;transform:none;}
   .w-toggle{font-family:'JetBrains Mono',monospace;font-size:.46rem;letter-spacing:.2em;
             text-transform:uppercase;color:var(--muted);display:flex;gap:.9rem;}
   .w-toggle b{color:var(--off);font-weight:400;}
@@ -126,8 +130,8 @@
     <div class="works" id="works">
       <div class="works-in" id="worksIn">
         <div class="w-hdr">
-          <h2 class="w-hed">Selected Works <em>(12)</em></h2>
-          <div class="w-toggle"><span>Grid</span><b>List</b></div>
+          <h2 class="w-hed"><span id="wTitle">Selected Works</span> <em id="wCount">(12)</em></h2>
+          <div class="w-toggle" id="wToggle"><span>Grid</span><b>List</b></div>
         </div>
         <div class="cards">
           <a class="card"><span class="c-num">01</span><span></span><div class="c-info"><h3 class="c-title">SIGNATURE ESTATES X HARPER&#x27;S BAZAAR</h3><p class="c-year">2026</p></div></a>
@@ -194,6 +198,54 @@ function measure(){
     vert: !!(i%2)
   }));
   buildGrid();
+  buildTitle();
+}
+
+/* The heading is drawn on after the structure, the way a drawing is labelled
+   once it has been made. Split into characters once; the scroll decides how
+   far along the reveal has got. */
+let titleChars = [];
+function buildTitle(){
+  const el = document.getElementById('wTitle');
+  if(!el || titleChars.length) return;
+  const text = el.textContent;
+  el.textContent = '';
+  titleChars = [...text].map(ch=>{
+    const sp = document.createElement('span');
+    sp.className = 'ch';
+    sp.textContent = ch === ' ' ? '\u00a0' : ch;
+    el.appendChild(sp);
+    return {el:sp, ch};
+  });
+}
+
+const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/#*';
+function paintTitle(p){
+  const n = titleChars.length;
+  titleChars.forEach((c,i)=>{
+    /* left to right, each character a little behind the one before it */
+    const at = .50 + (i / n) * .16;
+    if(p < at){ c.el.classList.remove('on'); c.el.style.opacity = 0; return; }
+    c.el.style.opacity = '';
+    if(p < at + .035 && c.ch !== ' '){
+      /* a moment of noise as it lands, the way the rest of the site reveals */
+      c.el.classList.remove('on');
+      c.el.textContent = GLYPHS[(Math.random()*GLYPHS.length)|0];
+    }else{
+      c.el.classList.add('on');
+      c.el.textContent = c.ch === ' ' ? '\u00a0' : c.ch;
+    }
+  });
+  /* the count runs up as the rules it is counting are drawn */
+  const cEl = document.getElementById('wCount');
+  if(cEl){
+    const k = clamp01((p - .52) / .18);
+    const v = Math.round(k * 12);
+    cEl.textContent = '(' + String(v).padStart(2,'0') + ')';
+    cEl.style.opacity = String(clamp01((p - .50) / .06));
+  }
+  const tg = document.getElementById('wToggle');
+  if(tg) tg.style.opacity = String(clamp01((p - .70) / .10));
 }
 
 /* The blueprint is a grid, not a scatter. Every card edge contributes a
@@ -297,6 +349,7 @@ function apply(p){
   const zoom = lerp(1.18, 1, p);
   worksIn.style.transform = `scale(${zoom})`;
   works.style.opacity = String(Math.min(1, p*3.2));
+  paintTitle(p);
 
   panel.style.transform = `scale(${lerp(1, 1.35, p)})`;
   panel.style.opacity   = String(Math.max(0, 1 - p*1.9));
