@@ -406,9 +406,13 @@ function apply(p){
   fctx.globalAlpha = 1;
   fctx.restore();
 
-  const spent = clamp01((p - .1) / .5);
-  gsap.set(lines, {opacity: 1 - spent*.92});
-  gsap.set(dots,  {opacity: 1 - clamp01((p-.2)/.22)});
+  /* The frame is the outermost layer of the drawing, not scaffolding under
+     it. It used to dim away from a tenth of the way in, so by the time the
+     blueprint was being made its corner dot sat greyed out beside a blueprint
+     dot at full strength, a few pixels apart. It holds now, and leaves on the
+     same beat as everything else. */
+  gsap.set(lines, {opacity: 1 - leave});
+  gsap.set(dots,  {opacity: 1 - leave});
 
   const resolve = clamp01((p - .80) / .2);
   cards.forEach((c,i)=>{
