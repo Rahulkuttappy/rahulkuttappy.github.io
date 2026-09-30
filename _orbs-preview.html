@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Brand Orbs — preview</title>
+<!-- Local scratch page, not part of the site and not linked from it. -->
+<style>
+  :root { --off:#edeae2; --muted:#6b6b6b; --border:rgba(237,234,226,.1); }
+  body { margin:0; padding:2.5rem; background:#080808; color:var(--off);
+         font-family:ui-monospace,'JetBrains Mono',monospace; }
+  h1 { font-size:.7rem; letter-spacing:.24em; text-transform:uppercase; color:var(--muted);
+       font-weight:600; margin:0 0 2rem; }
+  h2 { font-size:.55rem; letter-spacing:.24em; text-transform:uppercase; color:var(--muted);
+       font-weight:600; margin:2.5rem 0 1rem; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:1rem; }
+  .cell { border:1px solid var(--border); padding:1rem .6rem; text-align:center; }
+  .medium { width:56px; height:56px; margin:0 auto; }
+  .small  { width:20px; height:20px; margin:0 auto; }
+  .name { margin-top:.7rem; font-size:.46rem; letter-spacing:.14em;
+          text-transform:uppercase; color:rgba(237,234,226,.55); }
+  .row { display:flex; flex-wrap:wrap; gap:1.4rem; align-items:center; }
+</style>
+</head>
+<body>
+<h1>Brand Orbs — 23 variants</h1>
+
+<h2>Medium · 56px</h2>
+<div class="grid" id="med"></div>
+
+<h2>Small · 20px</h2>
+<div class="row" id="sml"></div>
+
+<script src="js/brand-orbs.js"></script>
+<script>
+  var med = document.getElementById('med');
+  var sml = document.getElementById('sml');
+  BrandOrbs.VARIANTS.forEach(function (v) {
+    var cell = document.createElement('div');
+    cell.className = 'cell';
+    var slot = document.createElement('div');
+    slot.className = 'medium';
+    cell.appendChild(slot);
+    var name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = BrandOrbs.LABELS[v];
+    cell.appendChild(name);
+    med.appendChild(cell);
+    BrandOrbs.mount(slot, { variant: v, size: 'medium' });
+
+    var s = document.createElement('div');
+    s.className = 'small';
+    sml.appendChild(s);
+    BrandOrbs.mount(s, { variant: v, size: 'small' });
+  });
+</script>
+</body>
+</html>
