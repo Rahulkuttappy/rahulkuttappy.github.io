@@ -356,7 +356,7 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 }
 /* One set of measurements for the panel and the hairlines that meet at its
    corners, so they cannot drift apart at any width. */
-#hero{--px:16%;--pt:24%;--pb:18%;}
+#hero,.xframe{--px:16%;--pt:24%;--pb:18%;}
 .hero-grid{position:absolute;inset:0;z-index:4;pointer-events:none;}
 /* The lines draw themselves on load: verticals down, horizontals out, then
    the dots land where they cross. Scale rather than width, so it is one
@@ -503,6 +503,62 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 .mq-track .dot{color:var(--red);padding:0 .3rem;letter-spacing:0;}
 @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-25%)}}
 @media(prefers-reduced-motion:reduce){.mq-track{animation:none;}}
+
+/* ── HERO → WORKS ──
+   The hero is held at the top of the stage while the frame it draws opens out
+   to full bleed, and Selected Works is what the opening reveals.
+
+   Three layers, painted bottom to top: the hero, the list, and an overlay
+   carrying the frame, the blueprint and the monogram. The overlay has to be
+   above the list, which is why it does not live inside the hero -- a child
+   cannot climb out of its parent's stacking context.
+
+   What is written here is the shape the page takes with the transition OFF:
+   hero, then the list beneath it, the frame sitting over the hero alone. The
+   script adds .xs-on and only then do the layers start overlapping. So a
+   visitor without JavaScript, on a narrow screen, or with reduced motion
+   asked for, gets an ordinary page rather than three stacked sections. */
+.xstage{position:relative;}
+.xhero{position:relative;height:100svh;overflow:hidden;}
+.xhero #hero{height:100%;min-height:0;}
+.xover{position:absolute;top:0;left:0;right:0;height:100svh;pointer-events:none;}
+.xframe{position:absolute;inset:0;overflow:hidden;}
+.xframe .hero-grid{z-index:2;}
+.xtrail{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+/* Held at the tuned 56px rather than blown up: the mark is sampled for that
+   size, and scaling the canvas only softens it. */
+.xorb{position:absolute;left:50%;top:50%;width:56px;height:56px;
+      margin:-28px 0 0 -28px;z-index:3;pointer-events:none;
+      opacity:0;will-change:clip-path;}
+
+/* The heading is drawn rather than typed: an outline that inks itself on
+   letter by letter, then a wipe that floods the letterforms from the left.
+   The words themselves stay in the markup for anything that reads the page
+   rather than looks at it. */
+.w-stroke{display:inline-block;vertical-align:baseline;line-height:0;margin-right:.25em;}
+.w-stroke svg{display:block;overflow:visible;}
+.w-stroke text{user-select:none;font-family:'Bebas Neue',sans-serif;}
+.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;}
+
+/* ── with the transition on ── */
+/* Zero height, so the overlay and the hero take no room in the flow and the
+   list begins at the top of the stage, underneath them. Both hold at the top
+   for the stage's whole length; the script offsets the list to keep it still
+   while the frame opens, and lets it go afterwards. */
+.xs-on .xhero{position:sticky;top:0;z-index:1;}
+.xs-on .xover{position:sticky;height:0;z-index:3;}
+.xs-on .xframe{height:100svh;}
+.xs-on #works{position:relative;z-index:2;background:var(--ink);will-change:clip-path;}
+/* The header bar is sticky in the finished page, and a transform on its
+   ancestor would give it a different thing to stick to. The transform is only
+   there while the frame is opening, and the bar is at the top of the list for
+   all of it, so it is simply switched off for the duration. */
+.xs-on.xs-running .works-hdr{position:static;}
+/* The rows are outlined by the blueprint and resolve as it leaves. They are
+   hidden by the script, from its first frame, rather than by a rule here: a
+   stylesheet that hides them cannot know whether the script is alive to bring
+   them back. */
 
 /* ── WORKS ── */
 #works{padding:6rem 2.5rem 0;}
@@ -939,7 +995,7 @@ footer p{font-size:.5rem;letter-spacing:.1em;color:var(--muted);}
   }
   .nav-links a.active-link{color:var(--red);border-bottom:none;padding-bottom:1.15rem;}
   .hero-side{display:none;}
-  #hero{--px:5%;--pt:20%;--pb:14%;}
+  #hero,.xframe{--px:5%;--pt:20%;--pb:14%;}
   .hero-content{padding:1.2rem 1rem;}
   .hero-disc{padding-top:1rem;}   /* size stays on the clamp, so it tracks the bio */
   #works{padding:5rem 1.5rem 0;}

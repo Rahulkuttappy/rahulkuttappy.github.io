@@ -765,16 +765,23 @@ function startHeroDust(){
   size(); seed(); draw();
   if(!reduced) raf = requestAnimationFrame(loop);
 
+  function setRun(on){
+    if(on === run) return;
+    run = on;
+    if(run && !reduced) raf = requestAnimationFrame(loop);
+    else cancelAnimationFrame(raf);
+  }
+
   /* nothing drifts while the hero is scrolled away */
   if(window.IntersectionObserver){
-    new IntersectionObserver(es=>{
-      const on = es[0].isIntersecting;
-      if(on === run) return;
-      run = on;
-      if(run && !reduced) raf = requestAnimationFrame(loop);
-      else cancelAnimationFrame(raf);
-    },{threshold:0}).observe(hero);
+    new IntersectionObserver(es=>setRun(es[0].isIntersecting),{threshold:0}).observe(hero);
   }
+  /* Which the hero no longer does on the homepage: it is held at the top of
+     the stage while the frame opens over it, so it never stops intersecting
+     and the drift would carry on under the whole page -- eighty motes redrawn
+     every frame behind a section that covers them. The transition says when
+     instead, and it costs about eight frames a second while it is running. */
+  window.HeroDust = { set: setRun };
 
   let rt;
   window.addEventListener('resize', ()=>{
@@ -979,7 +986,11 @@ function revealHero(){
        would be counted back from the end of the dust instead of the end of the
        move -- which held the orbs at their marks for over a second and left
        the trails switched off for the whole flight. */
-    .to('#hdust', {opacity:1, duration:1.6, ease:'power1.out'}, 0);
+    .to('#hdust', {opacity:1, duration:1.6, ease:'power1.out'}, 0)
+    /* The frame is drawn; from here the scroll owns it. The transition writes
+       to these same four lines and four dots, so it is not allowed to start
+       until this has stopped. */
+    .add(()=>{ if(window.WorksTransition) WorksTransition.enable(); });
 }
 
 function showHeroInstantly(){
@@ -989,6 +1000,7 @@ function showHeroInstantly(){
   gsap.set('.hg-t,.hg-b',{x:0,y:0,rotation:0,scaleX:1});
   gsap.set('.hg-dot',{x:0,y:0,scale:1,opacity:1});
   gsap.set('#hrule',{scaleX:1});
+  if(window.WorksTransition) WorksTransition.enable();
 }
 
 if(loaderEl){
