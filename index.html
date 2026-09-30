@@ -49,7 +49,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/style.css?v=20260930i"/>
+<link rel="stylesheet" href="css/style.css?v=20260930k"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js" defer></script>
@@ -173,9 +173,18 @@ setTimeout(function(){
   <div class="hero-content" id="hcontent">
    <div class="hero-inner">
     <p class="hero-stamp">(Aspiring Filmmaker &mdash; Visual Storyteller)</p>
+    <!-- The name fuzzes rather than decodes. Size and tracking are given as
+         the same clamp and em the stylesheet uses, so the canvas is rebuilt
+         to match at every width. -->
     <div class="hero-name">
-      <span class="n1">RAHUL</span>
-      <span class="n2">KUTTAPPY</span>
+      <span class="n1" data-fuzzy data-fuzzy-size="clamp(2.6rem,7.4vw,7.2rem)"
+            data-fuzzy-weight="600" data-fuzzy-spacing="-0.052em"
+            data-fuzzy-color="#EDEAE2" data-fuzzy-base=".07" data-fuzzy-hover=".42"
+            data-fuzzy-range="20" data-fuzzy-transition="240">RAHUL</span>
+      <span class="n2" data-fuzzy data-fuzzy-size="clamp(2.6rem,7.4vw,7.2rem)"
+            data-fuzzy-weight="600" data-fuzzy-spacing="-0.052em"
+            data-fuzzy-color="#7A1B18" data-fuzzy-base=".07" data-fuzzy-hover=".42"
+            data-fuzzy-range="20" data-fuzzy-transition="240">KUTTAPPY</span>
     </div>
     <div class="hero-rule" id="hrule"></div>
     <p class="hero-bio">I chase the moment <b>just before something breaks</b>, and hold it still long enough to <b>feel it</b>.</p>
@@ -490,7 +499,14 @@ setTimeout(function(){
       <span class="c-orb" data-orb="rk" data-orb-size="medium" data-orb-bg="none"
             aria-label="Rahul Kuttappy"><img src="assets/images/logo.png" alt=""/></span>
       <p class="c-lbl">Open to projects, collabs, conversations</p>
-      <a class="c-email" href="mailto:rahulkuttappy805@gmail.com">rahulkuttappy805@gmail.com</a>
+      <!-- Kept in its own face and size: the fuzz is a drop-in over whatever
+           the stylesheet already sets. Base intensity stays very low, because
+           an address that cannot be read is not an address. -->
+      <a class="c-email" href="mailto:rahulkuttappy805@gmail.com"
+         data-fuzzy data-fuzzy-size="clamp(1rem,1.8vw,1.4rem)" data-fuzzy-weight="400"
+         data-fuzzy-spacing="0.05em" data-fuzzy-color="#EDEAE2"
+         data-fuzzy-base=".04" data-fuzzy-hover=".3" data-fuzzy-range="12"
+         data-fuzzy-transition="200">rahulkuttappy805@gmail.com</a>
       <div class="socials">
         <a href="https://www.instagram.com/rahul____kuttappy/" target="_blank" rel="noopener">Instagram</a>
         <a href="https://www.youtube.com/@rahulkuttappy" target="_blank" rel="noopener">YouTube</a>
@@ -508,7 +524,8 @@ setTimeout(function(){
   <a class="f-back" href="#hero">Back to top ↑</a>
 </footer>
 
-<script src="js/brand-orbs.js?v=20260930i" defer></script>
-<script src="js/main.js?v=20260930i" defer></script>
+<script src="js/brand-orbs.js?v=20260930k" defer></script>
+<script src="js/fuzzy-text.js?v=20260930k" defer></script>
+<script src="js/main.js?v=20260930k" defer></script>
 </body>
 </html>

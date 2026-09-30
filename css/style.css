@@ -24,7 +24,6 @@ html.no-anim #pageFade{opacity:0!important;visibility:hidden!important;}
 html.no-anim #nav,html.no-anim #hside,html.no-anim #hcontent,
 html.no-anim .hero-bio,html.no-anim .hero-scroll,
 html.no-anim .hero-stamp,html.no-anim .hero-disc{opacity:1!important;}
-html.no-anim .n1,html.no-anim .n2{transform:none!important;}
 html.no-anim .hero-inner .lc{opacity:1!important;transform:none!important;color:inherit!important;}
 html.no-anim .hg-l,html.no-anim .hg-r{transform:rotate(0deg) scaleY(1)!important;}
 html.no-anim .hg-t,html.no-anim .hg-b{transform:rotate(0deg) scaleX(1)!important;}
@@ -447,10 +446,15 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 .hero-name{
   font-family:'Geist',sans-serif;font-weight:600;
   font-size:clamp(2.6rem,7.4vw,7.2rem);
-  line-height:.88;letter-spacing:-0.052em;overflow:hidden;
+  line-height:.88;letter-spacing:-0.052em;
 }
-.n1{display:block;color:var(--off);transform:translateY(110%);}
-.n2{display:block;color:var(--red);transform:translateY(110%);}
+/* No overflow mask and no slide-up: the name is a fuzz canvas now, and the
+   mask would have cropped the displacement the effect depends on. The lines
+   keep their own colour for the moment before the canvas is built, and for
+   anyone the canvas never reaches. */
+.n1{display:block;color:var(--off);}
+.n2{display:block;color:var(--red);}
+.n1 canvas,.n2 canvas{display:block;}
 .hero-rule{width:2.5rem;height:2px;background:var(--red);margin:1.3rem 0;transform:scaleX(0);transform-origin:left;}
 /* Mono, to sit with the blocky display type rather than against it. Same
    face as the eyebrows, clock and loader. */
@@ -864,7 +868,9 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 }
 .c-lbl{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:1.5rem;}
 .c-email{display:block;font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,1.8vw,1.4rem);letter-spacing:.05em;color:var(--off);text-decoration:none;border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:.8rem;transition:border-color .3s,letter-spacing .3s;}
-.c-email:hover{border-color:var(--red);letter-spacing:.08em;}
+/* the tracking transition went with the live type: the fuzz owns the glyphs
+   now, and only the rule under them is still CSS */
+.c-email:hover{border-color:var(--red);}
 .socials{margin-top:2rem;display:flex;gap:1.8rem;flex-wrap:wrap;}
 .socials a{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:none;position:relative;padding-bottom:2px;transition:color .2s;}
 .socials a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--red);transition:width .25s;}

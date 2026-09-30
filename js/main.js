@@ -798,15 +798,15 @@ function revealHero(){
      been readable yet; by the time it fades up every character is already a
      hidden cell waiting for its scramble. Before this, the finished words sat
      visible for four hundred milliseconds and were then torn apart. */
+  /* The name is not in here: it fuzzes instead of decoding, and the two
+     cannot share an element -- the decode wraps every character in its own
+     span while the fuzz replaces the contents with a canvas. */
   const WORDS = [
     ['.hero-stamp', {stagger:12, speed:22}],
-    ['.n1',         {stagger:50, speed:30}],
-    ['.n2',         {stagger:50, speed:30}],
     ['.hero-bio',   {stagger:7,  speed:18}],
     ['.hero-disc',  {stagger:16, speed:22}]
   ].map(w=>[document.querySelector(w[0]), w[1]]);
   WORDS.forEach(w=>prepareText(w[0]));
-  gsap.set('.n1,.n2',{y:'0%'});
   gsap.set(['.hero-stamp','.hero-bio','.hero-disc'],{opacity:1});
 
   /* A comet tail behind each orb. This was a row of ghost dots reading back
@@ -973,7 +973,6 @@ function showHeroInstantly(){
   gsap.set('.hg-l,.hg-r',{x:0,y:0,rotation:0,scaleY:1});
   gsap.set('.hg-t,.hg-b',{x:0,y:0,rotation:0,scaleX:1});
   gsap.set('.hg-dot',{x:0,y:0,scale:1,opacity:1});
-  gsap.set(['.n1','.n2'],{y:'0%'});
   gsap.set('#hrule',{scaleX:1});
 }
 

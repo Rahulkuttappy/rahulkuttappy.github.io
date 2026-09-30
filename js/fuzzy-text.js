@@ -112,21 +112,30 @@
       offCtx.font = font;
       offCtx.textBaseline = 'alphabetic';
 
+      /* letter spacing may be given in em, which has to be resolved against
+         whatever the font size worked out to -- the hero name is tracked in
+         em and its size is a clamp, so a fixed pixel value would be wrong at
+         every width but one. */
+      var spacing = o.letterSpacing;
+      if (typeof spacing === 'string') {
+        spacing = /em$/.test(spacing) ? parseFloat(spacing) * numericSize : parseFloat(spacing) || 0;
+      }
+
       var total = 0, i;
-      if (o.letterSpacing !== 0) {
-        for (i = 0; i < text.length; i++) total += offCtx.measureText(text[i]).width + o.letterSpacing;
-        total -= o.letterSpacing;
+      if (spacing !== 0) {
+        for (i = 0; i < text.length; i++) total += offCtx.measureText(text[i]).width + spacing;
+        total -= spacing;
       } else {
         total = offCtx.measureText(text).width;
       }
 
       var m = offCtx.measureText(text);
       var left = m.actualBoundingBoxLeft || 0;
-      var right = o.letterSpacing !== 0 ? total : (m.actualBoundingBoxRight || m.width);
+      var right = spacing !== 0 ? total : (m.actualBoundingBoxRight || m.width);
       var ascent = m.actualBoundingBoxAscent || numericSize;
       var descent = m.actualBoundingBoxDescent || numericSize * 0.2;
 
-      var boundW = Math.ceil(o.letterSpacing !== 0 ? total : left + right);
+      var boundW = Math.ceil(spacing !== 0 ? total : left + right);
       tightH = Math.ceil(ascent + descent);
       var buffer = 10;
       offW = boundW + buffer;
@@ -149,11 +158,11 @@
       }
 
       var xOff = buffer / 2;
-      if (o.letterSpacing !== 0) {
+      if (spacing !== 0) {
         var x = xOff;
         for (i = 0; i < text.length; i++) {
           offCtx.fillText(text[i], x, ascent);
-          x += offCtx.measureText(text[i]).width + o.letterSpacing;
+          x += offCtx.measureText(text[i]).width + spacing;
         }
       } else {
         offCtx.fillText(text, xOff - left, ascent);
@@ -172,6 +181,14 @@
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       midCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      /* the margins exist only to give the fuzz somewhere to go; without
+         pulling them back the glyphs sit inset from where the text was, which
+         breaks the alignment of anything this replaces in place. */
+      canvas.style.marginLeft = -hMargin + 'px';
+      canvas.style.marginRight = -hMargin + 'px';
+      canvas.style.marginTop = -vMargin + 'px';
+      canvas.style.marginBottom = -vMargin + 'px';
 
       hit.l = hMargin + xOff; hit.t = vMargin;
       hit.r = hit.l + boundW; hit.b = hit.t + tightH;
@@ -261,8 +278,33 @@
       clickT = setTimeout(function () { clicking = false; }, 150);
     }
 
-    build();
-    if (calm) drawStill(); else play();
+    /* Measuring before the webfont lands gives the fallback face's metrics
+       and a canvas of the wrong size. The React original awaits this; leaving
+       it out happened to work wherever the font was already cached, which is
+       not the same as working. */
+    function whenReady(fn) {
+      if (!document.fonts || !document.fonts.load) { fn(); return; }
+      var sizeStr = typeof o.fontSize === 'number' ? o.fontSize + 'px' : o.fontSize;
+      var fam = o.fontFamily === 'inherit'
+        ? (getComputedStyle(el).fontFamily || 'sans-serif') : o.fontFamily;
+      /* load() wants a resolvable size; a clamp() is not one, so probe for px */
+      var px = parseFloat(sizeStr);
+      if (isNaN(px)) {
+        var probe = document.createElement('span');
+        probe.style.cssText = 'position:absolute;visibility:hidden;font-size:' + sizeStr;
+        el.appendChild(probe);
+        px = parseFloat(getComputedStyle(probe).fontSize) || 32;
+        probe.remove();
+      }
+      document.fonts.load(o.fontWeight + ' ' + px + 'px ' + fam)
+        .catch(function () {})
+        .then(function () { if (!cancelled) fn(); });
+    }
+
+    whenReady(function () {
+      build();
+      if (calm) drawStill(); else play();
+    });
     if (o.glitchMode && !calm) startGlitch();
 
     if (o.enableHover && !calm) {
