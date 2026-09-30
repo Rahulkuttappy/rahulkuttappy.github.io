@@ -19,9 +19,10 @@ const over  = document.getElementById('xover');
 const frame = document.getElementById('xframe');
 const heroL = document.getElementById('xhero');
 const works = document.getElementById('works');
+const worksIn = document.getElementById('worksIn');
 const fx    = document.getElementById('xtrail');
 const orbEl = document.getElementById('xorb');
-if(!stage || !over || !frame || !heroL || !works || !fx || !orbEl) return;
+if(!stage || !over || !frame || !heroL || !works || !worksIn || !fx || !orbEl) return;
 
 const grid  = frame.querySelector('.hero-grid');
 const dots  = grid ? [...grid.querySelectorAll('.hg-dot')] : [];        /* tl tr bl br */
@@ -43,109 +44,38 @@ const SPAN = 1.6;
 
 let W=0, H=0, TR=0, box=null, base=null, dpr=1;
 let hLines=[], vLines=[], visibleRows=0, lastP=0;
-let running=false, painting=false, trigger=null;
+let running=false, painting=false, trigger=null, fontsWatched=false;
 
 /* how long the staggers get to run in total, however many rules there are */
 const BIRTH_SPAN = .20, JOIN_SPAN = .18;
+/* where the last rule has finished connecting -- the frame has to be able to
+   show a rule by here or it is never seen */
+const DRAWN_BY = .80;
 let tierBirth = .05, tierJoin = .045;
 
 
-/* ── the heading, drawn rather than typed ─────────────────────────────────
-   Two copies of the words in SVG: one stroked, whose dash offset retreats so
-   each letter inks itself on, and one filled, clipped by a rectangle that
-   widens to flood them. A drawing being labelled. */
-const TITLE = 'Selected Works';
-const DASH  = 900;                    /* longer than any glyph outline here */
-let strokeChars=[], fillChars=[], wipeRect=null, titleBox=null, countEl=null;
+/* ── the heading ──────────────────────────────────────────────────────────
+   The section's own heading, left as it is. It was briefly drawn instead: an
+   SVG outline that inked itself on letter by letter, then a wipe that flooded
+   the letterforms. At the prototype's size the outline read as the edge of
+   the fill; at the 64px this heading is actually set in it read as a second
+   heading in red sitting behind the white one, and its box sat the rows and
+   the count out of line with it. What animates here is the count and the
+   view toggle, both of which the heading already had. */
+let countEl = null;
 
 function buildTitle(){
-  if(strokeChars.length) return;
-  countEl = hed.querySelector('em');
-  const host = document.createElement('span');
-  host.className = 'w-stroke';
-  const SVG = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(SVG,'svg');
-  svg.setAttribute('preserveAspectRatio','xMidYMid meet');
-  svg.setAttribute('aria-hidden','true');
-
-  const defs = document.createElementNS(SVG,'defs');
-  const cp = document.createElementNS(SVG,'clipPath');
-  cp.setAttribute('id','wWipe');
-  cp.setAttribute('clipPathUnits','userSpaceOnUse');
-  wipeRect = document.createElementNS(SVG,'rect');
-  wipeRect.setAttribute('width','0');
-  cp.appendChild(wipeRect); defs.appendChild(cp); svg.appendChild(defs);
-
-  const mk = attrs => {
-    const t = document.createElementNS(SVG,'text');
-    t.setAttribute('x','0'); t.setAttribute('y','0');
-    t.setAttribute('font-size','100');
-    t.setAttribute('letter-spacing','3');
-    Object.keys(attrs).forEach(k=>t.setAttribute(k,attrs[k]));
-    const cells = [...TITLE].map(ch=>{
-      const sp = document.createElementNS(SVG,'tspan');
-      sp.textContent = ch;
-      t.appendChild(sp);
-      return sp;
-    });
-    svg.appendChild(t);
-    return {node:t, cells};
-  };
-  /* inked in the brighter red the logo gradient uses -- the brand red is too
-     dark to read as a hairline against a near-black section */
-  const stroke = mk({fill:'none', stroke:'#b8514a', 'stroke-width':'1.6',
-                     'stroke-linejoin':'round', 'stroke-linecap':'round'});
-  const fill   = mk({fill:'#EDEAE2', stroke:'none', 'clip-path':'url(#wWipe)'});
-  strokeChars = stroke.cells; fillChars = fill.cells;
-  host.appendChild(svg);
-
-  /* the words themselves stay in the markup for anything that reads the page
-     rather than looks at it; only the visible copy becomes a drawing */
-  const sr = document.createElement('span');
-  sr.className = 'visually-hidden';
-  sr.textContent = TITLE;
-  hed.insertBefore(host, hed.firstChild);
-  hed.insertBefore(sr, host);
-  [...hed.childNodes].forEach(n=>{ if(n.nodeType === 3) n.remove(); });
-
-  const fit = () => {
-    let bb; try { bb = stroke.node.getBBox(); } catch(e){ return; }
-    if(!bb || !bb.width) return;
-    const pad = 8;
-    titleBox = {x:bb.x-pad, y:bb.y-pad, w:bb.width+pad*2, h:bb.height+pad*2};
-    svg.setAttribute('viewBox', titleBox.x+' '+titleBox.y+' '+titleBox.w+' '+titleBox.h);
-    wipeRect.setAttribute('x', titleBox.x);
-    wipeRect.setAttribute('y', titleBox.y);
-    wipeRect.setAttribute('height', titleBox.h);
-    /* sized off the heading it replaces, so it sits on the same line */
-    const px = parseFloat(getComputedStyle(hed).fontSize) * 1.18;
-    svg.style.height = px + 'px';
-    svg.style.width  = (titleBox.w / titleBox.h) * px + 'px';
-  };
-  fit();
-  /* Bebas arriving resizes the wordmark, which moves the rows again, so the
-     whole thing is measured once more rather than only the title. */
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(()=>{ fit(); relayout(); }).catch(()=>{});
-  }
+  if(!countEl) countEl = hed.querySelector('em');
 }
 
 function paintTitle(p){
-  if(!strokeChars.length) return;
-  const n = strokeChars.length;
-  /* the outline inks on letter by letter while the rules are connecting */
-  strokeChars.forEach((sp,i)=>{
-    const k = clamp01((p - .46 - (i/n)*.12) / .10);
-    sp.style.strokeDasharray  = DASH;
-    sp.style.strokeDashoffset = DASH * (1-k);
-  });
-  /* then the fill floods across them */
-  if(wipeRect && titleBox) wipeRect.setAttribute('width', (titleBox.w * clamp01((p - .62)/.10)).toFixed(1));
+  /* the tally runs up as the rows are outlined and lands on the real figure */
   if(countEl){
     const k = clamp01((p - .52) / .18);
     countEl.textContent = '(' + String(Math.round(k*cards.length)).padStart(2,'0') + ')';
-    countEl.style.opacity = String(clamp01((p - .50) / .06));
   }
+  /* the heading arrives with the section rather than ahead of it */
+  hed.style.opacity = String(clamp01((p - .46) / .12));
   if(toggle) toggle.style.opacity = String(clamp01((p - .72) / .10));
 }
 
@@ -203,6 +133,13 @@ function measure(){
      finally land, and the blueprint sits just off the list. */
   buildTitle();
   buildGrid();
+  /* Bebas arriving resizes the heading, which moves every row under it, so
+     the rules are measured again once the face is in rather than against the
+     fallback's metrics. */
+  if(!fontsWatched && document.fonts && document.fonts.ready){
+    fontsWatched = true;
+    document.fonts.ready.then(relayout).catch(()=>{});
+  }
 }
 
 function relayout(){
@@ -222,11 +159,11 @@ function buildGrid(){
   /* Measured where the transition puts the list, not where the flow leaves
      it. Untouched, the list sits a whole viewport lower -- below the hero --
      and every rule would be recorded that far down the frame. */
-  const prev = works.style.transform;
-  works.style.transform = 'none';
+  const prev = worksIn.style.transform;
+  worksIn.style.transform = 'none';
   works.style.top = (-H) + 'px';
   const vr = frame.getBoundingClientRect();
-  const wr = works.getBoundingClientRect();
+  const wr = worksIn.getBoundingClientRect();
   const xs = new Set(), ys = new Set();
 
   /* Only the rows the frame can show. A rule for a row below the fold would
@@ -238,9 +175,19 @@ function buildGrid(){
      edge, but not to the decimal, so rounding used to be what merged them and
      without it every rule quietly doubled. They are merged by proximity
      instead. */
+  /* Measured against the frame at the moment the drawing finishes, not
+     against the window. The frame is only full bleed at the very end, and by
+     then everything is already fading out -- so a row that merely fits on
+     screen can still have its rule drawn below the frame's bottom edge and
+     clipped away for the whole of the sequence. It was scheduled, it took up
+     a tier, and it was never once visible. */
+  const zoomAt = lerp(1.18, 1, DRAWN_BY);
+  const bAt    = lerp(box.b, H, DRAWN_BY);
   const shown = cards.filter(c=>{
     const r = c.getBoundingClientRect();
-    return r.height > 0 && (r.bottom - vr.top) <= H + 1;
+    if(r.height <= 0) return false;
+    const edge = H/2 + ((r.bottom - vr.top) - H/2) * zoomAt;
+    return edge <= bAt + 1;
   });
   visibleRows = shown.length;
   shown.forEach(c=>{
@@ -258,9 +205,9 @@ function buildGrid(){
      a CSS scale() runs about the element's own centre. Those two only
      coincide by accident, which is why the rules landed on the row borders
      most of the time and drifted off them the rest. */
-  works.style.transformOrigin =
+  worksIn.style.transformOrigin =
     (W/2 - (wr.left - vr.left)) + 'px ' + (H/2 - (wr.top - vr.top)) + 'px';
-  works.style.transform = prev;
+  worksIn.style.transform = prev;
 
   /* anything within a pixel and a half is the same edge seen twice */
   const merge = set => {
@@ -359,9 +306,14 @@ function layout(p){
      is sticky, and a transformed ancestor would give it something else to
      stick to. */
   works.style.top = (Math.min(p,1) * TR - H) + 'px';
+  /* The clip goes on the section and the scale on the wrapper inside it.
+     Both on one element and clip-path, which is applied in the element's own
+     coordinates and then transformed along with it, is dragged out past the
+     frame by the same 18% -- the section shows through above and to the left
+     of the hairlines that are meant to be holding it in. */
   works.style.clipPath = p >= 1 ? 'none'
     : 'inset(' + t + 'px ' + (W-r) + 'px ' + (H-b) + 'px ' + l + 'px)';
-  works.style.transform = p >= 1 ? 'none' : 'scale(' + lerp(1.18, 1, p) + ')';
+  worksIn.style.transform = p >= 1 ? 'none' : 'scale(' + lerp(1.18, 1, p) + ')';
   works.style.opacity = String(Math.min(1, p*3.2));
   stage.classList.toggle('xs-running', p < 1);
   /* nothing to play to behind a section that now covers it */
@@ -602,13 +554,17 @@ function disable(){
   running = painting = false;
   if(trigger){ trigger.kill(); trigger = null; }
   stage.classList.remove('xs-on','xs-running');
-  ['top','clipPath','transform','transformOrigin','opacity'].forEach(k=>works.style[k]='');
+  ['top','clipPath','opacity'].forEach(k=>works.style[k]='');
+  ['transform','transformOrigin'].forEach(k=>worksIn.style[k]='');
   heroL.style.visibility = '';
   stage.style.paddingBottom = '';
   const dust = document.getElementById('hdust');
   if(dust) dust.style.opacity = '';
   if(window.HeroDust) HeroDust.set(true);
   cards.forEach(c=>c.style.opacity = '');
+  hed.style.opacity = '';
+  if(toggle) toggle.style.opacity = '';
+  if(countEl) countEl.textContent = '(' + String(cards.length).padStart(2,'0') + ')';
   orbEl.style.opacity = '0';
   if(midOrb) midOrb.setPaused(true);
   fctx.clearRect(0,0,W,H);

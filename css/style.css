@@ -531,15 +531,6 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
       margin:-28px 0 0 -28px;z-index:3;pointer-events:none;
       opacity:0;will-change:clip-path;}
 
-/* The heading is drawn rather than typed: an outline that inks itself on
-   letter by letter, then a wipe that floods the letterforms from the left.
-   The words themselves stay in the markup for anything that reads the page
-   rather than looks at it. */
-.w-stroke{display:inline-block;vertical-align:baseline;line-height:0;margin-right:.25em;}
-.w-stroke svg{display:block;overflow:visible;}
-.w-stroke text{user-select:none;font-family:'Bebas Neue',sans-serif;}
-.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
-  overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;}
 
 /* ── with the transition on ── */
 /* Zero height, so the overlay and the hero take no room in the flow and the
@@ -550,6 +541,7 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 .xs-on .xover{position:sticky;height:0;z-index:3;}
 .xs-on .xframe{height:100svh;}
 .xs-on #works{position:relative;z-index:2;background:var(--ink);will-change:clip-path;}
+.xs-on .works-in{will-change:transform;}
 /* The header bar is sticky in the finished page, and a transform on its
    ancestor would give it a different thing to stick to. The transform is only
    there while the frame is opening, and the bar is at the top of the list for
