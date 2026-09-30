@@ -278,70 +278,100 @@ function apply(p){
   const cx = W/2, cy = H/2;
   fctx.clearRect(0,0,W,H);
 
-  const leave = clamp01((p - .80) / .2);
+  const leave = clamp01((p - .82) / .18);
 
-  /* horizontals: born on the frame's top or bottom edge, then sliding
-     vertically to the card edge they belong to. Nothing moves sideways. */
-  let live = 0;
+  /* Every line is carried by two dots that live on the frame itself and
+     travel along it -- a horizontal's pair run down the left and right edges,
+     a vertical's pair run along the top and bottom. Nothing leaves the outer
+     layer. Only once both have arrived does the line strike across between
+     them, which is the moment the grid stops being a boundary and becomes a
+     drawing. */
+  const slide = k => ease(clamp01(k));
+  let placed = 0, joined = 0;
+
   hLines.forEach(ln=>{
-    ln.on = clamp01((p - ln.birth) / .06) * (1 - leave);
-    const k = ease(clamp01((p - .22 - ln.order*.05) / .38));
-    const target = cy + (ln.y - cy) * zoom;
-    ln.py = lerp(ln.fromTop ? t : b, target, k);
-    if(ln.on > .01) live++;
+    ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
+    const k = slide((p - .14 - ln.order*.045) / .30);
+    ln.py   = lerp(ln.fromTop ? t : b, cy + (ln.y - cy) * zoom, k);
+    ln.k    = k;
+    ln.join = clamp01((p - .50 - ln.order*.03) / .16);
+    if(ln.on > .01){ placed++; if(ln.join > .01) joined++; }
   });
   vLines.forEach(ln=>{
-    ln.on = clamp01((p - ln.birth) / .06) * (1 - leave);
-    const k = ease(clamp01((p - .22 - ln.order*.05) / .38));
-    const target = cx + (ln.x - cx) * zoom;
-    ln.px = lerp(ln.fromLeft ? l : r, target, k);
-    if(ln.on > .01) live++;
+    ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
+    const k = slide((p - .14 - ln.order*.045) / .30);
+    ln.px   = lerp(ln.fromLeft ? l : r, cx + (ln.x - cx) * zoom, k);
+    ln.k    = k;
+    ln.join = clamp01((p - .50 - ln.order*.03) / .16);
+    if(ln.on > .01){ placed++; if(ln.join > .01) joined++; }
   });
-
-  /* the grid only extends as far as the grid itself */
-  const x0 = Math.min(...vLines.map(v=>v.px)), x1 = Math.max(...vLines.map(v=>v.px));
-  const y0 = Math.min(...hLines.map(h=>h.py)), y1 = Math.max(...hLines.map(h=>h.py));
 
   fctx.strokeStyle = 'rgb(237,234,226)';
   fctx.lineWidth = 1;
+
+  /* the connection is drawn out from both ends at once, so it reads as the
+     two dots reaching for each other rather than a line being revealed */
+  hLines.forEach(ln=>{
+    if(ln.on <= .01 || ln.join <= .01) return;
+    const half = (r - l) / 2, mid = (l + r) / 2;
+    fctx.globalAlpha = ln.on * .45;
+    fctx.beginPath();
+    fctx.moveTo(l, ln.py); fctx.lineTo(mid - half*(1-ln.join), ln.py);
+    fctx.moveTo(r, ln.py); fctx.lineTo(mid + half*(1-ln.join), ln.py);
+    fctx.stroke();
+  });
+  vLines.forEach(ln=>{
+    if(ln.on <= .01 || ln.join <= .01) return;
+    const half = (b - t) / 2, mid = (t + b) / 2;
+    fctx.globalAlpha = ln.on * .45;
+    fctx.beginPath();
+    fctx.moveTo(ln.px, t); fctx.lineTo(ln.px, mid - half*(1-ln.join));
+    fctx.moveTo(ln.px, b); fctx.lineTo(ln.px, mid + half*(1-ln.join));
+    fctx.stroke();
+  });
+
+  fctx.fillStyle = 'rgb(237,234,226)';
+
+  /* the dots on the frame: two per line, always on an edge */
   hLines.forEach(ln=>{
     if(ln.on <= .01) return;
-    fctx.globalAlpha = ln.on * .45;
-    fctx.beginPath(); fctx.moveTo(x0, ln.py); fctx.lineTo(x1, ln.py); fctx.stroke();
+    fctx.globalAlpha = ln.on;
+    fctx.beginPath(); fctx.arc(l, ln.py, 2, 0, Math.PI*2); fctx.fill();
+    fctx.beginPath(); fctx.arc(r, ln.py, 2, 0, Math.PI*2); fctx.fill();
   });
   vLines.forEach(ln=>{
     if(ln.on <= .01) return;
-    fctx.globalAlpha = ln.on * .45;
-    fctx.beginPath(); fctx.moveTo(ln.px, y0); fctx.lineTo(ln.px, y1); fctx.stroke();
+    fctx.globalAlpha = ln.on;
+    fctx.beginPath(); fctx.arc(ln.px, t, 2, 0, Math.PI*2); fctx.fill();
+    fctx.beginPath(); fctx.arc(ln.px, b, 2, 0, Math.PI*2); fctx.fill();
   });
 
-  /* a dot at every crossing, which is the only place a dot can be */
-  let count = 0;
-  fctx.fillStyle = 'rgb(237,234,226)';
+  /* and the crossings, which only exist once both lines have joined */
+  let cross = 0;
   vLines.forEach(v=>{
     hLines.forEach(h=>{
-      const on = Math.min(v.on, h.on);
-      if(on <= .01) return;
-      count++;
+      const on = Math.min(v.on, h.on) * Math.min(v.join, h.join);
+      if(on <= .02) return;
+      cross++;
       fctx.globalAlpha = on;
-      fctx.beginPath(); fctx.arc(v.px, h.py, 2, 0, Math.PI*2); fctx.fill();
+      fctx.beginPath(); fctx.arc(v.px, h.py, 1.8, 0, Math.PI*2); fctx.fill();
     });
   });
   fctx.globalAlpha = 1;
 
   const spent = clamp01((p - .1) / .5);
   gsap.set(lines, {opacity: 1 - spent*.92});
-  gsap.set(dots,  {opacity: 1 - clamp01((p-.24)/.26)});
+  gsap.set(dots,  {opacity: 1 - clamp01((p-.2)/.22)});
 
-  const resolve = clamp01((p - .78) / .22);
+  const resolve = clamp01((p - .80) / .2);
   cards.forEach((c,i)=>{
-    const d = clamp01((resolve - (i%3)*.05) / .85);
+    const d = clamp01((resolve - (i%3)*.04) / .88);
     c.style.opacity = String(d);
     c.style.transform = `scale(${lerp(.99,1,d)})`;
   });
 
   readout.textContent = 'progress ' + p.toFixed(2)
-    + '  ·  lines ' + live + '  ·  crossings ' + count;
+    + '  ·  on the frame ' + placed + '  ·  joined ' + joined + '  ·  crossings ' + cross;
 }
 
 measure();
