@@ -470,19 +470,24 @@ function apply(p){
      run along the frame before it starts connecting. And the last connection
      has to land before the rows resolve at .80. The run can scatter harder
      than the join, because nothing depends on the order it arrives in. */
-  const runOf  = ln => slide((p - .10 - ln.skew*.12 - ln.axis) / .20);
+  /* A dot sets off as soon as it appears. It used to be born on its tier and
+     then wait for a run that started on a different schedule, so a dozen of
+     them sat stacked on the same frame corner before any of them moved. */
+  const runOf  = ln => slide((p - ln.birth - .02) / .20);
   const joinOf = ln => clamp01(
     (p - .46 - ln.joinOrder*.045 - ln.skew*.03 - ln.axis) / .09);
 
   hLines.forEach(ln=>{
     ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
-    ln.py   = lerp(ln.fromTop ? t : b, cy + (ln.y - cy) * zoom, runOf(ln));
+    ln.run  = runOf(ln);
+    ln.py   = lerp(ln.fromTop ? t : b, cy + (ln.y - cy) * zoom, ln.run);
     ln.join = joinOf(ln);
     if(ln.on > .01){ placed++; if(ln.join > .01) joined++; }
   });
   vLines.forEach(ln=>{
     ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
-    ln.px   = lerp(ln.fromLeft ? l : r, cx + (ln.x - cx) * zoom, runOf(ln));
+    ln.run  = runOf(ln);
+    ln.px   = lerp(ln.fromLeft ? l : r, cx + (ln.x - cx) * zoom, ln.run);
     ln.join = joinOf(ln);
     if(ln.on > .01){ placed++; if(ln.join > .01) joined++; }
   });
@@ -516,16 +521,19 @@ function apply(p){
   /* The dots on the frame: two per line, always on an edge. Sat one radius
      inside it rather than centred on it, so the clip above leaves them whole
      instead of shaving them in half. */
+  /* Faint while it is still running and full strength once it is home, so a
+     dot in transit reads as on its way rather than as another arrival. */
   const R = 2;
+  const lit = ln => ln.on * (.16 + .84 * ln.run * ln.run);
   hLines.forEach(ln=>{
     if(ln.on <= .01) return;
-    fctx.globalAlpha = ln.on;
+    fctx.globalAlpha = lit(ln);
     fctx.beginPath(); fctx.arc(l + R, ln.py, R, 0, Math.PI*2); fctx.fill();
     fctx.beginPath(); fctx.arc(r - R, ln.py, R, 0, Math.PI*2); fctx.fill();
   });
   vLines.forEach(ln=>{
     if(ln.on <= .01) return;
-    fctx.globalAlpha = ln.on;
+    fctx.globalAlpha = lit(ln);
     fctx.beginPath(); fctx.arc(ln.px, t + R, R, 0, Math.PI*2); fctx.fill();
     fctx.beginPath(); fctx.arc(ln.px, b - R, R, 0, Math.PI*2); fctx.fill();
   });
