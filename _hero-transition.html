@@ -101,8 +101,12 @@
           color:var(--muted);margin:.25rem 0 0;}
   .after{padding:0 2.5rem 6rem;}
   .after .cards{border-top:0;}
-  .after p{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.16em;
-           text-transform:uppercase;color:var(--muted);}
+  /* the section's own note, not every paragraph in it -- unscoped, this also
+     caught each row's year and set it three pixels larger than the same year
+     inside the frame, so the continuation rows stood taller than the ones
+     they continue from */
+  .after > p{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.16em;
+             text-transform:uppercase;color:var(--muted);}
   /* the list is one column at every width -- the two-column rule here was
      left over from the card version and was quietly laying the rows out
      two abreast, which is why the blueprint had twice the verticals and
