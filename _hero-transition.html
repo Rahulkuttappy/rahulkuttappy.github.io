@@ -67,7 +67,7 @@
      size and scaling the canvas only softens it. */
   .orb-mid{position:absolute;left:50%;top:50%;width:56px;height:56px;
            margin:-28px 0 0 -28px;z-index:8;pointer-events:none;
-           opacity:0;will-change:transform,opacity;}
+           opacity:0;will-change:clip-path;}
 
   /* ── works layer: revealed through the frame ── */
   /* Anchored to the top and cut off by the frame. Centring it meant a list
@@ -322,19 +322,25 @@ if (window.BrandOrbs) {
 function paintOrb(p){
   const el = document.getElementById('orbMid');
   if(!el) return;
-  const inK   = clamp01((p - .12) / .08);      /* arrives as the dots run   */
-  const outK  = clamp01((p - .50) / .10);      /* leaves before the drawing */
-  const show  = inK * (1 - outK);
+  /* It does not move. A wipe travels across it left to right to bring it in,
+     and another follows to take it away, so the mark itself is only ever
+     still -- scaling it in and out fought the stillness of everything else
+     on the frame. */
+  const inK  = clamp01((p - .12) / .10);
+  const outK = clamp01((p - .34) / .08);
+  el.style.transform = 'none';
+  el.style.clipPath  = 'inset(0 ' + ((1-inK)*100).toFixed(1) + '% 0 ' + (outK*100).toFixed(1) + '%)';
+  const show = (inK > 0 && outK < 1) ? 1 : 0;
   el.style.opacity = String(show);
-  /* comes up from nothing and pushes past on the way out */
-  const sc = lerp(.72, 1, inK) * lerp(1, 1.9, outK);
-  el.style.transform = 'scale(' + sc.toFixed(3) + ')';
   if(midOrb){
-    /* the cycle completes as the exit begins, not during it, so the loop is
-       finished before the orb starts to go */
-    const k = clamp01((p - .12) / .38);
+    /* one full cycle across the hold, finished by the time the wipe out
+       starts rather than during it. The mark is gone at .42; the innermost
+       tier does not start connecting until .46 and still has to cross half
+       the frame to reach the centre, so the earliest a rule can lie over the
+       mark is about .52 whatever the window is. It is never drawn through. */
+    const k = clamp01((p - .12) / .22);
     midOrb.setTime(k * ORB_CYCLE_MS);
-    midOrb.setPaused(show <= .01);
+    midOrb.setPaused(!show);
   }
 }
 
