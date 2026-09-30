@@ -216,11 +216,9 @@ function buildGrid(){
     ys.add(Math.round(r.bottom - vr.top));
     xs.add(Math.round(r.left - vr.left));
     xs.add(Math.round(r.right - vr.left));
-    /* the gutter comes from where the second grid column starts, not from the
-       width of the number's own text -- "01" and "12" are not the same width,
-       so measuring the text gave a different vertical for every row */
-    const mid = c.children[1];
-    if(mid) xs.add(Math.round(mid.getBoundingClientRect().left - vr.left - 11));
+    /* No gutter line. It landed a few pixels inside the left edge and read as
+       a doubled rail rather than as structure, and the list does not draw one
+       either. Two verticals, the edges, and the rules do the rest. */
     /* deliberately not the title's own left edge: the titles are right
        aligned in an auto column, so every row starts somewhere different and
        the blueprint turns into a spreadsheet. The list has three verticals --
