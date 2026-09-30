@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Contact section designs</title>
+<!-- Local scratch page. Not linked, not in the sitemap. Five takes on the
+     "LET'S MAKE SOMETHING REAL" block, in the site's own type and colour. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{--red:#7A1B18;--red-glow:122,27,24;--off:#EDEAE2;--muted:#5a5652;
+        --border:rgba(237,234,226,.1);--bg:#080808;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--off);font-family:'Inter',system-ui,sans-serif;}
+  a{text-decoration:none;color:inherit;}
+  .lab{padding:2.8rem 2.5rem 1rem;font-family:'JetBrains Mono',monospace;
+       font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
+  .lab b{color:var(--red);font-weight:700;}
+  .lab i{font-style:normal;color:rgba(237,234,226,.45);text-transform:none;letter-spacing:.06em;font-size:.58rem;}
+
+  /* shared: the studio frame behind each block */
+  .sec{position:relative;overflow:hidden;border-top:1px solid var(--border);padding:7rem 2.5rem;}
+  .sec-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .sec-bg img{width:100%;height:100%;object-fit:cover;object-position:center 45%;
+              opacity:.16;filter:grayscale(1) contrast(1.08) brightness(.8);}
+  .sec-bg::after{content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at 50% 45%,rgba(8,8,8,.35) 0%,rgba(8,8,8,.7) 58%,rgba(8,8,8,.96) 100%);}
+  .inner{position:relative;z-index:1;}
+  .hed{font-family:'Bebas Neue',sans-serif;letter-spacing:.02em;line-height:.85;color:var(--off);margin:0;}
+  .hed em{color:var(--red);font-style:normal;}
+  .eye{font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
+       letter-spacing:.24em;text-transform:uppercase;color:var(--red);margin:0 0 1.2rem;}
+  .socials{display:flex;gap:1.8rem;flex-wrap:wrap;}
+  .socials a{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
+             position:relative;padding-bottom:2px;transition:color .2s;}
+  .socials a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;
+                    background:var(--red);transition:width .25s;}
+  .socials a:hover{color:var(--off);} .socials a:hover::after{width:100%;}
+
+  /* ── 01 CURRENT ── */
+  .c1-grid{display:grid;grid-template-columns:1fr 1fr;gap:7rem;align-items:center;}
+  .c1 .hed{font-size:clamp(3rem,9vw,9rem);}
+  .c1-lbl{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin:0 0 1.5rem;}
+  .c1-mail{display:block;font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,1.8vw,1.4rem);
+           letter-spacing:.05em;border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:.8rem;}
+  .c1 .socials{margin-top:2rem;}
+  .c1-orb{display:block;width:56px;height:56px;margin-bottom:1.4rem;}
+  .c1-orb img{height:16px;opacity:.5;} .c1-orb[data-orb-mounted] img{display:none;}
+
+  /* ── 02 THE EMAIL IS THE HEADLINE ── */
+  .c2{text-align:center;padding:8rem 2.5rem;}
+  .c2 .eye{margin-bottom:1.8rem;}
+  .c2-mail{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,6.6vw,5.4rem);
+           letter-spacing:.01em;line-height:1;color:var(--off);display:inline-block;
+           border-bottom:2px solid rgba(237,234,226,.14);padding-bottom:.3rem;
+           transition:border-color .35s ease,color .35s ease;word-break:break-word;}
+  .c2-mail:hover{border-color:var(--red);}
+  .c2-sub{margin:2rem 0 0;font-family:'JetBrains Mono',monospace;font-size:.56rem;
+          letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+  .c2 .socials{justify-content:center;margin-top:2.6rem;}
+
+  /* ── 03 SPEC SHEET ── */
+  .c3-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:5rem;align-items:end;}
+  .c3 .hed{font-size:clamp(2.6rem,7.4vw,7rem);}
+  .c3-rows{border-top:1px solid var(--border);}
+  .c3-row{display:grid;grid-template-columns:8rem 1fr;gap:1.4rem;align-items:baseline;
+          padding:1.05rem 0;border-bottom:1px solid var(--border);}
+  .c3-k{font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
+        letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
+  .c3-v{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.05em;
+        color:rgba(237,234,226,.82);}
+  .c3-v em{font-style:normal;color:var(--red);}
+  .c3-v a{border-bottom:1px solid var(--border);padding-bottom:2px;transition:border-color .3s;}
+  .c3-v a:hover{border-color:var(--red);}
+  .c3 .socials{margin-top:1.6rem;}
+
+  /* ── 04 ORB LED ── */
+  .c4{text-align:center;padding:7rem 2.5rem;}
+  .c4-orb{width:56px;height:56px;margin:0 auto 2rem;}
+  .c4-orb img{height:16px;opacity:.5;} .c4-orb[data-orb-mounted] img{display:none;}
+  .c4 .hed{font-size:clamp(2.4rem,7vw,6.4rem);margin-bottom:2rem;}
+  .c4-mail{font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:.12em;
+           color:rgba(237,234,226,.78);border:1px solid var(--border);
+           padding:.95rem 1.8rem;display:inline-block;transition:border-color .3s,color .3s,background .3s;}
+  .c4-mail:hover{border-color:var(--red);color:var(--off);background:rgba(var(--red-glow),.08);}
+  .c4 .socials{justify-content:center;margin-top:2.4rem;}
+
+  /* ── 05 EDGE TO EDGE ── */
+  .c5{padding:0;}
+  .c5-top{padding:6rem 2.5rem 2.4rem;}
+  .c5 .hed{font-size:clamp(3rem,11vw,11rem);}
+  .c5-band{border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+           display:grid;grid-template-columns:repeat(3,1fr);}
+  .c5-cell{padding:1.7rem 2.5rem;border-right:1px solid var(--border);}
+  .c5-cell:last-child{border-right:0;}
+  .c5-k{font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
+        letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;}
+  .c5-v{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.05em;
+        color:rgba(237,234,226,.8);}
+  .c5-v em{font-style:normal;color:var(--red);}
+  .c5-bottom{padding:1.6rem 2.5rem 5rem;}
+
+  @media(max-width:900px){
+    .c1-grid,.c3-grid{grid-template-columns:1fr;gap:2.6rem;}
+    .c5-band{grid-template-columns:1fr;}
+    .c5-cell{border-right:0;border-bottom:1px solid var(--border);}
+  }
+</style>
+</head>
+<body>
+
+<p class="lab"><b>01</b> &mdash; Current &nbsp; <i>headline left, details right, orb above the label</i></p>
+<section class="sec c1">
+  <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
+  <div class="inner c1-grid">
+    <div><h2 class="hed">LET'S<br>MAKE<br><em>SOMETHING</em><br>REAL</h2></div>
+    <div>
+      <span class="c1-orb" data-orb="rk" data-orb-size="medium" data-orb-bg="none"><img src="assets/images/logo.png" alt=""/></span>
+      <p class="c1-lbl">Open to projects, collabs, conversations</p>
+      <a class="c1-mail" href="#">rahulkuttappy805@gmail.com</a>
+      <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
+    </div>
+  </div>
+</section>
+
+<p class="lab"><b>02</b> &mdash; The email is the headline &nbsp; <i>one thing to do, set as large as the name</i></p>
+<section class="sec c2">
+  <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
+  <div class="inner">
+    <p class="eye">Let's make something real</p>
+    <a class="c2-mail" href="#">rahulkuttappy805@gmail.com</a>
+    <p class="c2-sub">Open to projects, collabs, conversations &mdash; Calicut // Bengaluru</p>
+    <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
+  </div>
+</section>
+
+<p class="lab"><b>03</b> &mdash; Spec sheet &nbsp; <i>the headline kept, the details as a technical readout</i></p>
+<section class="sec c3">
+  <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
+  <div class="inner c3-grid">
+    <div><h2 class="hed">LET'S<br>MAKE<br><em>SOMETHING</em><br>REAL</h2></div>
+    <div>
+      <div class="c3-rows">
+        <div class="c3-row"><div class="c3-k">Status</div><div class="c3-v"><em>&bull;</em> Open for 2026</div></div>
+        <div class="c3-row"><div class="c3-k">Based</div><div class="c3-v">Calicut <em>//</em> Bengaluru</div></div>
+        <div class="c3-row"><div class="c3-k">Works in</div><div class="c3-v">Film / Edit / Colour / Stills</div></div>
+        <div class="c3-row"><div class="c3-k">Email</div><div class="c3-v"><a href="#">rahulkuttappy805@gmail.com</a></div></div>
+      </div>
+      <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
+    </div>
+  </div>
+</section>
+
+<p class="lab"><b>04</b> &mdash; Orb led &nbsp; <i>centred, the monogram opening it, one button to press</i></p>
+<section class="sec c4">
+  <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
+  <div class="inner">
+    <span class="c4-orb" data-orb="rk" data-orb-size="medium" data-orb-bg="none"><img src="assets/images/logo.png" alt=""/></span>
+    <h2 class="hed">LET'S MAKE<br><em>SOMETHING REAL</em></h2>
+    <a class="c4-mail" href="#">rahulkuttappy805@gmail.com</a>
+    <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
+  </div>
+</section>
+
+<p class="lab"><b>05</b> &mdash; Edge to edge &nbsp; <i>headline big, then a ruled band across the full width</i></p>
+<section class="sec c5">
+  <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
+  <div class="inner">
+    <div class="c5-top"><h2 class="hed">LET'S MAKE<br><em>SOMETHING REAL</em></h2></div>
+    <div class="c5-band">
+      <div class="c5-cell"><div class="c5-k">Email</div><div class="c5-v"><a href="#">rahulkuttappy805@gmail.com</a></div></div>
+      <div class="c5-cell"><div class="c5-k">Based</div><div class="c5-v">Calicut <em>//</em> Bengaluru</div></div>
+      <div class="c5-cell"><div class="c5-k">Status</div><div class="c5-v"><em>&bull;</em> Open for 2026</div></div>
+    </div>
+    <div class="c5-bottom">
+      <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
+    </div>
+  </div>
+</section>
+
+<p class="lab" style="padding-bottom:3rem">end</p>
+
+<script src="js/brand-orbs.js"></script>
+</body>
+</html>
