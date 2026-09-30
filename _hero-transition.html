@@ -48,7 +48,7 @@
        color:rgba(237,234,226,.42);max-width:44ch;margin:0;}
 
   /* ── the frame: four hairlines and four dots, as on the real hero ── */
-  .grid{position:absolute;inset:0;z-index:4;pointer-events:none;}
+  .grid{position:absolute;inset:0;z-index:7;pointer-events:none;}
   .grid i{position:absolute;background:rgba(237,234,226,.13);}
   .hg-l{top:0;bottom:0;width:1px;left:var(--px);}
   .hg-r{top:0;bottom:0;width:1px;right:var(--px);}
@@ -59,7 +59,10 @@
   .d-tr{right:var(--px);top:var(--pt);margin:-2.5px -2.5px 0 0;}
   .d-bl{left:var(--px);bottom:var(--pb);margin:0 0 -2.5px -2.5px;}
   .d-br{right:var(--px);bottom:var(--pb);margin:0 -2.5px -2.5px 0;}
-  .trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;}
+  /* Above the works layer: the blueprint is drawn over the empty section,
+     and the cards resolve underneath it as it leaves. Below z-index 5 it
+     was simply covered the moment the clip opened. */
+  .trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;}
 
   /* ── works layer: revealed through the frame ── */
   .works{position:absolute;inset:0;z-index:5;background:var(--bg);
@@ -153,7 +156,7 @@ const dots  = [...grid.querySelectorAll('.dot')];              /* tl tr bl br */
 const lines = ['.hg-t','.hg-r','.hg-b','.hg-l'].map(s => grid.querySelector(s));
 const ENDS  = [[0,1],[1,3],[2,3],[0,2]];
 
-let W=0,H=0,box=null,base=null,dpr=1,outline=[],swarm=[];
+let W=0,H=0,box=null,base=null,dpr=1,nodes=[],edges=[];
 const lerp = (a,b,k)=>a+(b-a)*k;
 const clamp01 = v => v<0?0:v>1?1:v;
 const ease = v => v<.5 ? 4*v*v*v : 1-Math.pow(-2*v+2,3)/2;   /* in-out cubic */
@@ -163,7 +166,7 @@ function measure(){
   dpr = Math.min(2, devicePixelRatio||1);
   fx.width = Math.round(W*dpr); fx.height = Math.round(H*dpr);
   fctx.setTransform(dpr,0,0,dpr,0,0);
-  fctx.lineCap='round'; fctx.lineJoin='round'; fctx.strokeStyle='rgb(237,234,226)';
+  fctx.lineCap='round'; fctx.lineJoin='round';
   const l = lines[3].offsetLeft, r = lines[1].offsetLeft, t = lines[0].offsetTop, b = lines[2].offsetTop;
   box = {l, r, t, b};
   base = lines.map((el,i)=>({
@@ -172,46 +175,53 @@ function measure(){
     len:(i%2) ? el.offsetHeight : el.offsetWidth,
     vert: !!(i%2)
   }));
-  buildOutline();
-  buildSwarm();
+  buildBlueprint();
 }
 
-/* Sample the edges of every card, at the size they end up. The swarm draws
-   this: the shape of the section before the section is there. */
-function buildOutline(){
+/* The blueprint: every card contributes four corners and the four lines
+   between them. Measured at the size the cards end up, so the drawing is the
+   section's real geometry rather than an impression of it. */
+function buildBlueprint(){
   const prev = worksIn.style.transform;
   worksIn.style.transform = 'none';
   const vr = vp.getBoundingClientRect();
-  outline = [];
-  const STEP = 26;
+  nodes = []; edges = [];
   cards.forEach(c=>{
     const r = c.getBoundingClientRect();
     const x0=r.left-vr.left, y0=r.top-vr.top, x1=x0+r.width, y1=y0+r.height;
-    const nx = Math.max(2, Math.round(r.width/STEP));
-    const ny = Math.max(2, Math.round(r.height/STEP));
-    for(let i=0;i<nx;i++){ const f=i/nx; outline.push({x:lerp(x0,x1,f), y:y0});
-                                          outline.push({x:lerp(x1,x0,f), y:y1}); }
-    for(let i=0;i<ny;i++){ const f=i/ny; outline.push({x:x1, y:lerp(y0,y1,f)});
-                                          outline.push({x:x0, y:lerp(y1,y0,f)}); }
+    const i0 = nodes.length;
+    nodes.push({x:x0,y:y0},{x:x1,y:y0},{x:x1,y:y1},{x:x0,y:y1});
+    edges.push([i0,i0+1],[i0+1,i0+2],[i0+2,i0+3],[i0+3,i0]);
   });
   worksIn.style.transform = prev;
+
+  /* Order them around the frame so each one has somewhere on the perimeter to
+     have come from, then hand out birth times in tiers: four to begin with,
+     the ones already there, then four more, then eight, then the rest. The
+     count doubles, so it reads as multiplying rather than as a crowd. */
+  const cx = W/2, cy = H/2;
+  const ring = nodes.map((n,i)=>({i, a: Math.atan2(n.y-cy, n.x-cx)}))
+                    .sort((p,q)=>p.a-q.a);
+  ring.forEach((e,k)=>{
+    const n = nodes[e.i];
+    n.u = (k + .5) / ring.length;                 /* where on the frame it starts */
+    const tier = (k % 6 === 0) ? 0 : (k % 3 === 0) ? 1 : (k % 2 === 0) ? 2 : 3;
+    n.birth = tier * .06;
+    n.tier = tier;
+  });
 }
 
-/* Every dot peels off a point on the frame itself, so the lines are what the
-   swarm is made of rather than something sitting beside it. */
-function buildSwarm(){
-  swarm = outline.map((pt,i)=>{
-    const side = i % 4;
-    const u = Math.random();
-    return {
-      target: pt,
-      side, u,
-      delay: Math.random()*.34,          /* they do not all leave at once */
-      spin: (Math.random()-.5)*2,
-      size: .9 + Math.random()*1.1,
-      hist: []
-    };
-  });
+/* a point on the frame's perimeter, clockwise from the top-left corner */
+function onPerimeter(u, l, r, t, b){
+  const w = r-l, h = b-t, per = 2*(w+h);
+  let d = ((u % 1) + 1) % 1 * per;
+  if(d < w)        return {x:l+d,       y:t};
+  d -= w;
+  if(d < h)        return {x:r,         y:t+d};
+  d -= h;
+  if(d < w)        return {x:r-d,       y:b};
+  d -= w;
+  return             {x:l,              y:b-d};
 }
 
 function paintFrame(l,r,t,b){
@@ -228,11 +238,9 @@ function paintFrame(l,r,t,b){
     o[bs.vert?'scaleY':'scaleX'] = len/bs.len;
     gsap.set(lines[i], o);
   });
-  return pts;
 }
 
 function apply(p){
-  /* the frame opens from the title box out to the whole screen */
   const l = lerp(box.l, 0, p), r = lerp(box.r, W, p);
   const t = lerp(box.t, 0, p), b = lerp(box.b, H, p);
   paintFrame(l,r,t,b);
@@ -245,77 +253,75 @@ function apply(p){
   panel.style.transform = `scale(${lerp(1, 1.35, p)})`;
   panel.style.opacity   = String(Math.max(0, 1 - p*1.9));
 
-  /* ── the swarm ──
-     peel off the frame, fly to the outline of the work, hold it, then go */
   const cx = W/2, cy = H/2;
   fctx.clearRect(0,0,W,H);
-  let lit = 0;
 
-  swarm.forEach(s=>{
-    /* where it starts: a point on the frame's own perimeter */
-    let ox, oy;
-    if(s.side===0){ ox = lerp(l,r,s.u); oy = t; }
-    else if(s.side===1){ ox = r; oy = lerp(t,b,s.u); }
-    else if(s.side===2){ ox = lerp(r,l,s.u); oy = b; }
-    else { ox = l; oy = lerp(b,t,s.u); }
+  /* Each node: born on the frame, then drawn across to its place in the
+     blueprint, then gone. */
+  let live = 0;
+  nodes.forEach(n=>{
+    const born = clamp01((p - n.birth) / .05);
+    if(born <= 0){ n.on = 0; return; }
+    const travel = ease(clamp01((p - .26 - n.tier*.02) / .34));
+    const leave  = clamp01((p - .80) / .2);
 
-    /* the target rides the same zoom the cards do, so it lands on them */
-    const tx = cx + (s.target.x - cx) * zoom;
-    const ty = cy + (s.target.y - cy) * zoom;
+    const from = onPerimeter(n.u, l, r, t, b);
+    const tx = cx + (n.x - cx) * zoom;
+    const ty = cy + (n.y - cy) * zoom;
 
-    const fly  = ease(clamp01((p - .06 - s.delay*.5) / .42));
-    const go   = clamp01((p - .74) / .26);
-
-    let x = lerp(ox, tx, fly);
-    let y = lerp(oy, ty, fly);
-    /* and on the way out they carry on past, away from the middle */
-    if(go > 0){
-      const away = go*go*260;
-      const a = Math.atan2(ty-cy, tx-cx) + s.spin*.35*go;
-      x += Math.cos(a)*away; y += Math.sin(a)*away;
+    n.px = lerp(from.x, tx, travel);
+    n.py = lerp(from.y, ty, travel);
+    n.on = born * (1 - leave);
+    n.travel = travel;
+    if(leave > 0){
+      const a = Math.atan2(ty-cy, tx-cx);
+      n.px += Math.cos(a)*leave*leave*200;
+      n.py += Math.sin(a)*leave*leave*200;
     }
+    if(n.on > .01) live++;
+  });
 
-    const alpha = Math.min(fly*2.2, 1) * (1-go) * .85;
-    if(alpha <= .01) { s.hist.length = 0; return; }
-    lit++;
-
-    s.hist.unshift({x,y});
-    if(s.hist.length > 5) s.hist.pop();
-    const sp = s.hist[1] ? Math.hypot(x-s.hist[1].x, y-s.hist[1].y) : 0;
-    if(sp > .6){
-      for(let k=0;k<s.hist.length-1;k++){
-        const f = 1 - k/(s.hist.length-1);
-        fctx.globalAlpha = alpha*.5*f*f;
-        fctx.lineWidth = Math.max(.35, 2.2*f*s.size);
-        fctx.beginPath();
-        fctx.moveTo(s.hist[k].x, s.hist[k].y);
-        fctx.lineTo(s.hist[k+1].x, s.hist[k+1].y);
-        fctx.stroke();
-      }
-    }
-    fctx.globalAlpha = alpha;
+  /* The lines between them only exist once both ends have arrived, so the
+     drawing assembles itself edge by edge rather than stretching into place. */
+  fctx.strokeStyle = 'rgb(237,234,226)';
+  fctx.lineWidth = 1;
+  edges.forEach(([i,j])=>{
+    const A = nodes[i], B = nodes[j];
+    if(!A.on || !B.on) return;
+    const k = Math.min(A.travel, B.travel);
+    if(k <= .55) return;
+    const drawn = clamp01((k - .55) / .45);
+    fctx.globalAlpha = Math.min(A.on, B.on) * drawn * .5;
     fctx.beginPath();
-    fctx.arc(x, y, 1.15*s.size, 0, Math.PI*2);
-    fctx.fillStyle = 'rgb(237,234,226)';
+    fctx.moveTo(A.px, A.py);
+    fctx.lineTo(lerp(A.px, B.px, drawn), lerp(A.py, B.py, drawn));
+    fctx.stroke();
+  });
+
+  fctx.fillStyle = 'rgb(237,234,226)';
+  nodes.forEach(n=>{
+    if(!n.on || n.on <= .01) return;
+    fctx.globalAlpha = n.on;
+    fctx.beginPath();
+    fctx.arc(n.px, n.py, 2, 0, Math.PI*2);
     fctx.fill();
   });
   fctx.globalAlpha = 1;
 
-  /* the frame's own lines fade as the swarm takes over -- they are being
-     spent, not simply switched off */
+  /* the frame is spent into the blueprint */
   const spent = clamp01((p - .1) / .5);
-  gsap.set(lines, {opacity: 1 - spent*.9});
-  gsap.set(dots,  {opacity: 1 - clamp01((p-.3)/.3)});
+  gsap.set(lines, {opacity: 1 - spent*.92});
+  gsap.set(dots,  {opacity: 1 - clamp01((p-.24)/.26)});
 
-  /* the cards resolve only once their outline has been drawn */
-  const resolve = clamp01((p - .7) / .26);
+  /* and the cards fill the drawing in, once it has been made */
+  const resolve = clamp01((p - .78) / .22);
   cards.forEach((c,i)=>{
-    const d = clamp01((resolve - (i%3)*.06) / .8);
+    const d = clamp01((resolve - (i%3)*.05) / .85);
     c.style.opacity = String(d);
-    c.style.transform = `scale(${lerp(.985,1,d)})`;
+    c.style.transform = `scale(${lerp(.99,1,d)})`;
   });
 
-  readout.textContent = 'progress ' + p.toFixed(2) + '  ·  dots ' + lit;
+  readout.textContent = 'progress ' + p.toFixed(2) + '  ·  dots ' + live + '/' + nodes.length;
 }
 
 measure();
