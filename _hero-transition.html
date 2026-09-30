@@ -199,8 +199,12 @@ function measure(){
     len:(i%2) ? el.offsetHeight : el.offsetWidth,
     vert: !!(i%2)
   }));
-  buildGrid();
+  /* Title first. Turning the heading into an SVG changes the header's height,
+     and the rules are measured from where the rows sit -- built the other way
+     round, every rule was recorded about four pixels above where the row
+     borders finally landed, and the blueprint sat just off the list. */
   buildTitle();
+  buildGrid();
 }
 
 /* StrokeText, rebuilt off React and driven by the scroll rather than by a
@@ -250,7 +254,7 @@ function buildTitle(){
   strokeChars = stroke.cells; fillChars = fill.cells;
   host.appendChild(svg);
 
-  const measure = () => {
+  const fit = () => {
     let bb; try { bb = stroke.node.getBBox(); } catch(e){ return; }
     if(!bb || !bb.width) return;
     const pad = 8;
@@ -265,8 +269,19 @@ function buildTitle(){
     svg.style.height = px + 'px';
     svg.style.width = (titleBox.w / titleBox.h) * px + 'px';
   };
+  fit();
+  /* Bebas arriving resizes the wordmark, which moves the rows again, so the
+     whole thing is measured once more rather than only the title. */
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(()=>{ fit(); relayout(); }).catch(()=>{});
+  }
+}
+
+let lastP = 0;
+function relayout(){
   measure();
-  if(document.fonts && document.fonts.ready) document.fonts.ready.then(measure).catch(()=>{});
+  if(window.ScrollTrigger && ScrollTrigger.refresh) ScrollTrigger.refresh();
+  apply(lastP);
 }
 
 function paintTitle(p){
@@ -307,12 +322,18 @@ function buildGrid(){
      and below every row; verticals are the two edges and the gutter the
      number column ends at -- which is the structure the section actually has,
      rather than a rectangle drawn round each item. */
+  /* Sub-pixel, because rounding to whole pixels was the last half pixel of
+     drift between a rule and the border under it. Adjacent rows share an
+     edge, but not to the decimal -- a row's bottom and the next row's top can
+     differ by a fraction -- so rounding used to be what merged them, and
+     without it every rule quietly doubled. They are merged by proximity
+     below instead. */
   cards.forEach(c=>{
     const r = c.getBoundingClientRect();
-    ys.add(Math.round(r.top - vr.top));
-    ys.add(Math.round(r.bottom - vr.top));
-    xs.add(Math.round(r.left - vr.left));
-    xs.add(Math.round(r.right - vr.left));
+    ys.add(r.top - vr.top);
+    ys.add(r.bottom - vr.top);
+    xs.add(r.left - vr.left);
+    xs.add(r.right - vr.left);
     /* No gutter line. It landed a few pixels inside the left edge and read as
        a doubled rail rather than as structure, and the list does not draw one
        either. Two verticals, the edges, and the rules do the rest. */
@@ -321,13 +342,32 @@ function buildGrid(){
        the blueprint turns into a spreadsheet. The list has three verticals --
        the two edges and the gutter -- and that is what it should draw. */
   });
+  /* The blueprint's targets are worked out as a scale about the middle of the
+     viewport, but a CSS scale() runs about the element's own centre. Those
+     two only coincide by accident, which is why the rules landed on the row
+     borders most of the time and drifted off them the rest. Pinning the
+     origin to the viewport centre makes the assumption true instead of
+     hoping it is. */
+  const originX = W/2 - (worksIn.getBoundingClientRect().left - vr.left);
+  const originY = H/2 - (worksIn.getBoundingClientRect().top  - vr.top);
+  worksIn.style.transformOrigin = originX + 'px ' + originY + 'px';
+
   worksIn.style.transform = prev;
 
   const cy = H/2, cx = W/2;
   /* each new line peels off whichever frame edge it is nearer, so nothing
      ever crosses the frame to get where it is going */
-  hLines = [...ys].sort((a,b)=>a-b).map(y => ({ y, fromTop: y < cy }));
-  vLines = [...xs].sort((a,b)=>a-b).map(x => ({ x, fromLeft: x < cx }));
+  /* anything within a pixel and a half is the same edge seen twice */
+  const merge = set => {
+    const out = [];
+    [...set].sort((a,b)=>a-b).forEach(v=>{
+      if(!out.length || v - out[out.length-1] > 1.5) out.push(v);
+      else out[out.length-1] = (out[out.length-1] + v) / 2;
+    });
+    return out;
+  };
+  hLines = merge(ys).map(y => ({ y, fromTop: y < cy }));
+  vLines = merge(xs).map(x => ({ x, fromLeft: x < cx }));
 
   /* births in tiers, outermost first, so the count doubles inward */
   /* A stable scatter per line. Distance from the edge is mirror symmetric --
@@ -450,24 +490,24 @@ function apply(p){
   fctx.strokeStyle = 'rgb(237,234,226)';
   fctx.lineWidth = 1;
 
-  /* the connection is drawn out from both ends at once, so it reads as the
-     two dots reaching for each other rather than a line being revealed */
+  /* Each line is drawn in one direction, from the dot it starts at to the dot
+     it ends at -- verticals down the page, horizontals across it. It used to
+     grow from both ends and meet in the middle, which read as the line
+     appearing rather than being drawn. */
   hLines.forEach(ln=>{
     if(ln.on <= .01 || ln.join <= .01) return;
-    const half = (r - l) / 2, mid = (l + r) / 2;
     fctx.globalAlpha = ln.on * .45;
     fctx.beginPath();
-    fctx.moveTo(l, ln.py); fctx.lineTo(mid - half*(1-ln.join), ln.py);
-    fctx.moveTo(r, ln.py); fctx.lineTo(mid + half*(1-ln.join), ln.py);
+    fctx.moveTo(l, ln.py);
+    fctx.lineTo(lerp(l, r, ln.join), ln.py);
     fctx.stroke();
   });
   vLines.forEach(ln=>{
     if(ln.on <= .01 || ln.join <= .01) return;
-    const half = (b - t) / 2, mid = (t + b) / 2;
     fctx.globalAlpha = ln.on * .45;
     fctx.beginPath();
-    fctx.moveTo(ln.px, t); fctx.lineTo(ln.px, mid - half*(1-ln.join));
-    fctx.moveTo(ln.px, b); fctx.lineTo(ln.px, mid + half*(1-ln.join));
+    fctx.moveTo(ln.px, t);
+    fctx.lineTo(ln.px, lerp(t, b, ln.join));
     fctx.stroke();
   });
 
@@ -519,6 +559,7 @@ function apply(p){
     c.style.transform = `scale(${lerp(.99,1,d)})`;
   });
 
+  lastP = p;
   readout.textContent = 'progress ' + p.toFixed(2)
     + '  ·  on the frame ' + placed + '  ·  joined ' + joined + '  ·  crossings ' + cross;
 }
