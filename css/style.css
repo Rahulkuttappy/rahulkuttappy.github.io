@@ -437,10 +437,14 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
   letter-spacing:.24em;text-transform:uppercase;color:rgba(237,234,226,.5);
   margin-bottom:.9rem;opacity:0;
 }
+/* The disciplines read in the same voice as the bio above them -- same mono,
+   same caps, same tracking -- and sit against the right edge of the panel, so
+   the block is anchored at both corners rather than all down one side. */
 .hero-disc{
-  margin-top:auto;padding-top:1.6rem;
-  font-family:'Geist',sans-serif;font-weight:500;letter-spacing:-.01em;
-  font-size:clamp(.8rem,1.5vw,1.1rem);color:rgba(237,234,226,.8);opacity:0;
+  margin-top:auto;padding-top:1.6rem;text-align:right;
+  font-family:'JetBrains Mono',monospace;font-weight:400;
+  font-size:clamp(.66rem,.82vw,.78rem);letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(237,234,226,.62);opacity:0;
 }
 .hero-disc i{color:rgba(237,234,226,.28);font-style:normal;margin:0 .5rem;}
 .hero-name{
@@ -931,7 +935,7 @@ footer p{font-size:.5rem;letter-spacing:.1em;color:var(--muted);}
   .hero-side{display:none;}
   #hero{--px:5%;--pt:20%;--pb:14%;}
   .hero-content{padding:1.2rem 1rem;}
-  .hero-disc{padding-top:1rem;font-size:.82rem;}
+  .hero-disc{padding-top:1rem;}   /* size stays on the clamp, so it tracks the bio */
   #works{padding:5rem 1.5rem 0;}
   .wgrid{grid-template-columns:1fr;}
   #about{grid-template-columns:1fr;gap:3rem;padding:5rem 1.5rem;}
