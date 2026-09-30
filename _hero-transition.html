@@ -144,6 +144,10 @@
           <a class="card"><span class="c-num">06</span><span></span><div class="c-info"><h3 class="c-title">KNARI</h3><p class="c-year">2024</p></div></a>
           <a class="card"><span class="c-num">07</span><span></span><div class="c-info"><h3 class="c-title">MILES MASTERCLASS</h3><p class="c-year">2026</p></div></a>
           <a class="card"><span class="c-num">08</span><span></span><div class="c-info"><h3 class="c-title">HYROX</h3><p class="c-year">2026</p></div></a>
+          <a class="card"><span class="c-num">09</span><span></span><div class="c-info"><h3 class="c-title">CONCERT</h3><p class="c-year">2026</p></div></a>
+          <a class="card"><span class="c-num">10</span><span></span><div class="c-info"><h3 class="c-title">BRAND SHOWREELS</h3><p class="c-year">2026</p></div></a>
+          <a class="card"><span class="c-num">11</span><span></span><div class="c-info"><h3 class="c-title">WEDDING FILMS</h3><p class="c-year">2026</p></div></a>
+          <a class="card"><span class="c-num">12</span><span></span><div class="c-info"><h3 class="c-title">ONAM&#x27;23 W/ABIDA</h3><p class="c-year">2023</p></div></a>
         </div>
       </div>
     </div>
@@ -181,6 +185,9 @@ const lines = ['.hg-t','.hg-r','.hg-b','.hg-l'].map(s => grid.querySelector(s));
 const ENDS  = [[0,1],[1,3],[2,3],[0,2]];
 
 let W=0,H=0,box=null,base=null,dpr=1,hLines=[],vLines=[];
+/* how long the staggers get to run in total, however many lines there are */
+const BIRTH_SPAN = .20, JOIN_SPAN = .18;
+let tierBirth = .05, tierJoin = .045;
 const lerp = (a,b,k)=>a+(b-a)*k;
 const clamp01 = v => v<0?0:v>1?1:v;
 const ease = v => v<.5 ? 4*v*v*v : 1-Math.pow(-2*v+2,3)/2;   /* in-out cubic */
@@ -391,7 +398,6 @@ function buildGrid(){
     arr.forEach((ln,i)=>{
       ln.order = Math.min(i, n-1-i);            /* 0 at the outside */
       ln.skew  = skew(i, salt);
-      ln.birth = ln.order * .05 + ln.skew * .03;
       /* the two axes are offset from each other, so a horizontal and a
          vertical never arrive on the same beat either */
       ln.axis  = salt === 1 ? 0 : .022;
@@ -406,7 +412,20 @@ function buildGrid(){
      out in the first tier and finished long before the reveal. Against the
      whole grid they are the outer rails, and close last with them. */
   const deepest = Math.max(...[...hLines, ...vLines].map(ln => ln.order));
-  [...hLines, ...vLines].forEach(ln => { ln.joinOrder = deepest - ln.order; });
+
+  /* The tiers are spread across a fixed span rather than given a fixed step
+     each. With a step, more rows meant more tiers meant a longer sequence:
+     at twelve rows the last line was still being drawn at .872, well after
+     the list itself had appeared at .80, and one line began connecting six
+     hundredths before it had finished arriving. Dividing a span by the depth
+     keeps the whole choreography the same length whatever the section holds. */
+  tierBirth = BIRTH_SPAN / Math.max(1, deepest);
+  tierJoin  = JOIN_SPAN  / Math.max(1, deepest);
+
+  [...hLines, ...vLines].forEach(ln => {
+    ln.joinOrder = deepest - ln.order;
+    ln.birth = ln.order * tierBirth + ln.skew * .03;
+  });
 
   /* The topmost rule is the heading's own separator, which the section
      already draws under its title. It reads as belonging to the heading
@@ -481,7 +500,7 @@ function apply(p){
      them sat stacked on the same frame corner before any of them moved. */
   const runOf  = ln => slide((p - ln.birth - .02) / .20);
   const joinOf = ln => clamp01(
-    (p - .46 - ln.joinOrder*.045 - ln.skew*.03 - ln.axis) / .09);
+    (p - .46 - ln.joinOrder*tierJoin - ln.skew*.03 - ln.axis) / .09);
 
   hLines.forEach(ln=>{
     ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
