@@ -541,6 +541,7 @@
     const p = proj(.15 * Math.sin(t * .4), .13 * Math.sin(t * .31), cx, cy, R);
     const pts = pathDots(cfg.key, MARK_PATHS[cfg.key], o.mini ? (cfg.nMini ?? 12) : (cfg.n ?? 26), cfg.vb, cfg.stroke, cfg.invert, cfg.recenter);
     const wave = (((t * (cfg.speed ?? .4)) % 1 + 1) % 1) * 2.4 - 1.2;
+    const ring = (((t * (cfg.speed ?? .32)) % 1 + 1) % 1) * 2.2 - .2;
     const dots = [];
     for (const [gx, gy] of pts) {
       let crest;
@@ -548,6 +549,8 @@
       else if (cfg.motion === "sweep") {
         const ph = ((Math.atan2(gy, gx) / TAU + .5 - t * .3) % 1 + 1) % 1;
         crest = Math.exp(-Math.pow(ph - .5, 2) / .014);
+      } else if (cfg.motion === "ring") {
+        crest = Math.exp(-Math.pow(Math.hypot(gx, gy) - ring, 2) / .045);
       } else crest = Math.exp(-Math.pow((gx - gy) * .5 - wave, 2) / .05);
       const [x, y, z] = p(gx, -gy, 0);
       const dep = (z + 1) / 2;
@@ -1430,8 +1433,8 @@
   }
 
   const MODES = {
-    rk: { draw: mk({ key: "rk", n: 34, nMini: 15, motion: "diag", fit: .96, vb: 400,
-                     v: .70 }), accent: null, speed: 1, staticT: 1.2 },
+    rk: { draw: mk({ key: "rk", n: 34, nMini: 15, motion: "ring", speed: .32,
+                     fit: .96, vb: 400, v: .70 }), accent: null, speed: 1, staticT: 1.2 },
     claude: { draw: drawClaude, accent: [217, 119, 87], speed: 1, staticT: 1.4 },
     openai: { draw: drawOpenAI, accent: null, speed: 1, staticT: .8 },
     cursor: { draw: drawCursor, accent: null, speed: 1, staticT: 1 },

@@ -61,9 +61,28 @@ out = once(out,
 out = once(out,
   '  const MODES = {\n',
   '  const MODES = {\n' +
-  '    rk: { draw: mk({ key: "rk", n: 34, nMini: 15, motion: "diag", fit: .96, vb: 400,\n' +
-  '                     v: .70 }), accent: null, speed: 1, staticT: 1.2 },\n',
+  '    rk: { draw: mk({ key: "rk", n: 34, nMini: 15, motion: "ring", speed: .32,\n' +
+  '                     fit: .96, vb: 400, v: .70 }), accent: null, speed: 1, staticT: 1.2 },\n',
   'MODES opening');
+
+/* 4. a fourth motion for the generic mark renderer: the outward ring that
+      gives the Aura orb its pulse. Aura is a bespoke draw function over its
+      own geometry, so its motion cannot simply be pointed at another mark.
+      The maths below is lifted from it unchanged -- a crest travelling out
+      from the centre, driven by each dot's radial distance -- and added
+      alongside scan, sweep and diag so any mark can use it. */
+out = once(out,
+  '    const wave = (((t * (cfg.speed ?? .4)) % 1 + 1) % 1) * 2.4 - 1.2;\n',
+  '    const wave = (((t * (cfg.speed ?? .4)) % 1 + 1) % 1) * 2.4 - 1.2;\n' +
+  '    const ring = (((t * (cfg.speed ?? .32)) % 1 + 1) % 1) * 2.2 - .2;\n',
+  'drawMark wave line');
+
+out = once(out,
+  '      } else crest = Math.exp(-Math.pow((gx - gy) * .5 - wave, 2) / .05);',
+  '      } else if (cfg.motion === "ring") {\n' +
+  '        crest = Math.exp(-Math.pow(Math.hypot(gx, gy) - ring, 2) / .045);\n' +
+  '      } else crest = Math.exp(-Math.pow((gx - gy) * .5 - wave, 2) / .05);',
+  'drawMark motion chain');
 
 const header =
 `/* Brand Orbs V2 — the authored Canvas 2D dot engine from @designcodeio/threeui
