@@ -23,7 +23,7 @@
 </style>
 </head>
 <body>
-<h1>Brand Orbs — 23 variants</h1>
+<h1 id="hed">Brand Orbs</h1>
 
 <h2>Medium · 56px</h2>
 <div class="grid" id="med"></div>
@@ -33,6 +33,8 @@
 
 <script src="js/brand-orbs.js"></script>
 <script>
+  document.getElementById('hed').textContent =
+    'Brand Orbs \u2014 ' + BrandOrbs.VARIANTS.length + ' variants, rk first';
   var med = document.getElementById('med');
   var sml = document.getElementById('sml');
   BrandOrbs.VARIANTS.forEach(function (v) {

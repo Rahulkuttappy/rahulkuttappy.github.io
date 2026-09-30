@@ -15,26 +15,83 @@
 (function (global) {
   'use strict';
 
-  var VARIANTS = ["claude","openai","codex","cursor","gemini","figma","framer","react",
+  /* rk is ours: the monogram, added to the engine by tools/build-brand-orbs.mjs.
+     The other twenty-three ship with the package. */
+  var VARIANTS = ["rk","claude","openai","codex","cursor","gemini","figma","framer","react",
     "swift","designcode","aura","dreamcut","ui","ux","css","ios","neuform","github",
     "x","instagram","threads","linkedin","email"];
   var SIZES = ["small","medium"];
   var LABELS = {
+    rk:"Rahul Kuttappy",
     claude:"Claude Code", openai:"OpenAI", codex:"Codex", cursor:"Cursor", gemini:"Gemini",
     figma:"Figma", framer:"Framer", react:"React", swift:"Swift", designcode:"DesignCode",
     aura:"Aura", dreamcut:"DreamCut", ui:"UI", ux:"UX", css:"CSS", ios:"iOS",
     neuform:"Neuform", github:"GitHub", x:"X", instagram:"Instagram", threads:"Threads",
     linkedin:"LinkedIn", email:"Email"
   };
-  var DEFAULTS = { variant:"claude", size:"medium", mode:"dark", speed:1, paused:false };
+  var DEFAULTS = { variant:"rk", size:"medium", mode:"dark", speed:1, paused:false };
 
-  /* The project pages sit a directory down, so the host page is resolved from
-     this script's own URL rather than from whoever is doing the mounting. */
-  var HOST = (function () {
+  /* The project pages sit a directory down, so assets are resolved from this
+     script's own URL rather than from whoever is doing the mounting. */
+  var BASE = (function () {
     var s = document.currentScript && document.currentScript.src;
-    if (!s) return 'assets/brand-orbs/orb.html';
-    return s.split('?')[0].replace(/js\/brand-orbs\.js$/, 'assets/brand-orbs/orb.html');
+    if (!s) return 'assets/brand-orbs/';
+    return s.split('?')[0].replace(/js\/brand-orbs\.js$/, 'assets/brand-orbs/');
   })();
+
+  /* The engine is fetched once and the frames are built as srcdoc, which is
+     how the package does it. A sandboxed frame pointed at a real file has to
+     navigate, and a navigation can be blocked -- it is blocked outright in
+     some embedded browsers, where every such frame came back
+     ERR_BLOCKED_BY_CLIENT and rendered nothing. An inline document makes no
+     request at all, so there is nothing to block. Fetching the engine rather
+     than inlining it in this file keeps it cacheable and off every page that
+     never mounts an orb. */
+  var enginePromise = null;
+  function engine() {
+    if (!enginePromise) {
+      enginePromise = fetch(BASE + 'engine.js')
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
+        /* a closing script tag inside the source would end the block early */
+        .then(function (src) { return src.replace(/<\/script/gi, '<\\/script'); });
+    }
+    return enginePromise;
+  }
+
+  var SHIM = [
+    '(function () {',
+    '  var nativeNow = performance.now.bind(performance);',
+    '  var last = nativeNow(), virtual = last;',
+    '  var controls = { speed: 1, paused: false };',
+    '  window.__BRAND_ORB_PAUSED = false;',
+    '  performance.now = function () {',
+    '    var real = nativeNow();',
+    '    if (!controls.paused) virtual += (real - last) * controls.speed;',
+    '    last = real; return virtual;',
+    '  };',
+    '  window.addEventListener("message", function (event) {',
+    '    if (!event.data || event.data.type !== "brand-orbs-controls") return;',
+    '    var next = event.data.controls || {};',
+    '    if (Number.isFinite(next.speed)) controls.speed = Math.max(.1, Math.min(3, next.speed));',
+    '    controls.paused = Boolean(next.paused);',
+    '    window.__BRAND_ORB_PAUSED = controls.paused;',
+    '  });',
+    '})();'
+  ].join('\n');
+
+  function buildDoc(variant, sizePx, light, clear, engineSrc) {
+    var bg = clear ? 'transparent' : (light ? '#dad7cc' : '#050608');
+    /* the authored light treatment: the engine only ever draws a dark orb */
+    var filter = light ? 'invert(1) hue-rotate(180deg) contrast(1.04) saturate(.92)' : 'none';
+    return '<!doctype html><html lang="en" data-theme="' + (light ? 'light' : 'dark') + '">' +
+      '<head><meta charset="utf-8">' +
+      '<style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:' + bg + ';}' +
+      'body{display:grid;place-items:center;}' +
+      'canvas{display:block;width:' + sizePx + 'px;height:' + sizePx + 'px;filter:' + filter + ';}</style>' +
+      '<script>' + SHIM + '<\/script></head><body>' +
+      '<canvas data-mode="' + variant + '" data-size="' + sizePx + '" aria-hidden="true"></canvas>' +
+      '<script>' + engineSrc + '<\/script></body></html>';
+  }
 
   function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
 
@@ -63,15 +120,13 @@
     var pageVisible = !document.hidden;
 
     var frame = document.createElement('iframe');
-    frame.src = HOST + '?variant=' + encodeURIComponent(variant) +
-                '&size=' + encodeURIComponent(size) +
-                '&mode=' + encodeURIComponent(mode);
+    var clear = o.bg === 'none' && mode !== 'light';
+    var sizePx = size === 'small' ? 20 : 56;
     frame.setAttribute('sandbox', 'allow-scripts');
-    frame.setAttribute('loading', 'eager');
     frame.setAttribute('scrolling', 'no');
     frame.title = o.label || (LABELS[variant] + ' animated brand orb');
     frame.style.cssText = 'display:block;width:100%;height:100%;border:0;background:' +
-      (mode === 'light' ? '#dad7cc' : '#050608') + ';';
+      (clear ? 'transparent' : (mode === 'light' ? '#dad7cc' : '#050608')) + ';';
 
     /* Nothing should be drawing while it is off screen or the tab is in the
        background; the engine keeps its frame and picks up where it left off. */
@@ -85,6 +140,9 @@
 
     frame.addEventListener('load', push);
     el.appendChild(frame);
+    engine().then(function (src) {
+      frame.srcdoc = buildDoc(variant, sizePx, mode === 'light', clear, src);
+    }).catch(function () { /* the markup fallback stays put */ });
 
     var io = null;
     if (window.IntersectionObserver) {
@@ -123,6 +181,7 @@
         variant: el.dataset.orb,
         size:    el.dataset.orbSize,
         mode:    el.dataset.orbMode,
+        bg:      el.dataset.orbBg,
         speed:   el.dataset.orbSpeed ? parseFloat(el.dataset.orbSpeed) : undefined,
         label:   el.getAttribute('aria-label') || undefined
       }));

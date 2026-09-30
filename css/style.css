@@ -880,6 +880,12 @@ footer{
 #plexus{position:absolute;inset:0;opacity:.35;pointer-events:none;}
 footer>*{position:relative;z-index:1;}
 .f-logo{height:16px;opacity:.35;}
+/* The monogram as a dot orb, signing off the contact block. The static logo
+   inside it is the fallback and steps aside only once the orb has mounted, so
+   a blocked script leaves the mark rather than a gap. */
+.c-orb{display:block;width:56px;height:56px;margin-bottom:1.4rem;}
+.c-orb img{height:16px;width:auto;opacity:.5;}
+.c-orb[data-orb-mounted] img{display:none;}
 footer p{font-size:.5rem;letter-spacing:.1em;color:var(--muted);}
 .f-back{font-size:.5rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;}
 .f-back:hover{color:var(--off);}
