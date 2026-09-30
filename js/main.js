@@ -63,10 +63,28 @@ if(window.Lenis){
   }catch(e){}
 })();
 
-/* Always land at the top of the page (unless an anchor was requested) */
+/* Always land at the top of the page (unless an anchor was requested).
+   This has to go through Lenis, not window.scrollTo. Lenis owns the scroll
+   position, so a native jump it was never told about gets re-asserted a frame
+   later: the page settles a little below the top while every scroll-driven
+   transform stays frozen at the value it held further down. Coming back to a
+   page that was left half way down, that pushed the hero clean out of its own
+   frame -- the name clipped off the top of the screen. Measured before the
+   fix: a native jump to zero landed at 41px with the hero 40px above the
+   viewport, and Lenis still holding the old position. */
 if('scrollRestoration' in history) history.scrollRestoration='manual';
-window.addEventListener('pageshow',()=>{ if(!location.hash) window.scrollTo(0,0); });
-if(!location.hash) window.scrollTo(0,0);
+function toTop(){
+  if(location.hash) return;
+  if(lenis){
+    lenis.scrollTo(0,{immediate:true,force:true});
+    if(typeof lenis.resize === 'function') lenis.resize();
+  }
+  window.scrollTo(0,0);
+  /* positions were measured further down the page; make them agree again */
+  if(window.ScrollTrigger && ScrollTrigger.refresh) ScrollTrigger.refresh();
+}
+window.addEventListener('pageshow',toTop);
+toTop();
 
 /* Logo click returns to the top */
 const navLogoLink=document.getElementById('navLogoLink');

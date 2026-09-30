@@ -11,3 +11,6 @@ Dump/
 # Agent skills installed with `npx skills add` — local tooling, like .claude/
 .agents/
 skills-lock.json
+
+# npm packages — the repo root is the published web root, so this must never ship
+node_modules/
