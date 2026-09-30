@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Fuzzy text — takes</title>
+<!-- Local scratch page. Not linked, not in the sitemap.
+     FuzzyText ported off React, shown on the places it might actually go.
+     Hover each one. -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root{--red:#7A1B18;--off:#EDEAE2;--muted:#5a5652;--border:rgba(237,234,226,.1);--bg:#080808;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--off);font-family:'Inter',system-ui,sans-serif;}
+  .lab{padding:2.6rem 2.5rem .9rem;font-family:'JetBrains Mono',monospace;
+       font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
+  .lab b{color:var(--red);font-weight:700;}
+  .lab i{font-style:normal;color:rgba(237,234,226,.45);text-transform:none;letter-spacing:.06em;font-size:.58rem;}
+  .stage{border-top:1px solid var(--border);padding:3.4rem 2.5rem;}
+  .s-eye{font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
+         letter-spacing:.24em;text-transform:uppercase;color:var(--red);margin:0 0 1rem;}
+  .bebas{font-family:'Bebas Neue',sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .geist{font-family:'Geist',sans-serif;font-weight:600;letter-spacing:-.05em;}
+  .note{margin:1rem 0 0;font-family:'JetBrains Mono',monospace;font-size:.5rem;
+        letter-spacing:.12em;color:rgba(237,234,226,.3);}
+</style>
+</head>
+<body>
+
+<p class="lab"><b>01</b> &mdash; The 404 code &nbsp; <i>where the library demos it; your page already dithers this word</i></p>
+<div class="stage">
+  <p class="s-eye">Signal Lost</p>
+  <span class="bebas" data-fuzzy data-fuzzy-size="128" data-fuzzy-weight="400"
+        data-fuzzy-color="#EDEAE2" data-fuzzy-base=".14" data-fuzzy-hover=".7"
+        data-fuzzy-range="26">404</span>
+  <p class="note">bebas 128 &middot; horizontal &middot; base .14 / hover .7</p>
+</div>
+
+<p class="lab"><b>02</b> &mdash; The name, hero scale &nbsp; <i>the display face the homepage uses</i></p>
+<div class="stage">
+  <span class="geist" data-fuzzy data-fuzzy-size="86" data-fuzzy-weight="600"
+        data-fuzzy-color="#EDEAE2" data-fuzzy-base=".08" data-fuzzy-hover=".45"
+        data-fuzzy-range="22" data-fuzzy-transition="240">KUTTAPPY</span>
+  <p class="note">geist 86 &middot; eased over 240ms &middot; base .08 / hover .45</p>
+</div>
+
+<p class="lab"><b>03</b> &mdash; A section heading &nbsp; <i>red, the way SOMETHING is set in the contact block</i></p>
+<div class="stage">
+  <span class="bebas" data-fuzzy data-fuzzy-size="72" data-fuzzy-weight="400"
+        data-fuzzy-color="#7A1B18" data-fuzzy-base=".1" data-fuzzy-hover=".6"
+        data-fuzzy-range="24" data-fuzzy-direction="vertical">SOMETHING</span>
+  <p class="note">vertical displacement &middot; the source clips this; the port does not</p>
+</div>
+
+<p class="lab"><b>04</b> &mdash; The email, mono &nbsp; <i>small text is where the effect is hardest to read</i></p>
+<div class="stage">
+  <span class="mono" data-fuzzy data-fuzzy-size="26" data-fuzzy-weight="400"
+        data-fuzzy-color="#EDEAE2" data-fuzzy-base=".05" data-fuzzy-hover=".35"
+        data-fuzzy-range="12" data-fuzzy-transition="200">rahulkuttappy805@gmail.com</span>
+  <p class="note">base kept very low, or the address stops being an address</p>
+</div>
+
+<p class="lab"><b>05</b> &mdash; Glitch + click &nbsp; <i>periodic bursts, and a spike when pressed</i></p>
+<div class="stage">
+  <span class="bebas" data-fuzzy data-fuzzy-size="96" data-fuzzy-weight="400"
+        data-fuzzy-color="#EDEAE2" data-fuzzy-base=".1" data-fuzzy-hover=".55"
+        data-fuzzy-range="30" data-fuzzy-glitch="true" data-fuzzy-click="true"
+        data-fuzzy-direction="both">SIGNAL</span>
+  <p class="note">both axes &middot; glitch every 2s &middot; click for a burst</p>
+</div>
+
+<p class="lab" style="padding-bottom:3rem">end &mdash; every one keeps its real text in the markup for screen readers, and holds still under reduced motion</p>
+
+<script src="js/fuzzy-text.js"></script>
+</body>
+</html>
