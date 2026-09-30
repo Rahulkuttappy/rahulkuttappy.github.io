@@ -407,6 +407,12 @@ function buildGrid(){
      whole grid they are the outer rails, and close last with them. */
   const deepest = Math.max(...[...hLines, ...vLines].map(ln => ln.order));
   [...hLines, ...vLines].forEach(ln => { ln.joinOrder = deepest - ln.order; });
+
+  /* The topmost rule is the heading's own separator, which the section
+     already draws under its title. It reads as belonging to the heading
+     rather than to the grid, so it connects first and the rest of the
+     drawing follows it, instead of it arriving last with the outer rails. */
+  if(hLines.length) hLines[0].joinOrder = -1;
 }
 
 function paintFrame(l,r,t,b){
