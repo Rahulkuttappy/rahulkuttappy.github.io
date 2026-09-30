@@ -451,6 +451,12 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
   font-family:'Geist',sans-serif;font-weight:600;
   font-size:clamp(2.6rem,7.4vw,7.2rem);
   line-height:.88;letter-spacing:-0.052em;
+  /* A canvas has no line box, so line-height stopped separating the two
+     lines the moment the name became one: they stacked at glyph height and
+     the leading vanished. Measured, the advance fell 0.135em short of what
+     .88 line-height gave, so that is handed back as a gap -- in em, so it
+     holds as the clamp resizes the name. */
+  display:flex;flex-direction:column;gap:.135em;align-items:flex-start;
 }
 /* No overflow mask and no slide-up: the name is a fuzz canvas now, and the
    mask would have cropped the displacement the effect depends on. The lines
