@@ -235,21 +235,41 @@ function buildGrid(){
   vLines = [...xs].sort((a,b)=>a-b).map(x => ({ x, fromLeft: x < cx }));
 
   /* births in tiers, outermost first, so the count doubles inward */
-  const tier = (arr) => {
+  /* A stable scatter per line. Distance from the edge is mirror symmetric --
+     the leftmost and rightmost share it exactly -- so on its own every line
+     had a twin doing the same thing at the same moment, and the whole grid
+     moved in pairs. This breaks the mirror without making it random: it is
+     derived from the index, so it is the same on every frame and every
+     reload, and it is small enough that the inside-out order still reads. */
+  /* An integer hash rather than sin(i*k): with a single small multiplier,
+     mirrored indices land on almost the same value, which is how twelve
+     supposedly distinct offsets still came out within four thousandths of
+     each other and the grid kept moving in pairs. */
+  const skew = (i, salt) => {
+    let v = Math.imul(i + salt * 101 + 1, 2654435761) >>> 0;
+    v ^= v >>> 15; v = Math.imul(v, 2246822519) >>> 0;
+    v ^= v >>> 13;
+    return (v >>> 8) / 16777216;
+  };
+  const tier = (arr, salt) => {
     const n = arr.length;
     const maxEdge = Math.floor((n-1)/2);
     arr.forEach((ln,i)=>{
       const edge = Math.min(i, n-1-i);          /* 0 at the outside */
-      ln.birth = edge * .05;
+      ln.birth = edge * .05 + skew(i, salt) * .03;
       ln.order = edge;
       /* Connecting runs the other way, innermost first, so the outermost
          line is the last to close rather than the first. It sat on the very
          edge of the mask and finished while the frame was still opening,
          which read as the drawing running ahead of the section. */
       ln.joinOrder = maxEdge - edge;
+      ln.skew = skew(i, salt);
+      /* and the two axes are offset from each other, so a horizontal and a
+         vertical never arrive on the same beat either */
+      ln.axis = salt === 1 ? 0 : .022;
     });
   };
-  tier(hLines); tier(vLines);
+  tier(hLines, 1); tier(vLines, 7);
 }
 
 function paintFrame(l,r,t,b){
@@ -304,19 +324,28 @@ function apply(p){
   const slide = k => ease(clamp01(k));
   let placed = 0, joined = 0;
 
-  /* every line finishes its run along the frame at the same moment, so none
-     of them is standing finished while the others are still travelling */
-  const travel = slide((p - .16) / .32);
+  /* Runs along the frame land close together but not on top of each other,
+     and connecting keeps the inside-out order with the scatter on top. */
+  /* Three constraints at once. The scatter has to be big enough to see, but
+     smaller than the step between order tiers or it overrides the inside-out
+     sequence and the outermost line stops being last. A line must finish its
+     run along the frame before it starts connecting. And the last connection
+     has to land before the rows resolve at .80. The run can scatter harder
+     than the join, because nothing depends on the order it arrives in. */
+  const runOf  = ln => slide((p - .10 - ln.skew*.12 - ln.axis) / .20);
+  const joinOf = ln => clamp01(
+    (p - .46 - ln.joinOrder*.045 - ln.skew*.03 - ln.axis) / .09);
+
   hLines.forEach(ln=>{
     ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
-    ln.py   = lerp(ln.fromTop ? t : b, cy + (ln.y - cy) * zoom, travel);
-    ln.join = clamp01((p - .54 - ln.joinOrder*.03) / .14);
+    ln.py   = lerp(ln.fromTop ? t : b, cy + (ln.y - cy) * zoom, runOf(ln));
+    ln.join = joinOf(ln);
     if(ln.on > .01){ placed++; if(ln.join > .01) joined++; }
   });
   vLines.forEach(ln=>{
     ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
-    ln.px   = lerp(ln.fromLeft ? l : r, cx + (ln.x - cx) * zoom, travel);
-    ln.join = clamp01((p - .54 - ln.joinOrder*.03) / .14);
+    ln.px   = lerp(ln.fromLeft ? l : r, cx + (ln.x - cx) * zoom, runOf(ln));
+    ln.join = joinOf(ln);
     if(ln.on > .01){ placed++; if(ln.join > .01) joined++; }
   });
 
