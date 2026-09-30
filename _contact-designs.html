@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Contact section designs</title>
-<!-- Local scratch page. Not linked, not in the sitemap. Five takes on the
-     "LET'S MAKE SOMETHING REAL" block, in the site's own type and colour. -->
+<title>Contact — reactive takes</title>
+<!-- Local scratch page. Not linked, not in the sitemap.
+     Three takes on the contact block that react to the pointer, so the
+     section behaves like the rest of the site instead of sitting still.
+     Move the cursor across each one. -->
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -20,7 +22,6 @@
   .lab b{color:var(--red);font-weight:700;}
   .lab i{font-style:normal;color:rgba(237,234,226,.45);text-transform:none;letter-spacing:.06em;font-size:.58rem;}
 
-  /* shared: the studio frame behind each block */
   .sec{position:relative;overflow:hidden;border-top:1px solid var(--border);padding:7rem 2.5rem;}
   .sec-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
   .sec-bg img{width:100%;height:100%;object-fit:cover;object-position:center 45%;
@@ -31,7 +32,7 @@
   .hed{font-family:'Bebas Neue',sans-serif;letter-spacing:.02em;line-height:.85;color:var(--off);margin:0;}
   .hed em{color:var(--red);font-style:normal;}
   .eye{font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
-       letter-spacing:.24em;text-transform:uppercase;color:var(--red);margin:0 0 1.2rem;}
+       letter-spacing:.24em;text-transform:uppercase;color:var(--red);margin:0 0 1.4rem;}
   .socials{display:flex;gap:1.8rem;flex-wrap:wrap;}
   .socials a{font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);
              position:relative;padding-bottom:2px;transition:color .2s;}
@@ -39,149 +40,246 @@
                     background:var(--red);transition:width .25s;}
   .socials a:hover{color:var(--off);} .socials a:hover::after{width:100%;}
 
-  /* ── 01 CURRENT ── */
-  .c1-grid{display:grid;grid-template-columns:1fr 1fr;gap:7rem;align-items:center;}
-  .c1 .hed{font-size:clamp(3rem,9vw,9rem);}
-  .c1-lbl{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin:0 0 1.5rem;}
-  .c1-mail{display:block;font-family:'Bebas Neue',sans-serif;font-size:clamp(1rem,1.8vw,1.4rem);
-           letter-spacing:.05em;border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:.8rem;}
-  .c1 .socials{margin-top:2rem;}
-  .c1-orb{display:block;width:56px;height:56px;margin-bottom:1.4rem;}
-  .c1-orb img{height:16px;opacity:.5;} .c1-orb[data-orb-mounted] img{display:none;}
+  /* a character mid-scramble sits in red and settles into the line's own colour */
+  .lc{display:inline-block;white-space:pre;color:var(--red);opacity:.55;
+      transition:color .18s ease,opacity .18s ease;}
+  .lc.on{color:inherit;opacity:1;}
+  .lw{white-space:nowrap;}
 
-  /* ── 02 THE EMAIL IS THE HEADLINE ── */
-  .c2{text-align:center;padding:8rem 2.5rem;}
-  .c2 .eye{margin-bottom:1.8rem;}
-  .c2-mail{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,6.6vw,5.4rem);
-           letter-spacing:.01em;line-height:1;color:var(--off);display:inline-block;
-           border-bottom:2px solid rgba(237,234,226,.14);padding-bottom:.3rem;
-           transition:border-color .35s ease,color .35s ease;word-break:break-word;}
-  .c2-mail:hover{border-color:var(--red);}
-  .c2-sub{margin:2rem 0 0;font-family:'JetBrains Mono',monospace;font-size:.56rem;
-          letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
-  .c2 .socials{justify-content:center;margin-top:2.6rem;}
+  /* ── A: proximity decode ── */
+  .a-mail{font-family:'JetBrains Mono',monospace;font-size:clamp(.9rem,3.4vw,2.2rem);
+          letter-spacing:.04em;color:var(--off);display:inline-block;cursor:pointer;}
+  .a-sub{margin:1.8rem 0 0;font-family:'JetBrains Mono',monospace;font-size:.56rem;
+         letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+  .a .hed{font-size:clamp(2.4rem,7vw,6rem);margin-bottom:2.2rem;}
+  .a .socials{margin-top:2.4rem;}
+  .hint{font-family:'JetBrains Mono',monospace;font-size:.46rem;letter-spacing:.22em;
+        text-transform:uppercase;color:rgba(237,234,226,.28);margin:0 0 1rem;}
 
-  /* ── 03 SPEC SHEET ── */
-  .c3-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:5rem;align-items:end;}
-  .c3 .hed{font-size:clamp(2.6rem,7.4vw,7rem);}
-  .c3-rows{border-top:1px solid var(--border);}
-  .c3-row{display:grid;grid-template-columns:8rem 1fr;gap:1.4rem;align-items:baseline;
-          padding:1.05rem 0;border-bottom:1px solid var(--border);}
-  .c3-k{font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
-        letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
-  .c3-v{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.05em;
-        color:rgba(237,234,226,.82);}
-  .c3-v em{font-style:normal;color:var(--red);}
-  .c3-v a{border-bottom:1px solid var(--border);padding-bottom:2px;transition:border-color .3s;}
-  .c3-v a:hover{border-color:var(--red);}
-  .c3 .socials{margin-top:1.6rem;}
+  /* ── B: dither dissolve ── */
+  .b-wrap{position:relative;display:inline-block;}
+  .b-wrap canvas{display:block;image-rendering:pixelated;}
+  .b-measure{position:absolute;left:0;top:0;visibility:hidden;white-space:nowrap;
+             font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,6vw,4.6rem);letter-spacing:.02em;}
+  .b .hed{font-size:clamp(2.2rem,6vw,5rem);margin-bottom:1.8rem;}
+  .b .socials{margin-top:2.4rem;}
 
-  /* ── 04 ORB LED ── */
-  .c4{text-align:center;padding:7rem 2.5rem;}
-  .c4-orb{width:56px;height:56px;margin:0 auto 2rem;}
-  .c4-orb img{height:16px;opacity:.5;} .c4-orb[data-orb-mounted] img{display:none;}
-  .c4 .hed{font-size:clamp(2.4rem,7vw,6.4rem);margin-bottom:2rem;}
-  .c4-mail{font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:.12em;
-           color:rgba(237,234,226,.78);border:1px solid var(--border);
-           padding:.95rem 1.8rem;display:inline-block;transition:border-color .3s,color .3s,background .3s;}
-  .c4-mail:hover{border-color:var(--red);color:var(--off);background:rgba(var(--red-glow),.08);}
-  .c4 .socials{justify-content:center;margin-top:2.4rem;}
+  /* ── C: the whole block wakes ── */
+  .c-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:5rem;align-items:end;}
+  .c .hed{font-size:clamp(2.6rem,7.4vw,7rem);}
+  .c-rows{border-top:1px solid var(--border);}
+  .c-row{display:grid;grid-template-columns:7rem 1fr;gap:1.4rem;align-items:baseline;
+         padding:1.05rem 0;border-bottom:1px solid var(--border);}
+  .c-k{font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
+       letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
+  .c-v{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.05em;
+       color:rgba(237,234,226,.82);}
+  .c .socials{margin-top:1.6rem;}
 
-  /* ── 05 EDGE TO EDGE ── */
-  .c5{padding:0;}
-  .c5-top{padding:6rem 2.5rem 2.4rem;}
-  .c5 .hed{font-size:clamp(3rem,11vw,11rem);}
-  .c5-band{border-top:1px solid var(--border);border-bottom:1px solid var(--border);
-           display:grid;grid-template-columns:repeat(3,1fr);}
-  .c5-cell{padding:1.7rem 2.5rem;border-right:1px solid var(--border);}
-  .c5-cell:last-child{border-right:0;}
-  .c5-k{font-family:'JetBrains Mono',monospace;font-size:.44rem;font-weight:700;
-        letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;}
-  .c5-v{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.05em;
-        color:rgba(237,234,226,.8);}
-  .c5-v em{font-style:normal;color:var(--red);}
-  .c5-bottom{padding:1.6rem 2.5rem 5rem;}
-
-  @media(max-width:900px){
-    .c1-grid,.c3-grid{grid-template-columns:1fr;gap:2.6rem;}
-    .c5-band{grid-template-columns:1fr;}
-    .c5-cell{border-right:0;border-bottom:1px solid var(--border);}
-  }
+  @media(max-width:900px){ .c-grid{grid-template-columns:1fr;gap:2.6rem;} }
 </style>
 </head>
 <body>
 
-<p class="lab"><b>01</b> &mdash; Current &nbsp; <i>headline left, details right, orb above the label</i></p>
-<section class="sec c1">
-  <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
-  <div class="inner c1-grid">
-    <div><h2 class="hed">LET'S<br>MAKE<br><em>SOMETHING</em><br>REAL</h2></div>
-    <div>
-      <span class="c1-orb" data-orb="rk" data-orb-size="medium" data-orb-bg="none"><img src="assets/images/logo.png" alt=""/></span>
-      <p class="c1-lbl">Open to projects, collabs, conversations</p>
-      <a class="c1-mail" href="#">rahulkuttappy805@gmail.com</a>
-      <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
-    </div>
-  </div>
-</section>
-
-<p class="lab"><b>02</b> &mdash; The email is the headline &nbsp; <i>one thing to do, set as large as the name</i></p>
-<section class="sec c2">
+<p class="lab"><b>A</b> &mdash; Proximity decode &nbsp; <i>the cursor is a torch: characters resolve as it passes over them</i></p>
+<section class="sec a">
   <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
   <div class="inner">
-    <p class="eye">Let's make something real</p>
-    <a class="c2-mail" href="#">rahulkuttappy805@gmail.com</a>
-    <p class="c2-sub">Open to projects, collabs, conversations &mdash; Calicut // Bengaluru</p>
+    <h2 class="hed">LET'S MAKE<br><em>SOMETHING REAL</em></h2>
+    <p class="hint">&larr; run the cursor along it</p>
+    <a class="a-mail" href="#" data-prox>rahulkuttappy805@gmail.com</a>
+    <p class="a-sub">Open to projects, collabs, conversations &mdash; Calicut // Bengaluru</p>
     <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
   </div>
 </section>
 
-<p class="lab"><b>03</b> &mdash; Spec sheet &nbsp; <i>the headline kept, the details as a technical readout</i></p>
-<section class="sec c3">
+<p class="lab"><b>B</b> &mdash; Dither dissolve &nbsp; <i>the same Bayer dither as REAL, but the cursor sharpens it</i></p>
+<section class="sec b">
   <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
-  <div class="inner c3-grid">
+  <div class="inner">
+    <h2 class="hed">LET'S MAKE<br><em>SOMETHING REAL</em></h2>
+    <p class="hint">&larr; move towards it</p>
+    <a class="b-wrap" href="#" data-dissolve="rahulkuttappy805@gmail.com"></a>
+    <p class="a-sub">Open to projects, collabs, conversations &mdash; Calicut // Bengaluru</p>
+    <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
+  </div>
+</section>
+
+<p class="lab"><b>C</b> &mdash; The whole block wakes &nbsp; <i>everything is noise until the pointer enters, then it resolves outward from it</i></p>
+<section class="sec c" data-wake>
+  <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
+  <div class="inner c-grid">
     <div><h2 class="hed">LET'S<br>MAKE<br><em>SOMETHING</em><br>REAL</h2></div>
     <div>
-      <div class="c3-rows">
-        <div class="c3-row"><div class="c3-k">Status</div><div class="c3-v"><em>&bull;</em> Open for 2026</div></div>
-        <div class="c3-row"><div class="c3-k">Based</div><div class="c3-v">Calicut <em>//</em> Bengaluru</div></div>
-        <div class="c3-row"><div class="c3-k">Works in</div><div class="c3-v">Film / Edit / Colour / Stills</div></div>
-        <div class="c3-row"><div class="c3-k">Email</div><div class="c3-v"><a href="#">rahulkuttappy805@gmail.com</a></div></div>
+      <div class="c-rows">
+        <div class="c-row"><div class="c-k">Status</div><div class="c-v" data-wake-text>Open for 2026</div></div>
+        <div class="c-row"><div class="c-k">Based</div><div class="c-v" data-wake-text>Calicut // Bengaluru</div></div>
+        <div class="c-row"><div class="c-k">Works in</div><div class="c-v" data-wake-text>Film / Edit / Colour / Stills</div></div>
+        <div class="c-row"><div class="c-k">Email</div><div class="c-v" data-wake-text>rahulkuttappy805@gmail.com</div></div>
       </div>
       <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
     </div>
   </div>
 </section>
 
-<p class="lab"><b>04</b> &mdash; Orb led &nbsp; <i>centred, the monogram opening it, one button to press</i></p>
-<section class="sec c4">
-  <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
-  <div class="inner">
-    <span class="c4-orb" data-orb="rk" data-orb-size="medium" data-orb-bg="none"><img src="assets/images/logo.png" alt=""/></span>
-    <h2 class="hed">LET'S MAKE<br><em>SOMETHING REAL</em></h2>
-    <a class="c4-mail" href="#">rahulkuttappy805@gmail.com</a>
-    <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
-  </div>
-</section>
+<p class="lab" style="padding-bottom:3rem">end &mdash; all three fall back to plain, readable text without a pointer</p>
 
-<p class="lab"><b>05</b> &mdash; Edge to edge &nbsp; <i>headline big, then a ruled band across the full width</i></p>
-<section class="sec c5">
-  <div class="sec-bg"><img src="assets/images/about/about-03.jpg" alt=""/></div>
-  <div class="inner">
-    <div class="c5-top"><h2 class="hed">LET'S MAKE<br><em>SOMETHING REAL</em></h2></div>
-    <div class="c5-band">
-      <div class="c5-cell"><div class="c5-k">Email</div><div class="c5-v"><a href="#">rahulkuttappy805@gmail.com</a></div></div>
-      <div class="c5-cell"><div class="c5-k">Based</div><div class="c5-v">Calicut <em>//</em> Bengaluru</div></div>
-      <div class="c5-cell"><div class="c5-k">Status</div><div class="c5-v"><em>&bull;</em> Open for 2026</div></div>
-    </div>
-    <div class="c5-bottom">
-      <div class="socials"><a href="#">Instagram</a><a href="#">YouTube</a><a href="#">Behance</a><a href="#">LinkedIn</a></div>
-    </div>
-  </div>
-</section>
+<script>
+(function () {
+  'use strict';
+  var CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!<>/[]{}#*@.';
+  var calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine = matchMedia('(pointer: fine)').matches;
+  var rnd = function () { return CHARS[(Math.random() * CHARS.length) | 0]; };
 
-<p class="lab" style="padding-bottom:3rem">end</p>
+  /* split into per-character spans, words kept whole so lines break properly */
+  function split(el) {
+    var text = el.textContent;
+    el.textContent = '';
+    var cells = [];
+    text.split(/(\s+)/).forEach(function (part) {
+      if (!part) return;
+      if (/^\s+$/.test(part)) { el.appendChild(document.createTextNode(' ')); return; }
+      var w = document.createElement('span');
+      w.className = 'lw';
+      part.split('').forEach(function (ch) {
+        var s = document.createElement('span');
+        s.className = 'lc';
+        s.textContent = ch;
+        w.appendChild(s);
+        cells.push({ el: s, ch: ch });
+      });
+      el.appendChild(w);
+    });
+    return cells;
+  }
 
-<script src="js/brand-orbs.js"></script>
+  /* ── A: the cursor resolves whatever it is near ── */
+  document.querySelectorAll('[data-prox]').forEach(function (el) {
+    var cells = split(el);
+    if (!fine || calm) { cells.forEach(function (c) { c.el.classList.add('on'); }); return; }
+    var R = 90, pointer = null, raf = 0;
+    document.addEventListener('pointermove', function (e) { pointer = e; if (!raf) raf = requestAnimationFrame(tick); });
+    el.closest('.sec').addEventListener('pointerleave', function () { pointer = null; if (!raf) raf = requestAnimationFrame(tick); });
+    function tick() {
+      raf = 0;
+      cells.forEach(function (c) {
+        var r = c.el.getBoundingClientRect();
+        var near = false;
+        if (pointer) {
+          var dx = pointer.clientX - (r.left + r.width / 2);
+          var dy = pointer.clientY - (r.top + r.height / 2);
+          near = Math.sqrt(dx * dx + dy * dy) < R;
+        }
+        if (near) { c.el.textContent = c.ch; c.el.classList.add('on'); }
+        else { c.el.classList.remove('on'); c.el.textContent = rnd(); }
+      });
+      if (pointer) raf = requestAnimationFrame(tick);
+    }
+    tick();
+  });
+
+  /* ── B: a Bayer dither that sharpens as the pointer closes in ── */
+  var BAYER = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+  document.querySelectorAll('[data-dissolve]').forEach(function (el) {
+    var text = el.dataset.dissolve;
+    var probe = document.createElement('span');
+    probe.className = 'b-measure';
+    probe.textContent = text;
+    el.appendChild(probe);
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d', { willReadFrequently: true });
+    el.appendChild(canvas);
+    var off = document.createElement('canvas');
+    var octx = off.getContext('2d', { willReadFrequently: true });
+    var dpr = Math.min(2, devicePixelRatio || 1), W = 0, H = 0, font = '';
+
+    function build() {
+      var cs = getComputedStyle(probe);
+      font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+      var r = probe.getBoundingClientRect();
+      W = Math.ceil(r.width) + 8; H = Math.ceil(r.height) + 8;
+      [canvas, off].forEach(function (c) { c.width = W * dpr; c.height = H * dpr; });
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      octx.clearRect(0, 0, W, H);
+      octx.fillStyle = '#fff'; octx.font = font; octx.textBaseline = 'middle';
+      octx.fillText(text, 4, H / 2);
+    }
+
+    /* 0 = fully broken up, 1 = clean type */
+    function draw(k) {
+      if (!W) return;
+      var src = octx.getImageData(0, 0, off.width, off.height);
+      var d = src.data, blk = 3 * dpr;
+      for (var y = 0; y < off.height; y++) {
+        for (var x = 0; x < off.width; x++) {
+          var i = (y * off.width + x) * 4;
+          if (!d[i + 3]) continue;
+          var t = BAYER[((y / blk) | 0) % 4][((x / blk) | 0) % 4] / 16;
+          if (t > k) { d[i + 3] = 0; }
+        }
+      }
+      ctx.putImageData(src, 0, 0);
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-in';
+      ctx.fillStyle = k > .92 ? '#EDEAE2' : 'rgba(237,234,226,' + (.5 + k * .5) + ')';
+      ctx.fillRect(0, 0, off.width, off.height);
+      ctx.restore();
+    }
+
+    build(); draw(fine && !calm ? 0 : 1);
+    addEventListener('resize', function () { build(); draw(cur); });
+    var cur = fine && !calm ? 0 : 1, target = cur, raf = 0;
+    if (fine && !calm) {
+      document.addEventListener('pointermove', function (e) {
+        var r = canvas.getBoundingClientRect();
+        var dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right);
+        var dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        target = Math.max(0, Math.min(1, 1 - dist / 240));
+        if (!raf) raf = requestAnimationFrame(ease);
+      });
+    }
+    function ease() {
+      raf = 0;
+      cur += (target - cur) * .18;
+      draw(cur);
+      if (Math.abs(target - cur) > .004) raf = requestAnimationFrame(ease);
+    }
+  });
+
+  /* ── C: the block is noise until the pointer is inside it ── */
+  document.querySelectorAll('[data-wake]').forEach(function (sec) {
+    var groups = [].map.call(sec.querySelectorAll('[data-wake-text]'), function (el) {
+      return { el: el, cells: split(el) };
+    });
+    var all = groups.reduce(function (a, g) { return a.concat(g.cells); }, []);
+    if (!fine || calm) { all.forEach(function (c) { c.el.classList.add('on'); }); return; }
+
+    var inside = false, px = 0, py = 0, raf = 0, t0 = 0;
+    sec.addEventListener('pointerenter', function (e) { inside = true; px = e.clientX; py = e.clientY; t0 = performance.now(); if (!raf) raf = requestAnimationFrame(tick); });
+    sec.addEventListener('pointermove', function (e) { px = e.clientX; py = e.clientY; });
+    sec.addEventListener('pointerleave', function () { inside = false; if (!raf) raf = requestAnimationFrame(tick); });
+
+    function tick() {
+      raf = 0;
+      var wave = inside ? (performance.now() - t0) / 1000 * 900 : -1;  /* px of reach */
+      var busy = false;
+      all.forEach(function (c) {
+        var r = c.el.getBoundingClientRect();
+        var dx = px - (r.left + r.width / 2), dy = py - (r.top + r.height / 2);
+        var d = Math.sqrt(dx * dx + dy * dy);
+        var on = inside && d < wave;
+        if (on) { c.el.textContent = c.ch; c.el.classList.add('on'); }
+        else { c.el.classList.remove('on'); c.el.textContent = rnd(); busy = true; }
+      });
+      if (inside || busy) raf = requestAnimationFrame(tick);
+    }
+    all.forEach(function (c) { c.el.textContent = rnd(); });
+    tick();
+  });
+})();
+</script>
 </body>
 </html>
