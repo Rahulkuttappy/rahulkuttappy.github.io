@@ -156,7 +156,7 @@ const dots  = [...grid.querySelectorAll('.dot')];              /* tl tr bl br */
 const lines = ['.hg-t','.hg-r','.hg-b','.hg-l'].map(s => grid.querySelector(s));
 const ENDS  = [[0,1],[1,3],[2,3],[0,2]];
 
-let W=0,H=0,box=null,base=null,dpr=1,nodes=[],edges=[];
+let W=0,H=0,box=null,base=null,dpr=1,hLines=[],vLines=[];
 const lerp = (a,b,k)=>a+(b-a)*k;
 const clamp01 = v => v<0?0:v>1?1:v;
 const ease = v => v<.5 ? 4*v*v*v : 1-Math.pow(-2*v+2,3)/2;   /* in-out cubic */
@@ -166,7 +166,7 @@ function measure(){
   dpr = Math.min(2, devicePixelRatio||1);
   fx.width = Math.round(W*dpr); fx.height = Math.round(H*dpr);
   fctx.setTransform(dpr,0,0,dpr,0,0);
-  fctx.lineCap='round'; fctx.lineJoin='round';
+  fctx.lineCap='butt'; fctx.lineJoin='miter';
   const l = lines[3].offsetLeft, r = lines[1].offsetLeft, t = lines[0].offsetTop, b = lines[2].offsetTop;
   box = {l, r, t, b};
   base = lines.map((el,i)=>({
@@ -175,53 +175,44 @@ function measure(){
     len:(i%2) ? el.offsetHeight : el.offsetWidth,
     vert: !!(i%2)
   }));
-  buildBlueprint();
+  buildGrid();
 }
 
-/* The blueprint: every card contributes four corners and the four lines
-   between them. Measured at the size the cards end up, so the drawing is the
-   section's real geometry rather than an impression of it. */
-function buildBlueprint(){
+/* The blueprint is a grid, not a scatter. Every card edge contributes a
+   horizontal or a vertical, so the cards come out as the cells between them.
+   A line only ever moves along its own axis -- a horizontal slides up or
+   down, a vertical slides left or right -- and the dots live where two lines
+   cross, so a dot can only ever travel on the grid. */
+function buildGrid(){
   const prev = worksIn.style.transform;
   worksIn.style.transform = 'none';
   const vr = vp.getBoundingClientRect();
-  nodes = []; edges = [];
+  const xs = new Set(), ys = new Set();
   cards.forEach(c=>{
     const r = c.getBoundingClientRect();
-    const x0=r.left-vr.left, y0=r.top-vr.top, x1=x0+r.width, y1=y0+r.height;
-    const i0 = nodes.length;
-    nodes.push({x:x0,y:y0},{x:x1,y:y0},{x:x1,y:y1},{x:x0,y:y1});
-    edges.push([i0,i0+1],[i0+1,i0+2],[i0+2,i0+3],[i0+3,i0]);
+    xs.add(Math.round(r.left - vr.left));
+    xs.add(Math.round(r.right - vr.left));
+    ys.add(Math.round(r.top - vr.top));
+    ys.add(Math.round(r.bottom - vr.top));
   });
   worksIn.style.transform = prev;
 
-  /* Order them around the frame so each one has somewhere on the perimeter to
-     have come from, then hand out birth times in tiers: four to begin with,
-     the ones already there, then four more, then eight, then the rest. The
-     count doubles, so it reads as multiplying rather than as a crowd. */
-  const cx = W/2, cy = H/2;
-  const ring = nodes.map((n,i)=>({i, a: Math.atan2(n.y-cy, n.x-cx)}))
-                    .sort((p,q)=>p.a-q.a);
-  ring.forEach((e,k)=>{
-    const n = nodes[e.i];
-    n.u = (k + .5) / ring.length;                 /* where on the frame it starts */
-    const tier = (k % 6 === 0) ? 0 : (k % 3 === 0) ? 1 : (k % 2 === 0) ? 2 : 3;
-    n.birth = tier * .06;
-    n.tier = tier;
-  });
-}
+  const cy = H/2, cx = W/2;
+  /* each new line peels off whichever frame edge it is nearer, so nothing
+     ever crosses the frame to get where it is going */
+  hLines = [...ys].sort((a,b)=>a-b).map(y => ({ y, fromTop: y < cy }));
+  vLines = [...xs].sort((a,b)=>a-b).map(x => ({ x, fromLeft: x < cx }));
 
-/* a point on the frame's perimeter, clockwise from the top-left corner */
-function onPerimeter(u, l, r, t, b){
-  const w = r-l, h = b-t, per = 2*(w+h);
-  let d = ((u % 1) + 1) % 1 * per;
-  if(d < w)        return {x:l+d,       y:t};
-  d -= w;
-  if(d < h)        return {x:r,         y:t+d};
-  d -= h;
-  if(d < w)        return {x:r-d,       y:b};
-  d -= w;
-  return             {x:l,              y:b-d};
+  /* births in tiers, outermost first, so the count doubles inward */
+  const tier = (arr, key) => {
+    const n = arr.length;
+    arr.forEach((ln,i)=>{
+      const edge = Math.min(i, n-1-i);          /* 0 at the outside */
+      ln.birth = edge * .05;
+      ln.order = edge;
+    });
+  };
+  tier(hLines); tier(vLines);
 }
 
 function paintFrame(l,r,t,b){
@@ -256,64 +247,61 @@ function apply(p){
   const cx = W/2, cy = H/2;
   fctx.clearRect(0,0,W,H);
 
-  /* Each node: born on the frame, then drawn across to its place in the
-     blueprint, then gone. */
+  const leave = clamp01((p - .80) / .2);
+
+  /* horizontals: born on the frame's top or bottom edge, then sliding
+     vertically to the card edge they belong to. Nothing moves sideways. */
   let live = 0;
-  nodes.forEach(n=>{
-    const born = clamp01((p - n.birth) / .05);
-    if(born <= 0){ n.on = 0; return; }
-    const travel = ease(clamp01((p - .26 - n.tier*.02) / .34));
-    const leave  = clamp01((p - .80) / .2);
-
-    const from = onPerimeter(n.u, l, r, t, b);
-    const tx = cx + (n.x - cx) * zoom;
-    const ty = cy + (n.y - cy) * zoom;
-
-    n.px = lerp(from.x, tx, travel);
-    n.py = lerp(from.y, ty, travel);
-    n.on = born * (1 - leave);
-    n.travel = travel;
-    if(leave > 0){
-      const a = Math.atan2(ty-cy, tx-cx);
-      n.px += Math.cos(a)*leave*leave*200;
-      n.py += Math.sin(a)*leave*leave*200;
-    }
-    if(n.on > .01) live++;
+  hLines.forEach(ln=>{
+    ln.on = clamp01((p - ln.birth) / .06) * (1 - leave);
+    const k = ease(clamp01((p - .22 - ln.order*.05) / .38));
+    const target = cy + (ln.y - cy) * zoom;
+    ln.py = lerp(ln.fromTop ? t : b, target, k);
+    if(ln.on > .01) live++;
+  });
+  vLines.forEach(ln=>{
+    ln.on = clamp01((p - ln.birth) / .06) * (1 - leave);
+    const k = ease(clamp01((p - .22 - ln.order*.05) / .38));
+    const target = cx + (ln.x - cx) * zoom;
+    ln.px = lerp(ln.fromLeft ? l : r, target, k);
+    if(ln.on > .01) live++;
   });
 
-  /* The lines between them only exist once both ends have arrived, so the
-     drawing assembles itself edge by edge rather than stretching into place. */
+  /* the grid only extends as far as the grid itself */
+  const x0 = Math.min(...vLines.map(v=>v.px)), x1 = Math.max(...vLines.map(v=>v.px));
+  const y0 = Math.min(...hLines.map(h=>h.py)), y1 = Math.max(...hLines.map(h=>h.py));
+
   fctx.strokeStyle = 'rgb(237,234,226)';
   fctx.lineWidth = 1;
-  edges.forEach(([i,j])=>{
-    const A = nodes[i], B = nodes[j];
-    if(!A.on || !B.on) return;
-    const k = Math.min(A.travel, B.travel);
-    if(k <= .55) return;
-    const drawn = clamp01((k - .55) / .45);
-    fctx.globalAlpha = Math.min(A.on, B.on) * drawn * .5;
-    fctx.beginPath();
-    fctx.moveTo(A.px, A.py);
-    fctx.lineTo(lerp(A.px, B.px, drawn), lerp(A.py, B.py, drawn));
-    fctx.stroke();
+  hLines.forEach(ln=>{
+    if(ln.on <= .01) return;
+    fctx.globalAlpha = ln.on * .45;
+    fctx.beginPath(); fctx.moveTo(x0, ln.py); fctx.lineTo(x1, ln.py); fctx.stroke();
+  });
+  vLines.forEach(ln=>{
+    if(ln.on <= .01) return;
+    fctx.globalAlpha = ln.on * .45;
+    fctx.beginPath(); fctx.moveTo(ln.px, y0); fctx.lineTo(ln.px, y1); fctx.stroke();
   });
 
+  /* a dot at every crossing, which is the only place a dot can be */
+  let count = 0;
   fctx.fillStyle = 'rgb(237,234,226)';
-  nodes.forEach(n=>{
-    if(!n.on || n.on <= .01) return;
-    fctx.globalAlpha = n.on;
-    fctx.beginPath();
-    fctx.arc(n.px, n.py, 2, 0, Math.PI*2);
-    fctx.fill();
+  vLines.forEach(v=>{
+    hLines.forEach(h=>{
+      const on = Math.min(v.on, h.on);
+      if(on <= .01) return;
+      count++;
+      fctx.globalAlpha = on;
+      fctx.beginPath(); fctx.arc(v.px, h.py, 2, 0, Math.PI*2); fctx.fill();
+    });
   });
   fctx.globalAlpha = 1;
 
-  /* the frame is spent into the blueprint */
   const spent = clamp01((p - .1) / .5);
   gsap.set(lines, {opacity: 1 - spent*.92});
   gsap.set(dots,  {opacity: 1 - clamp01((p-.24)/.26)});
 
-  /* and the cards fill the drawing in, once it has been made */
   const resolve = clamp01((p - .78) / .22);
   cards.forEach((c,i)=>{
     const d = clamp01((resolve - (i%3)*.05) / .85);
@@ -321,7 +309,8 @@ function apply(p){
     c.style.transform = `scale(${lerp(.99,1,d)})`;
   });
 
-  readout.textContent = 'progress ' + p.toFixed(2) + '  ·  dots ' + live + '/' + nodes.length;
+  readout.textContent = 'progress ' + p.toFixed(2)
+    + '  ·  lines ' + live + '  ·  crossings ' + count;
 }
 
 measure();
