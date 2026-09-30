@@ -235,12 +235,18 @@ function buildGrid(){
   vLines = [...xs].sort((a,b)=>a-b).map(x => ({ x, fromLeft: x < cx }));
 
   /* births in tiers, outermost first, so the count doubles inward */
-  const tier = (arr, key) => {
+  const tier = (arr) => {
     const n = arr.length;
+    const maxEdge = Math.floor((n-1)/2);
     arr.forEach((ln,i)=>{
       const edge = Math.min(i, n-1-i);          /* 0 at the outside */
       ln.birth = edge * .05;
       ln.order = edge;
+      /* Connecting runs the other way, innermost first, so the outermost
+         line is the last to close rather than the first. It sat on the very
+         edge of the mask and finished while the frame was still opening,
+         which read as the drawing running ahead of the section. */
+      ln.joinOrder = maxEdge - edge;
     });
   };
   tier(hLines); tier(vLines);
@@ -298,20 +304,19 @@ function apply(p){
   const slide = k => ease(clamp01(k));
   let placed = 0, joined = 0;
 
+  /* every line finishes its run along the frame at the same moment, so none
+     of them is standing finished while the others are still travelling */
+  const travel = slide((p - .16) / .32);
   hLines.forEach(ln=>{
     ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
-    const k = slide((p - .14 - ln.order*.045) / .30);
-    ln.py   = lerp(ln.fromTop ? t : b, cy + (ln.y - cy) * zoom, k);
-    ln.k    = k;
-    ln.join = clamp01((p - .50 - ln.order*.03) / .16);
+    ln.py   = lerp(ln.fromTop ? t : b, cy + (ln.y - cy) * zoom, travel);
+    ln.join = clamp01((p - .54 - ln.joinOrder*.03) / .14);
     if(ln.on > .01){ placed++; if(ln.join > .01) joined++; }
   });
   vLines.forEach(ln=>{
     ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
-    const k = slide((p - .14 - ln.order*.045) / .30);
-    ln.px   = lerp(ln.fromLeft ? l : r, cx + (ln.x - cx) * zoom, k);
-    ln.k    = k;
-    ln.join = clamp01((p - .50 - ln.order*.03) / .16);
+    ln.px   = lerp(ln.fromLeft ? l : r, cx + (ln.x - cx) * zoom, travel);
+    ln.join = clamp01((p - .54 - ln.joinOrder*.03) / .14);
     if(ln.on > .01){ placed++; if(ln.join > .01) joined++; }
   });
 
