@@ -66,6 +66,8 @@
          display:flex;flex-direction:column;justify-content:center;
          padding:4rem 2.5rem;will-change:clip-path;}
   .works-in{will-change:transform;}
+  .cards{transition:none;}
+  .card{opacity:0;}            /* the dots outline them before they arrive */
   .w-eye{font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
          letter-spacing:.24em;text-transform:uppercase;color:var(--red);margin:0 0 .5rem;}
   .w-hed{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,5vw,4rem);
@@ -143,24 +145,25 @@ const works  = document.getElementById('works');
 const worksIn= document.getElementById('worksIn');
 const panel  = document.getElementById('panel');
 const readout= document.getElementById('readout');
-const trail  = document.getElementById('trail');
-const tctx   = trail.getContext('2d');
+const fx     = document.getElementById('trail');
+const fctx   = fx.getContext('2d');
+const cards  = [...document.querySelectorAll('.card')];
 
 const dots  = [...grid.querySelectorAll('.dot')];              /* tl tr bl br */
 const lines = ['.hg-t','.hg-r','.hg-b','.hg-l'].map(s => grid.querySelector(s));
 const ENDS  = [[0,1],[1,3],[2,3],[0,2]];
-const hist  = dots.map(()=>[]);
-const TRAIL = 10;
 
-let W=0,H=0,box=null,base=null,dpr=1;
+let W=0,H=0,box=null,base=null,dpr=1,outline=[],swarm=[];
+const lerp = (a,b,k)=>a+(b-a)*k;
+const clamp01 = v => v<0?0:v>1?1:v;
+const ease = v => v<.5 ? 4*v*v*v : 1-Math.pow(-2*v+2,3)/2;   /* in-out cubic */
 
 function measure(){
   W = vp.clientWidth; H = vp.clientHeight;
   dpr = Math.min(2, devicePixelRatio||1);
-  trail.width = Math.round(W*dpr); trail.height = Math.round(H*dpr);
-  tctx.setTransform(dpr,0,0,dpr,0,0);
-  tctx.lineCap='round'; tctx.lineJoin='round'; tctx.strokeStyle='rgb(237,234,226)';
-  /* the frame's resting rectangle, read off the laid-out hairlines */
+  fx.width = Math.round(W*dpr); fx.height = Math.round(H*dpr);
+  fctx.setTransform(dpr,0,0,dpr,0,0);
+  fctx.lineCap='round'; fctx.lineJoin='round'; fctx.strokeStyle='rgb(237,234,226)';
   const l = lines[3].offsetLeft, r = lines[1].offsetLeft, t = lines[0].offsetTop, b = lines[2].offsetTop;
   box = {l, r, t, b};
   base = lines.map((el,i)=>({
@@ -169,11 +172,49 @@ function measure(){
     len:(i%2) ? el.offsetHeight : el.offsetWidth,
     vert: !!(i%2)
   }));
+  buildOutline();
+  buildSwarm();
 }
 
-/* the same idea as the hero's own painter: dots are the corners, the
-   hairlines are the sides, all from one rectangle */
-function paint(l,r,t,b){
+/* Sample the edges of every card, at the size they end up. The swarm draws
+   this: the shape of the section before the section is there. */
+function buildOutline(){
+  const prev = worksIn.style.transform;
+  worksIn.style.transform = 'none';
+  const vr = vp.getBoundingClientRect();
+  outline = [];
+  const STEP = 26;
+  cards.forEach(c=>{
+    const r = c.getBoundingClientRect();
+    const x0=r.left-vr.left, y0=r.top-vr.top, x1=x0+r.width, y1=y0+r.height;
+    const nx = Math.max(2, Math.round(r.width/STEP));
+    const ny = Math.max(2, Math.round(r.height/STEP));
+    for(let i=0;i<nx;i++){ const f=i/nx; outline.push({x:lerp(x0,x1,f), y:y0});
+                                          outline.push({x:lerp(x1,x0,f), y:y1}); }
+    for(let i=0;i<ny;i++){ const f=i/ny; outline.push({x:x1, y:lerp(y0,y1,f)});
+                                          outline.push({x:x0, y:lerp(y1,y0,f)}); }
+  });
+  worksIn.style.transform = prev;
+}
+
+/* Every dot peels off a point on the frame itself, so the lines are what the
+   swarm is made of rather than something sitting beside it. */
+function buildSwarm(){
+  swarm = outline.map((pt,i)=>{
+    const side = i % 4;
+    const u = Math.random();
+    return {
+      target: pt,
+      side, u,
+      delay: Math.random()*.34,          /* they do not all leave at once */
+      spin: (Math.random()-.5)*2,
+      size: .9 + Math.random()*1.1,
+      hist: []
+    };
+  });
+}
+
+function paintFrame(l,r,t,b){
   const pts = [{x:l,y:t},{x:r,y:t},{x:l,y:b},{x:r,y:b}];
   pts.forEach((p,i)=>{
     const home = {x: dots[i].offsetLeft + 2.5, y: dots[i].offsetTop + 2.5};
@@ -190,51 +231,91 @@ function paint(l,r,t,b){
   return pts;
 }
 
-function drawTrails(pts){
-  tctx.clearRect(0,0,W,H);
-  pts.forEach((p,i)=>{
-    const h = hist[i];
-    h.unshift(p);
-    if(h.length > TRAIL) h.pop();
-    if(h.length < 2) return;
-    const sp = Math.hypot(h[0].x-h[1].x, h[0].y-h[1].y);
-    const lit = Math.min(1, sp/6);
-    if(lit <= .01) return;
-    for(let k=0;k<h.length-1;k++){
-      const f = 1 - k/(h.length-1);
-      const seg = Math.hypot(h[k].x-h[k+1].x, h[k].y-h[k+1].y);
-      if(seg < .4) continue;
-      tctx.globalAlpha = .5*lit*f*f;
-      tctx.lineWidth = Math.max(.4, 4.2*f);
-      tctx.beginPath();
-      tctx.moveTo(h[k].x,h[k].y); tctx.lineTo(h[k+1].x,h[k+1].y);
-      tctx.stroke();
-    }
-  });
-  tctx.globalAlpha = 1;
-}
-
-const lerp = (a,b,k)=>a+(b-a)*k;
-
 function apply(p){
   /* the frame opens from the title box out to the whole screen */
   const l = lerp(box.l, 0, p), r = lerp(box.r, W, p);
   const t = lerp(box.t, 0, p), b = lerp(box.b, H, p);
-  const pts = paint(l,r,t,b);
-  drawTrails(pts);
+  paintFrame(l,r,t,b);
 
-  /* works is revealed through that same rectangle, and settles out of a zoom */
   works.style.clipPath = `inset(${t}px ${W-r}px ${H-b}px ${l}px)`;
-  worksIn.style.transform = `scale(${lerp(1.18, 1, p)})`;
-  works.style.opacity = Math.min(1, p*3.2);
+  const zoom = lerp(1.18, 1, p);
+  worksIn.style.transform = `scale(${zoom})`;
+  works.style.opacity = String(Math.min(1, p*3.2));
 
-  /* and the hero pushes past you rather than sliding away */
   panel.style.transform = `scale(${lerp(1, 1.35, p)})`;
-  panel.style.opacity = String(Math.max(0, 1 - p*1.9));
+  panel.style.opacity   = String(Math.max(0, 1 - p*1.9));
 
-  /* the dots fade once the frame reaches the edges */
-  gsap.set(dots, {opacity: p > .82 ? Math.max(0, 1-(p-.82)/.18) : 1});
-  readout.textContent = 'progress ' + p.toFixed(2);
+  /* ── the swarm ──
+     peel off the frame, fly to the outline of the work, hold it, then go */
+  const cx = W/2, cy = H/2;
+  fctx.clearRect(0,0,W,H);
+  let lit = 0;
+
+  swarm.forEach(s=>{
+    /* where it starts: a point on the frame's own perimeter */
+    let ox, oy;
+    if(s.side===0){ ox = lerp(l,r,s.u); oy = t; }
+    else if(s.side===1){ ox = r; oy = lerp(t,b,s.u); }
+    else if(s.side===2){ ox = lerp(r,l,s.u); oy = b; }
+    else { ox = l; oy = lerp(b,t,s.u); }
+
+    /* the target rides the same zoom the cards do, so it lands on them */
+    const tx = cx + (s.target.x - cx) * zoom;
+    const ty = cy + (s.target.y - cy) * zoom;
+
+    const fly  = ease(clamp01((p - .06 - s.delay*.5) / .42));
+    const go   = clamp01((p - .74) / .26);
+
+    let x = lerp(ox, tx, fly);
+    let y = lerp(oy, ty, fly);
+    /* and on the way out they carry on past, away from the middle */
+    if(go > 0){
+      const away = go*go*260;
+      const a = Math.atan2(ty-cy, tx-cx) + s.spin*.35*go;
+      x += Math.cos(a)*away; y += Math.sin(a)*away;
+    }
+
+    const alpha = Math.min(fly*2.2, 1) * (1-go) * .85;
+    if(alpha <= .01) { s.hist.length = 0; return; }
+    lit++;
+
+    s.hist.unshift({x,y});
+    if(s.hist.length > 5) s.hist.pop();
+    const sp = s.hist[1] ? Math.hypot(x-s.hist[1].x, y-s.hist[1].y) : 0;
+    if(sp > .6){
+      for(let k=0;k<s.hist.length-1;k++){
+        const f = 1 - k/(s.hist.length-1);
+        fctx.globalAlpha = alpha*.5*f*f;
+        fctx.lineWidth = Math.max(.35, 2.2*f*s.size);
+        fctx.beginPath();
+        fctx.moveTo(s.hist[k].x, s.hist[k].y);
+        fctx.lineTo(s.hist[k+1].x, s.hist[k+1].y);
+        fctx.stroke();
+      }
+    }
+    fctx.globalAlpha = alpha;
+    fctx.beginPath();
+    fctx.arc(x, y, 1.15*s.size, 0, Math.PI*2);
+    fctx.fillStyle = 'rgb(237,234,226)';
+    fctx.fill();
+  });
+  fctx.globalAlpha = 1;
+
+  /* the frame's own lines fade as the swarm takes over -- they are being
+     spent, not simply switched off */
+  const spent = clamp01((p - .1) / .5);
+  gsap.set(lines, {opacity: 1 - spent*.9});
+  gsap.set(dots,  {opacity: 1 - clamp01((p-.3)/.3)});
+
+  /* the cards resolve only once their outline has been drawn */
+  const resolve = clamp01((p - .7) / .26);
+  cards.forEach((c,i)=>{
+    const d = clamp01((resolve - (i%3)*.06) / .8);
+    c.style.opacity = String(d);
+    c.style.transform = `scale(${lerp(.985,1,d)})`;
+  });
+
+  readout.textContent = 'progress ' + p.toFixed(2) + '  ·  dots ' + lit;
 }
 
 measure();
