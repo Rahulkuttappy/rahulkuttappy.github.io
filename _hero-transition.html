@@ -65,9 +65,12 @@
   .trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;}
 
   /* ── works layer: revealed through the frame ── */
-  .works{position:absolute;inset:0;z-index:5;background:var(--bg);
-         display:flex;flex-direction:column;justify-content:center;
-         padding:4rem 2.5rem;will-change:clip-path;}
+  /* Anchored to the top and cut off by the frame. Centring it meant a list
+     taller than the screen hung off both ends; now the frame shows the top of
+     it and the rest is simply below the fold, to be scrolled to. */
+  .works{position:absolute;inset:0;z-index:5;background:var(--bg);overflow:hidden;
+         display:flex;flex-direction:column;justify-content:flex-start;
+         padding:3rem 2.5rem;will-change:clip-path;}
   .works-in{will-change:transform;}
   .cards{transition:none;}
   .card{opacity:0;}            /* the dots outline them before they arrive */
@@ -96,7 +99,8 @@
            letter-spacing:.03em;line-height:1;margin:0;}
   .c-year{font-family:'JetBrains Mono',monospace;font-size:.4rem;letter-spacing:.18em;
           color:var(--muted);margin:.25rem 0 0;}
-  .after{padding:6rem 2.5rem;border-top:1px solid var(--border);}
+  .after{padding:0 2.5rem 6rem;}
+  .after .cards{border-top:0;}
   .after p{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.16em;
            text-transform:uppercase;color:var(--muted);}
   /* the list is one column at every width -- the two-column rule here was
@@ -155,7 +159,14 @@
   </div>
 </div>
 
-<section class="after"><p>…and the page carries on from here</p></section>
+<!-- The rest of the list, scrolled to normally once the frame has released.
+     In the real page this is not a second element: #works is one section, and
+     the pin simply holds its top while the frame opens over it. Split here
+     only because this prototype keeps its copy inside the pinned viewport. -->
+<section class="after">
+  <div class="cards" id="restCards"></div>
+  <p>…and the page carries on from here</p>
+</section>
 
 <p class="hint">scroll</p>
 <p class="readout" id="readout">progress 0.00</p>
@@ -182,12 +193,12 @@ const cards  = [...document.querySelectorAll('.card')];
 
 const dots  = [...grid.querySelectorAll('.dot')];              /* tl tr bl br */
 const lines = ['.hg-t','.hg-r','.hg-b','.hg-l'].map(s => grid.querySelector(s));
-const ENDS  = [[0,1],[1,3],[2,3],[0,2]];
 
 let W=0,H=0,box=null,base=null,dpr=1,hLines=[],vLines=[];
 /* how long the staggers get to run in total, however many lines there are */
 const BIRTH_SPAN = .20, JOIN_SPAN = .18;
 let tierBirth = .05, tierJoin = .045;
+let visibleRows = 0;
 const lerp = (a,b,k)=>a+(b-a)*k;
 const clamp01 = v => v<0?0:v>1?1:v;
 const ease = v => v<.5 ? 4*v*v*v : 1-Math.pow(-2*v+2,3)/2;   /* in-out cubic */
@@ -335,7 +346,16 @@ function buildGrid(){
      differ by a fraction -- so rounding used to be what merged them, and
      without it every rule quietly doubled. They are merged by proximity
      below instead. */
-  cards.forEach(c=>{
+  /* Only the rows the frame can show. A rule for a row below the fold would
+     be drawn outside the frame, or clipped away and counted as drawn while
+     never appearing -- the transition reveals the top of the list, not all
+     of it. */
+  const shown = cards.filter(c=>{
+    const r = c.getBoundingClientRect();
+    return (r.bottom - vr.top) <= H + 1;
+  });
+  visibleRows = shown.length;
+  shown.forEach(c=>{
     const r = c.getBoundingClientRect();
     ys.add(r.top - vr.top);
     ys.add(r.bottom - vr.top);
@@ -434,20 +454,21 @@ function buildGrid(){
   if(hLines.length) hLines[0].joinOrder = -1;
 }
 
+/* The hairlines cross the whole frame rather than stopping at the corners,
+   which is how the site's own hero draws them: four full-bleed lines with a
+   dot where each pair crosses. Scaling them down to the corner-to-corner
+   span made them stop at the dots, so the frame read as a box outline rather
+   than as crossed guides. They only ever move now, never shorten. */
 function paintFrame(l,r,t,b){
   const pts = [{x:l,y:t},{x:r,y:t},{x:l,y:b},{x:r,y:b}];
   pts.forEach((p,i)=>{
     const home = {x: dots[i].offsetLeft + 2.5, y: dots[i].offsetTop + 2.5};
     gsap.set(dots[i], {x:p.x-home.x, y:p.y-home.y});
   });
-  ENDS.forEach(([a,c],i)=>{
-    const A=pts[a], B=pts[c], bs=base[i];
-    const dx=B.x-A.x, dy=B.y-A.y, len=Math.sqrt(dx*dx+dy*dy);
-    const o = {x:(A.x+B.x)/2-bs.cx, y:(A.y+B.y)/2-bs.cy,
-               rotation: Math.atan2(dy,dx)*180/Math.PI - (bs.vert?90:0)};
-    o[bs.vert?'scaleY':'scaleX'] = len/bs.len;
-    gsap.set(lines[i], o);
-  });
+  gsap.set(lines[0], {x:0, y:t - base[0].cy, rotation:0, scaleX:1});   /* top    */
+  gsap.set(lines[1], {x:r - base[1].cx, y:0, rotation:0, scaleY:1});   /* right  */
+  gsap.set(lines[2], {x:0, y:b - base[2].cy, rotation:0, scaleX:1});   /* bottom */
+  gsap.set(lines[3], {x:l - base[3].cx, y:0, rotation:0, scaleY:1});   /* left   */
 }
 
 function apply(p){
@@ -594,10 +615,22 @@ function apply(p){
 
   lastP = p;
   readout.textContent = 'progress ' + p.toFixed(2)
+    + '  ·  rows shown ' + visibleRows + '/' + cards.length
     + '  ·  on the frame ' + placed + '  ·  joined ' + joined + '  ·  crossings ' + cross;
 }
 
 measure();
+
+/* whatever did not fit is moved out of the pinned copy and into the
+   continuation below it, so the list reads as one run of rows either side of
+   the release rather than repeating itself */
+(function splitList(){
+  const rest = document.getElementById('restCards');
+  if(!rest) return;
+  const all = [...document.querySelectorAll('#worksIn .card')];
+  all.slice(visibleRows).forEach(c => rest.appendChild(c));
+})();
+
 apply(0);
 
 ScrollTrigger.create({
