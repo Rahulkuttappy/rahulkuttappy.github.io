@@ -1,3 +1,19 @@
+/* ScrollTrigger banks history.scrollRestoration the first time it
+   initialises -- which is when its own script runs, before this file -- and
+   writes that banked value back after every refresh. It therefore always
+   banks "auto", and no setting made here can be early enough to change that:
+   measured, a single ScrollTrigger.refresh() turns "manual" back into
+   "auto", while an ordinary window.scrollTo leaves it alone. So it is set
+   here and re-asserted after each refresh, through refreshTriggers below.
+   Without that, the browser restores the old scroll offset on reload and the
+   page comes back half way down. */
+if('scrollRestoration' in history) history.scrollRestoration='manual';
+
+function refreshTriggers(){
+  if(window.ScrollTrigger && ScrollTrigger.refresh) ScrollTrigger.refresh();
+  if('scrollRestoration' in history) history.scrollRestoration='manual';
+}
+
 /* ── Without GSAP ──
    Everything below animates through GSAP, loaded from a CDN. A blocked or
    slow CDN used to throw on this first line and take the whole file with it,
@@ -72,7 +88,6 @@ if(window.Lenis){
    frame -- the name clipped off the top of the screen. Measured before the
    fix: a native jump to zero landed at 41px with the hero 40px above the
    viewport, and Lenis still holding the old position. */
-if('scrollRestoration' in history) history.scrollRestoration='manual';
 function toTop(){
   if(location.hash) return;
   if(lenis){
@@ -81,7 +96,7 @@ function toTop(){
   }
   window.scrollTo(0,0);
   /* positions were measured further down the page; make them agree again */
-  if(window.ScrollTrigger && ScrollTrigger.refresh) ScrollTrigger.refresh();
+  refreshTriggers();
 }
 window.addEventListener('pageshow',toTop);
 toTop();
@@ -1389,7 +1404,7 @@ if(gFilters.length){
         if(match) n++;
       });
       if(shown) shown.textContent=n;
-      if(window.ScrollTrigger) ScrollTrigger.refresh();
+      refreshTriggers();
     });
   });
 }
@@ -1453,7 +1468,7 @@ if(igGrid){
       }
       igGrid.appendChild(a);
     });
-    if(window.ScrollTrigger) ScrollTrigger.refresh();
+    refreshTriggers();
   }
 
   /* Posts can also be placed by hand in the markup. If any are there they
