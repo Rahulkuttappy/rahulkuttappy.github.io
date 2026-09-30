@@ -63,6 +63,11 @@
      and the cards resolve underneath it as it leaves. Below z-index 5 it
      was simply covered the moment the clip opened. */
   .trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;}
+  /* Held at the tuned 56px rather than blown up: the mark is sampled for that
+     size and scaling the canvas only softens it. */
+  .orb-mid{position:absolute;left:50%;top:50%;width:56px;height:56px;
+           margin:-28px 0 0 -28px;z-index:8;pointer-events:none;
+           opacity:0;will-change:transform,opacity;}
 
   /* ── works layer: revealed through the frame ── */
   /* Anchored to the top and cut off by the frame. Centring it meant a list
@@ -137,6 +142,9 @@
       <span class="dot d-bl"></span><span class="dot d-br"></span>
     </div>
 
+    <!-- the monogram, pulsing once through the middle of the frame -->
+    <div class="orb-mid" id="orbMid" aria-hidden="true"></div>
+
     <div class="works" id="works">
       <div class="works-in" id="worksIn">
         <div class="w-hdr">
@@ -178,6 +186,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"></script>
+<script src="js/brand-orbs.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger);
 const lenis = new Lenis({lerp:.085});
@@ -296,6 +305,36 @@ function buildTitle(){
      whole thing is measured once more rather than only the title. */
   if(document.fonts && document.fonts.ready){
     document.fonts.ready.then(()=>{ fit(); relayout(); }).catch(()=>{});
+  }
+}
+
+/* One full cycle of the ring, scrubbed rather than left to real time. The
+   mark pulses at .32, so a cycle is 1000/.32 milliseconds; mapping the hold
+   window onto that means the loop completes exactly once however fast the
+   page is scrolled, instead of being cut short by a quick flick. */
+const ORB_CYCLE_MS = 1000 / .32;
+let midOrb = null;
+if (window.BrandOrbs) {
+  midOrb = BrandOrbs.mount(document.getElementById('orbMid'),
+                           { variant:'rk', size:'medium', bg:'none' });
+}
+
+function paintOrb(p){
+  const el = document.getElementById('orbMid');
+  if(!el) return;
+  const inK   = clamp01((p - .12) / .08);      /* arrives as the dots run   */
+  const outK  = clamp01((p - .50) / .10);      /* leaves before the drawing */
+  const show  = inK * (1 - outK);
+  el.style.opacity = String(show);
+  /* comes up from nothing and pushes past on the way out */
+  const sc = lerp(.72, 1, inK) * lerp(1, 1.9, outK);
+  el.style.transform = 'scale(' + sc.toFixed(3) + ')';
+  if(midOrb){
+    /* the cycle completes as the exit begins, not during it, so the loop is
+       finished before the orb starts to go */
+    const k = clamp01((p - .12) / .38);
+    midOrb.setTime(k * ORB_CYCLE_MS);
+    midOrb.setPaused(show <= .01);
   }
 }
 
@@ -617,6 +656,7 @@ function apply(p){
     c.style.transform = `scale(${lerp(.99,1,d)})`;
   });
 
+  paintOrb(p);
   lastP = p;
   readout.textContent = 'progress ' + p.toFixed(2)
     + '  ·  rows shown ' + visibleRows + '/' + cards.length

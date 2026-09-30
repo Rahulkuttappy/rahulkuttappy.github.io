@@ -75,6 +75,10 @@
     '    if (Number.isFinite(next.speed)) controls.speed = Math.max(.1, Math.min(3, next.speed));',
     '    controls.paused = Boolean(next.paused);',
     '    window.__BRAND_ORB_PAUSED = controls.paused;',
+    '    /* an absolute clock, so the orb can be scrubbed to a phase rather',
+    '       than only slowed or stopped: a caller driving this from scroll can',
+    '       hold it to exactly one cycle however fast the page is moved */',
+    '    if (Number.isFinite(next.time)) { virtual = next.time; last = nativeNow(); }',
     '  });',
     '})();'
   ].join('\n');
@@ -130,12 +134,12 @@
 
     /* Nothing should be drawing while it is off screen or the tab is in the
        background; the engine keeps its frame and picks up where it left off. */
+    var atTime = null;                 /* set to drive the phase from outside */
     function push() {
       if (!frame.contentWindow) return;
-      frame.contentWindow.postMessage({
-        type: 'brand-orbs-controls',
-        controls: { speed: speed, paused: paused || !onScreen || !pageVisible }
-      }, '*');
+      var c = { speed: speed, paused: paused || !onScreen || !pageVisible };
+      if (atTime !== null) c.time = atTime;
+      frame.contentWindow.postMessage({ type: 'brand-orbs-controls', controls: c }, '*');
     }
 
     frame.addEventListener('load', push);
@@ -161,6 +165,9 @@
       variant: variant,
       setSpeed: function (v) { speed = clamp(v, 0.1, 3); push(); },
       setPaused: function (v) { paused = Boolean(v); push(); },
+      /* milliseconds on the orb's own clock; one ring cycle is 1000/speed of
+         the mark, which for the monogram's .32 is 3125ms */
+      setTime: function (ms) { atTime = ms; push(); },
       destroy: function () {
         if (io) io.disconnect();
         document.removeEventListener('visibilitychange', onVisibility);
