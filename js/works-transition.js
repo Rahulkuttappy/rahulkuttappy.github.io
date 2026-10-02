@@ -617,6 +617,18 @@ bindAnchor();
    time the hero is ready, whichever way it got there, the scroll is live. */
 let hashHandled = false, hashCalls = 0, lastJump = null;
 function wantsWorks(){ return location.hash === '#works'; }
+
+/* Once the link has been honoured the hash has done its job, so it is taken
+   back out of the address bar. Left in, it is not a one-off instruction but a
+   standing one: every refresh from then on returns to the list, the logo
+   scrolls to the top but the next reload undoes it, and there is no way back
+   to the homepage without editing the URL by hand. replaceState rather than
+   assigning location.hash, which would scroll and add a history entry. */
+function clearHash(){
+  if(location.hash !== '#works') return;
+  try { history.replaceState(null, '', location.pathname + location.search); }
+  catch(e){}
+}
 function honourIncomingHash(){
   hashCalls++;
   if(hashHandled || !running || !wantsWorks()){
@@ -665,6 +677,7 @@ function honourIncomingHash(){
   const settle = () => {
     if(Math.abs(window.scrollY - target) <= 4){
       hashHandled = true;                   /* there, and it stayed there */
+      clearHash();
       return;
     }
     if(performance.now() > deadline) return;   /* give up quietly, stay unhandled */
