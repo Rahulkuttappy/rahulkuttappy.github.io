@@ -806,8 +806,8 @@ window.HeroEntrance = {
     this.done = true;
     if(this._jump) this._jump();        /* already running: run it to its end */
     else this.skipped = true;           /* not started: do not start it */
+    if(lenis) lenis.start();            /* before the handover, see above */
     if(window.WorksTransition) WorksTransition.enable();
-    if(lenis) lenis.start();
   }
 };
 
@@ -829,8 +829,8 @@ function holdScrollForEntrance(){
     released = true;
     ['wheel','touchstart','keydown'].forEach(e=>window.removeEventListener(e,release));
     clearTimeout(failsafe);
-    if(window.HeroEntrance) HeroEntrance.finish();
     if(lenis) lenis.start();
+    if(window.HeroEntrance) HeroEntrance.finish();
   };
   ['wheel','touchstart','keydown'].forEach(e=>
     window.addEventListener(e, release, {passive:true}));
@@ -1056,8 +1056,12 @@ function revealHero(){
        until this has stopped. */
     .add(()=>{
       if(window.HeroEntrance) HeroEntrance.done = true;
-      if(window.WorksTransition) WorksTransition.enable();
+      /* Lenis first. It owns the scroll position, and while it is stopped its
+         own idea of that position stands still while the page moves without
+         it -- so a jump made here lands, and is then written straight back the
+         moment Lenis resumes from the number it was still holding. */
       if(lenis) lenis.start();
+      if(window.WorksTransition) WorksTransition.enable();
     });
 }
 
@@ -1069,8 +1073,8 @@ function showHeroInstantly(){
   gsap.set('.hg-dot',{x:0,y:0,scale:1,opacity:1});
   gsap.set('#hrule',{scaleX:1});
   if(window.HeroEntrance) HeroEntrance.done = true;
+  if(lenis) lenis.start();            /* before the handover, see above */
   if(window.WorksTransition) WorksTransition.enable();
-  if(lenis) lenis.start();
 }
 
 if(loaderEl){

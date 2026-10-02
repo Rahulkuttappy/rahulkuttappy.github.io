@@ -549,6 +549,9 @@ function prepare(){
   cards.forEach(c=>c.classList.remove('reveal'));
   measure();
   layout(0);
+  /* from here too, not only once the drawing is set up -- this is the earliest
+     the stage knows its own size, and the jump needs nothing else */
+  startHashWatch();
 }
 
 /* Phase two: the drawing. Held back until the hero's own entrance has
@@ -561,11 +564,14 @@ function enable(){
     midOrb = BrandOrbs.mount(orbEl, {variant:'rk', size:'medium', bg:'none'});
   }
   measure();
-  apply(0);
+  /* where the scroll actually is -- not assumed to be the top, because an
+     arrival on #works may already have been moved to the end */
+  apply(clamp01((window.scrollY - stageTop) / TR));
   /* Created here, not at prepare(). Nothing can scroll before this point --
      the entrance holds the scroll and releases it as it hands over -- so there
      is no window where the page moves with nobody listening, and no need to
      reach into a running update to catch up. */
+  startHashWatch();
   trigger = ScrollTrigger.create({
     trigger: stage,
     start: 'top top',
@@ -634,7 +640,29 @@ bindAnchor();
    is stopped and owns the scroll, so a jump made then goes nowhere. By the
    time the hero is ready, whichever way it got there, the scroll is live. */
 let hashHandled = false, hashCalls = 0, lastJump = null;
-function wantsWorks(){ return location.hash === '#works'; }
+/* Read once, at load, and remembered. Reading location.hash each time meant
+   the answer changed the moment the hash was cleared -- and the hero entrance
+   asks this question later, to decide whether to skip itself. It would have
+   been told no, and played the whole entrance over a page already scrolled to
+   the list. */
+function clearHash(){
+  if(!location.hash) return;
+  try { history.replaceState(null, '', location.pathname + location.search); }
+  catch(e){}
+}
+
+const worksRequested = location.hash === '#works';
+function wantsWorks(){ return worksRequested; }
+
+/* Taken out of the URL immediately, before the browser ever acts on it.
+
+   The browser scrolls to an anchor by where the element renders, and under the
+   transition the list is offset by a whole viewport so that it renders at the
+   top of the window -- so the native jump to #works goes to nought, which is
+   the hero. It landed after ours and put the reader straight back where they
+   started. The request is already recorded above, so the hash has nothing left
+   to say. */
+if(worksRequested) clearHash();
 
 /* Once the link has been honoured the hash has done its job, so it is taken
    back out of the address bar. Left in, it is not a one-off instruction but a
@@ -642,11 +670,31 @@ function wantsWorks(){ return location.hash === '#works'; }
    scrolls to the top but the next reload undoes it, and there is no way back
    to the homepage without editing the URL by hand. replaceState rather than
    assigning location.hash, which would scroll and add a history entry. */
-function clearHash(){
-  if(location.hash !== '#works') return;
-  try { history.replaceState(null, '', location.pathname + location.search); }
-  catch(e){}
+
+/* The jump used to be made from one place, at the end of setting the
+   transition up -- and if that one path did not run, for any of the reasons a
+   page has on load, nothing ever tried again and the reader was left on the
+   hero wondering why the link had done nothing. This keeps asking until it is
+   there, whichever way the page arrived. */
+let watching = false;
+const trace = [];
+const T = m => { if(trace.length < 80) trace.push(Math.round(performance.now())+'ms '+m+' y='+Math.round(window.scrollY)); };
+function startHashWatch(){
+  T('startHashWatch watching='+watching+' wants='+wantsWorks());
+  if(watching || !wantsWorks()) return;
+  watching = true;
+  const until = performance.now() + 8000;
+  let ticks = 0;
+  const tick = () => {
+    if(hashHandled){ T('watch stop: handled after '+ticks+' ticks'); return; }
+    ticks++;
+    honourIncomingHash();
+    if(performance.now() < until) requestAnimationFrame(tick);
+    else T('watch expired after '+ticks+' ticks');
+  };
+  requestAnimationFrame(tick);
 }
+
 function honourIncomingHash(){
   hashCalls++;
   if(hashHandled || !running || !wantsWorks()){
@@ -678,6 +726,7 @@ function honourIncomingHash(){
        repaints it and the whole thing appears to jump. */
     apply(clamp01((window.scrollY - stageTop) / TR));
     lastJump = 'to ' + target + ' landed ' + Math.round(window.scrollY);
+    T('jump '+lastJump);
   };
   jump();
   /* Something else wants the scroll on every arrival: the page transitions
@@ -695,10 +744,11 @@ function honourIncomingHash(){
   const settle = () => {
     if(Math.abs(window.scrollY - target) <= 4){
       hashHandled = true;                   /* there, and it stayed there */
+      T('settle ok, clearing hash');
       clearHash();
       return;
     }
-    if(performance.now() > deadline) return;   /* give up quietly, stay unhandled */
+    if(performance.now() > deadline){ T('settle deadline'); return; }
     jump();
     requestAnimationFrame(settle);
   };
@@ -749,7 +799,7 @@ window.WorksTransition = { prepare, enable, disable, relayout, eligible, wantsWo
   /* read-only view of the internals, for working out why something did not
      happen without having to guess from the outside */
   state: () => ({running, painting, hashHandled, hashCalls, lastJump, stageTop, TR,
-                 lenis: !!smooth(), lastP}),
+                 lenis: !!smooth(), lastP, worksRequested, watching, trace}),
   schedule: () => ({tierBirth, tierJoin, visibleRows,
     lines: [...hLines.map(l=>({axis:'h',...l})), ...vLines.map(l=>({axis:'v',...l}))]
       .map(l=>({axis:l.axis, order:l.order, joinOrder:l.joinOrder,
