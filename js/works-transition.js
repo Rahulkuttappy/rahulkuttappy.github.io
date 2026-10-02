@@ -333,16 +333,19 @@ function layout(p){
      clicks once it is the thing on screen. */
   works.style.pointerEvents = p >= 1 ? '' : 'none';
   stage.classList.toggle('xs-running', p < 1);
-  /* Nothing to play to behind a section that now covers it. The hero is held
-     at the top of the scroll rather than scrolled past, so everything in it
-     that pauses itself when it goes off screen never does: both video clips
-     keep decoding and the two fuzzed words keep redrawing under the whole
-     page. They are told. */
+  /* Nothing to look at behind a section that now covers it. The hero is held
+     at the top of the scroll rather than scrolled past, so the fuzzed words in
+     it never stop redrawing on their own.
+
+     The video is deliberately not touched. Pausing it here saved a little and
+     cost a great deal: a paused video holds its current frame, the opening
+     clip is almost black, and any path that failed to start it again left the
+     hero a black rectangle -- which is exactly what it did. It is left to the
+     browser, which stops decoding a covered video anyway. */
   const covered = p >= 1;
   heroL.style.visibility = covered ? 'hidden' : '';
   if(covered !== heroCovered){
     heroCovered = covered;
-    if(window.HeroVideo) HeroVideo.set(!covered);
     if(window.FuzzyText && FuzzyText.park) FuzzyText.park(heroL, covered);
   }
   /* The hero's dust drifts across a canvas the size of the window, eighty
@@ -618,7 +621,6 @@ function disable(){
   ['transform','transformOrigin'].forEach(k=>worksIn.style[k]='');
   heroL.style.visibility = '';
   heroCovered = false;
-  if(window.HeroVideo) HeroVideo.set(true);
   if(window.FuzzyText && FuzzyText.park) FuzzyText.park(heroL, false);
   stage.style.paddingBottom = '';
   const dust = document.getElementById('hdust');

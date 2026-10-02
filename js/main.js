@@ -126,7 +126,6 @@ tick();setInterval(tick,1000);
    stands in. */
 const heroVideo=document.getElementById('heroVideo');
 const heroVideo2=document.getElementById('heroVideo2');
-let parked=false;
 if(heroVideo){
   let active=heroVideo;
   let inView=true, attempts=0;
@@ -142,7 +141,6 @@ if(heroVideo){
 
   function resumeHero(reset){
     if(reset) attempts=0;
-    if(parked) return;                      /* covered, not merely off screen */
     if(!inView||document.hidden||!active.paused) return;
     if(attempts++>MAX_ATTEMPTS) return;
     const p=active.play();
@@ -213,27 +211,6 @@ if(heroVideo){
     },{threshold:0.01}).observe(heroVideo);
   }
 
-  /* Intersecting is not the same as visible. On the homepage the hero is held
-     at the top of the scroll and covered by the section that opens over it
-     rather than scrolled past, so the observer above never once reports it
-     gone and both clips decode their way through the entire page. Whatever is
-     covering it says so. */
-  window.HeroVideo = {
-    set(on){
-      if(on === !parked) return;
-      parked = !on;
-      if(parked){ if(!active.paused) active.pause(); return; }
-      /* Straight to play rather than through resumeHero, which gates on the
-         observer's idea of whether the hero is on screen. Being covered is
-         not being off screen, but the observer reports it as one while the
-         layer is hidden, so by the time the cover lifts it is holding a
-         "false" and the clip would never start again. Uncovered, the hero is
-         the whole window; there is nothing left to ask. */
-      attempts = 0;
-      const pr = active.play();
-      if(pr && pr.catch) pr.catch(()=>{});
-    }
-  };
 }
 
 /* ── Mobile menu ──
@@ -846,12 +823,24 @@ window.HeroEntrance = {
    entrance, and by the time anything scrolls the transition owns the frame. */
 function holdScrollForEntrance(){
   if(lenis) lenis.stop();
+  let released = false;
   const release = () => {
+    if(released) return;
+    released = true;
     ['wheel','touchstart','keydown'].forEach(e=>window.removeEventListener(e,release));
+    clearTimeout(failsafe);
     if(window.HeroEntrance) HeroEntrance.finish();
+    if(lenis) lenis.start();
   };
   ['wheel','touchstart','keydown'].forEach(e=>
-    window.addEventListener(e, release, {passive:true, once:true}));
+    window.addEventListener(e, release, {passive:true}));
+  /* The hold must never outlive the thing it is waiting for. The entrance runs
+     on GSAP's ticker, which stops with the tab -- open the page in a background
+     tab, come back, and the timeline may not have run at all. Without this the
+     page would simply refuse to scroll, with nothing on screen to explain it.
+     Four seconds is comfortably longer than the entrance and short enough that
+     nobody waits on it. */
+  const failsafe = setTimeout(release, 4000);
 }
 
 function revealHero(){
