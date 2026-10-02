@@ -7,9 +7,11 @@
    The whole thing is scrubbed from the scroll: there is no timeline of its
    own, so it runs forward and backward and stops wherever the reader stops.
 
-   Prototyped in _hero-transition.html; the working notes for each decision
-   are kept there. This is the same choreography attached to the real hero
-   and the real list.
+   Prototyped as a scratch page, _hero-transition.html, which is no longer in
+   the tree -- `git show 0a20f73:_hero-transition.html` has the last of it.
+   The working notes for each decision were kept there and the ones that still
+   matter have been carried into the comments below. This is the same
+   choreography attached to the real hero and the real list.
    ────────────────────────────────────────────────────────────────────────── */
 (function(){
 'use strict';
