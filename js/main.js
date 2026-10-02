@@ -1257,13 +1257,32 @@ if(sbFill&&sbDot){
 }
 
 /* Hero parallax — foreground, background and overlay move at different rates */
-/* the words drift, the panel holding them does not: it is pinned to the grid */
-gsap.to('.hero-inner',{yPercent:-16,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1}});
-gsap.to('.hero-bg img, .hero-bg video',{yPercent:14,scale:1.14,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1}});
-gsap.to('#hside',{yPercent:-28,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1}});
+(function heroParallax(){
+  const hero = document.getElementById('hero');
+  /* Only the homepage has one. Run unguarded, these four put a tween and a
+     ScrollTrigger on selectors that match nothing on every other page -- eight
+     warnings in the console and four triggers measuring an element that is not
+     there. */
+  if(!hero) return;
 
-/* Hero image fades out as you scroll through it */
-gsap.to('.hero-bg',{opacity:0,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:1}});
+  /* And on the homepage, only when the hero is not inside the works
+     transition. The transition holds the hero at the top of the stage and
+     decides what happens to it; these would be a second hand on the same
+     wheel, with the same elements told two different things -- including the
+     background, which this fades to nothing on the way down. With the hero
+     pinned rather than scrolled past, "bottom top" is no longer the end of the
+     hero either, so the fade would be spread across the whole stage. Narrow
+     screens and reduced motion, where the transition does not run, keep it. */
+  if(window.WorksTransition && WorksTransition.state && WorksTransition.state().running) return;
+
+  const through = () => ({trigger:hero, start:'top top', end:'bottom top', scrub:1});
+  /* the words drift, the panel holding them does not: it is pinned to the grid */
+  gsap.to('.hero-inner',{yPercent:-16,ease:'none',scrollTrigger:through()});
+  gsap.to('.hero-bg img, .hero-bg video',{yPercent:14,scale:1.14,ease:'none',scrollTrigger:through()});
+  gsap.to('#hside',{yPercent:-28,ease:'none',scrollTrigger:through()});
+  /* and the image fades out as you scroll through it */
+  gsap.to('.hero-bg',{opacity:0,ease:'none',scrollTrigger:through()});
+})();
 
 /* Magnetic elements */
 document.querySelectorAll('.nav-cta,.f-back').forEach(el=>{
