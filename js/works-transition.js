@@ -44,7 +44,7 @@ const clamp01 = v => v<0?0:v>1?1:v;
 /* how much scroll the transition is spread across, as a share of the window */
 const SPAN = 1.6;
 
-let W=0, H=0, TR=0, box=null, base=null, dpr=1;
+let W=0, H=0, TR=0, stageTop=0, box=null, base=null, dpr=1;
 let hLines=[], vLines=[], visibleRows=0, lastP=0;
 let running=false, painting=false, trigger=null, fontsWatched=false, heroCovered=false;
 let rowsWoken=false;
@@ -124,6 +124,7 @@ function paintOrb(p){
 /* ── measuring ────────────────────────────────────────────────────────────*/
 function measure(){
   W = frame.clientWidth; H = frame.clientHeight;
+  stageTop = stage.getBoundingClientRect().top + window.scrollY;
   TR = Math.round(H * SPAN);
   dpr = Math.min(2, window.devicePixelRatio || 1);
   fx.width = Math.round(W*dpr); fx.height = Math.round(H*dpr);
@@ -316,8 +317,17 @@ function layout(p){
      let go at the end, so the scroll that drives the transition is not also
      scrolling the list past it. Offset rather than transform: the header bar
      is sticky, and a transformed ancestor would give it something else to
-     stick to. */
-  works.style.top = (Math.min(p,1) * TR - H) + 'px';
+     stick to.
+
+     Measured from the scroll itself, not from the progress passed in. The two
+     are meant to be the same number, but a scrub can lag the scroll or be left
+     behind by a refresh, and because this offset is what cancels the scroll
+     out, any gap between them moves the list down the page by exactly that
+     much -- the list sliding away from the top of the window with a black band
+     opening above it. Taken from the scroll it cannot drift, whatever the
+     scrub is doing. */
+  const held = Math.max(0, Math.min(TR, window.scrollY - stageTop));
+  works.style.top = (held - H) + 'px';
   /* The clip goes on the section and the scale on the wrapper inside it.
      Both on one element and clip-path, which is applied in the element's own
      coordinates and then transformed along with it, is dragged out past the
@@ -347,6 +357,19 @@ function layout(p){
   if(covered !== heroCovered){
     heroCovered = covered;
     if(window.FuzzyText && FuzzyText.park) FuzzyText.park(heroL, covered);
+    /* Coming back to a hero whose video is not running shows whatever frame it
+       stopped on, and the opening clip is nearly black -- so the hero reads as
+       simply missing. This only ever starts playback and never stops it, so
+       the worst it can do is nothing: if the browser refuses, the hero is no
+       worse off than it already was. Deliberately not paired with a pause. */
+    if(!covered){
+      heroL.querySelectorAll('video').forEach(v=>{
+        if(v.paused && getComputedStyle(v).opacity !== '0'){
+          const pr = v.play();
+          if(pr && pr.catch) pr.catch(()=>{});
+        }
+      });
+    }
   }
   /* The hero's dust drifts across a canvas the size of the window, eighty
      motes redrawn every frame. It is there for the hero at rest; the moment
@@ -530,7 +553,12 @@ function enable(){
     start: 'top top',
     end: () => '+=' + TR,
     scrub: true,
-    onUpdate: self => apply(self.progress)
+    /* Progress read from the scroll rather than taken from the scrub. With
+       scrub:true the two are the same number -- until they are not, and then
+       the drawing and the list's position are working from different ones.
+       The trigger is still what decides when to run; it just does not get to
+       decide where in the transition we are. */
+    onUpdate: () => apply(clamp01((window.scrollY - stageTop) / TR))
   });
   ScrollTrigger.refresh();
   honourIncomingHash();
