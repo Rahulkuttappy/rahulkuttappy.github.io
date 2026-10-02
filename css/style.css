@@ -529,7 +529,7 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
    size, and scaling the canvas only softens it. */
 .xorb{position:absolute;left:50%;top:50%;width:56px;height:56px;
       margin:-28px 0 0 -28px;z-index:3;pointer-events:none;
-      opacity:0;will-change:clip-path;}
+      opacity:0;will-change:mask-position;}
 
 
 /* ── with the transition on ── */

@@ -115,6 +115,64 @@ function paintTitle(p){
 const ORB_CYCLE_MS = 1000 / .32;
 let midOrb = null;
 
+/* ── the wipe's edge ──────────────────────────────────────────────────────
+   A clip-path gives a ruled edge, which is the one thing on this frame that
+   does not look drawn: everything else here is made of dots. So the wipe is a
+   mask instead, and its edge is an ordered dither -- the same Bayer 4x4 the
+   loading bar is stippled with -- thresholded hard, so the mark is eaten dot
+   by dot rather than sliced.
+
+   The mask is built once, at device resolution, and only ever slid across.
+   Drawing it per frame would mean a canvas readback and a new data URI sixty
+   times a second for an effect that does not change shape.
+
+   It reads: a band of dither coming up from nothing, the mark's own width at
+   full strength, then a band going back down. Sliding that one image right to
+   left reveals the mark through the first band and takes it away through the
+   second. */
+const ORB_PX = 56, ORB_BAND = 18;
+const BAYER4 = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+let orbMask = null, orbMaskW = 0;
+
+function buildOrbMask(){
+  if(orbMask) return;
+  const d = Math.min(2, window.devicePixelRatio || 1);
+  const W = Math.round(ORB_PX*d), B = Math.round(ORB_BAND*d), H = W;
+  /* The grain is sized in CSS pixels, not device ones. A matrix stepped once
+     per device pixel is a pixel of noise on a retina screen -- technically a
+     dither and visually a soft edge. Stepped every couple of CSS pixels it
+     comes out at about the pitch of the mark's own dots, so the edge reads as
+     the same material breaking up rather than as a blur. */
+  const CELL = Math.max(1, Math.round(2*d));
+  orbMaskW = ORB_PX + ORB_BAND*2;
+  const cv = document.createElement('canvas');
+  cv.width = W + B*2; cv.height = H;
+  const c = cv.getContext('2d');
+  const img = c.createImageData(cv.width, H);
+  const o = img.data;
+  for(let y=0; y<H; y++){
+    for(let x=0; x<cv.width; x++){
+      /* how opaque this column wants to be: up across the first band, solid
+         through the middle, down across the last */
+      let t = 1;
+      if(x < B) t = x / B;
+      else if(x > B + W) t = 1 - (x - B - W) / B;
+      /* thresholded against the matrix rather than faded, so every pixel is
+         either there or not and the edge breaks up into grain */
+      const cx = (x / CELL) | 0, cy = (y / CELL) | 0;
+      const on = t > (BAYER4[cy & 3][cx & 3] + 0.5) / 16;
+      const i = (y*cv.width + x) * 4;
+      o[i] = o[i+1] = o[i+2] = 255;
+      o[i+3] = on ? 255 : 0;
+    }
+  }
+  c.putImageData(img, 0, 0);
+  orbMask = cv.toDataURL('image/png');
+  orbEl.style.webkitMaskImage = orbEl.style.maskImage = 'url(' + orbMask + ')';
+  orbEl.style.webkitMaskRepeat = orbEl.style.maskRepeat = 'no-repeat';
+  orbEl.style.webkitMaskSize = orbEl.style.maskSize = orbMaskW + 'px ' + ORB_PX + 'px';
+}
+
 function paintOrb(p){
   /* It does not move. A wipe travels across it left to right to bring it in,
      and another follows to take it away, so the mark itself is only ever
@@ -122,7 +180,13 @@ function paintOrb(p){
      the frame. */
   const inK  = clamp01((p - .12) / .10);
   const outK = clamp01((p - .34) / .08);
-  orbEl.style.clipPath = 'inset(0 ' + ((1-inK)*100).toFixed(1) + '% 0 ' + (outK*100).toFixed(1) + '%)';
+  buildOrbMask();
+  /* Where the mask sits. Coming in, it travels from clear of the right-hand
+     side to the mark's own width; going out, on by the same distance again. */
+  const B = ORB_BAND, W = ORB_PX;
+  const x = outK > 0 ? lerp(-B, -(W + B*2), outK)
+                     : lerp(W + B, -B, inK);
+  orbEl.style.webkitMaskPosition = orbEl.style.maskPosition = x.toFixed(1) + 'px 0';
   const show = (inK > 0 && outK < 1) ? 1 : 0;
   orbEl.style.opacity = String(show);
   if(midOrb){
