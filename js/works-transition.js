@@ -188,11 +188,21 @@ function paintOrb(p){
   const outK = clamp01((p - .34) / .08);
   try { buildOrbMask(); } catch(e){ orbMaskFailed = true; }
   if(orbMask){
-    /* Where the mask sits. Coming in, it travels from clear of the right-hand
-       side to the mark's own width; going out, on by the same distance again. */
+    /* Where the mask sits, and which way it travels.
+
+       The image reads: a band coming up from nothing, the mark's width solid,
+       a band going back down. Slide it so that its *trailing* edge crosses the
+       mark and the solid part arrives from the left -- the mark is revealed
+       left to right. Slide on, and the leading edge crosses next, taking it
+       away in the same direction.
+
+       Sliding the other way puts the solid part in from the right, which is
+       what this did at first: the mask ran right to left while the plain wipe
+       it falls back to ran left to right, so the two disagreed about which way
+       the thing was going. */
     const B = ORB_BAND, W = ORB_PX;
-    const x = outK > 0 ? lerp(-B, -(W + B*2), outK)
-                       : lerp(W + B, -B, inK);
+    const x = outK > 0 ? lerp(-B, W + B, outK)          /* leaves, left to right */
+                       : lerp(-(W + B*2), -B, inK);     /* arrives, left to right */
     orbEl.style.webkitMaskPosition = orbEl.style.maskPosition = x.toFixed(1) + 'px 0';
   } else {
     /* no mask to be had: the straight-edged wipe, which is at least a wipe */
