@@ -173,8 +173,13 @@ function measure(){
 function relayout(){
   if(!running) return;
   measure();
-  if(window.ScrollTrigger && ScrollTrigger.refresh) ScrollTrigger.refresh();
-  apply(lastP);
+  /* Put the layout back before anything measures it. buildGrid leaves the list
+     at its start-of-transition offset while it reads the rows, and refreshing
+     on top of that measures a page that is not the one being looked at. */
+  apply(clamp01((window.scrollY - stageTop) / TR));
+  if(window.ScrollTrigger && ScrollTrigger.refresh){
+    requestAnimationFrame(()=>ScrollTrigger.refresh());
+  }
 }
 
 /* ── the blueprint ────────────────────────────────────────────────────────
@@ -573,9 +578,18 @@ function enable(){
      reach into a running update to catch up. */
   startHashWatch();
   trigger = ScrollTrigger.create({
+    /* Given as plain numbers rather than measured off the element. Asked to
+       work out "top top" for itself, a refresh could come back with an end of
+       -0.001 -- a range of nothing, which pins progress at 1 for good. The
+       grid toggle refreshes, so switching to grid and scrolling back up left
+       the hero hidden behind a section that would never be told to move again,
+       and nothing short of a reload brought it back. These two numbers are
+       the stage's own, already measured, and cannot collapse. The element is
+       still named, so the trigger can be found and identified, but it is no
+       longer what decides the range. */
     trigger: stage,
-    start: 'top top',
-    end: () => '+=' + TR,
+    start: () => stageTop,
+    end: () => stageTop + TR,
     scrub: true,
     /* Progress read from the scroll rather than taken from the scrub. With
        scrub:true the two are the same number -- until they are not, and then
