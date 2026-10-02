@@ -90,7 +90,7 @@
     var hovering = false, clicking = false, glitching = false;
     var current = o.baseIntensity, targetI = o.baseIntensity;
     var lastFrame = 0, frameDur = 1000 / o.fps;
-    var onScreen = true, pageVisible = !document.hidden;
+    var onScreen = true, pageVisible = !document.hidden, parked = false;
     var hit = { l: 0, t: 0, r: 0, b: 0 };
 
     function build() {
@@ -250,6 +250,7 @@
     }
 
     function play() {
+      if (parked) return;
       if (cancelled || raf || calm) return;
       if (!onScreen || !pageVisible) return;
       lastFrame = 0;
@@ -334,8 +335,14 @@
     }
     addEventListener('resize', onResize);
 
-    return {
+    var inst = {
       el: canvas,
+      /* The observer above only knows whether the canvas is on screen, which
+         is not the same as whether anything can see it: on the homepage the
+         hero is held at the top of the scroll and is covered rather than
+         scrolled away, so it never stops intersecting. A caller that knows
+         better can park it. */
+      setParked: function (v) { parked = !!v; parked ? stop() : play(); },
       destroy: function () {
         cancelled = true;
         stop();
@@ -348,7 +355,11 @@
         el.textContent = text;
       }
     };
+    mounted.push(inst);
+    return inst;
   }
+
+  var mounted = [];
 
   function auto() {
     var out = [];
@@ -386,5 +397,8 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
   else auto();
 
-  global.FuzzyText = { mount: mount, auto: auto, DEFAULTS: DEFAULTS };
+  global.FuzzyText = {
+    mount: mount, auto: auto, DEFAULTS: DEFAULTS,
+    parkAll: function (v) { mounted.forEach(function (m) { m.setParked(v); }); }
+  };
 })(window);

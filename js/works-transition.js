@@ -44,7 +44,7 @@ const SPAN = 1.6;
 
 let W=0, H=0, TR=0, box=null, base=null, dpr=1;
 let hLines=[], vLines=[], visibleRows=0, lastP=0;
-let running=false, painting=false, trigger=null, fontsWatched=false;
+let running=false, painting=false, trigger=null, fontsWatched=false, heroCovered=false;
 
 /* how long the staggers get to run in total, however many rules there are */
 const BIRTH_SPAN = .20, JOIN_SPAN = .18;
@@ -315,9 +315,24 @@ function layout(p){
     : 'inset(' + t + 'px ' + (W-r) + 'px ' + (H-b) + 'px ' + l + 'px)';
   worksIn.style.transform = p >= 1 ? 'none' : 'scale(' + lerp(1.18, 1, p) + ')';
   works.style.opacity = String(Math.min(1, p*3.2));
+  /* Clipped away is still clickable. The list sits above the hero and at the
+     start it is a full-size, invisible sheet of links lying exactly over the
+     hero's own words -- clicking the name opened a project. It only takes
+     clicks once it is the thing on screen. */
+  works.style.pointerEvents = p >= 1 ? '' : 'none';
   stage.classList.toggle('xs-running', p < 1);
-  /* nothing to play to behind a section that now covers it */
-  heroL.style.visibility = p >= 1 ? 'hidden' : '';
+  /* Nothing to play to behind a section that now covers it. The hero is held
+     at the top of the scroll rather than scrolled past, so everything in it
+     that pauses itself when it goes off screen never does: both video clips
+     keep decoding and the two fuzzed words keep redrawing under the whole
+     page. They are told. */
+  const covered = p >= 1;
+  heroL.style.visibility = covered ? 'hidden' : '';
+  if(covered !== heroCovered){
+    heroCovered = covered;
+    if(window.HeroVideo) HeroVideo.set(!covered);
+    if(window.FuzzyText && FuzzyText.parkAll) FuzzyText.parkAll(covered);
+  }
   /* The hero's dust drifts across a canvas the size of the window, eighty
      motes redrawn every frame. It is there for the hero at rest; the moment
      the frame starts opening there is a second full-window canvas being drawn
@@ -340,6 +355,12 @@ function layout(p){
 }
 
 function apply(p){
+  /* Moving at all means the reader is past the hero, so the entrance gives
+     up its claim on the frame and jumps to its finished state rather than
+     carrying on underneath a transition that is already drawing. */
+  if(!painting && p > .002 && window.HeroEntrance && !HeroEntrance.done){
+    HeroEntrance.finish();
+  }
   const rect = layout(p);
   if(!rect || !painting) return;
   const l = rect.l, r = rect.r, t = rect.t, b = rect.b;
@@ -471,6 +492,18 @@ function prepare(){
   cards.forEach(c=>c.classList.remove('reveal'));
   measure();
   layout(0);
+  /* Armed from the start rather than when the entrance finishes. It used to
+     be created at the end of the hero's own animation, which left a two and a
+     half second window on every refresh where the page scrolled and nothing
+     was listening -- the reader arrived in the middle of a transition that
+     had never been told it had begun. */
+  trigger = ScrollTrigger.create({
+    trigger: stage,
+    start: 'top top',
+    end: () => '+=' + TR,
+    scrub: true,
+    onUpdate: self => apply(self.progress)
+  });
 }
 
 /* Phase two: the drawing. Held back until the hero's own entrance has
@@ -483,14 +516,7 @@ function enable(){
     midOrb = BrandOrbs.mount(orbEl, {variant:'rk', size:'medium', bg:'none'});
   }
   measure();
-  apply(0);
-  trigger = ScrollTrigger.create({
-    trigger: stage,
-    start: 'top top',
-    end: () => '+=' + TR,
-    scrub: true,
-    onUpdate: self => apply(self.progress)
-  });
+  apply(lastP);
   ScrollTrigger.refresh();
 }
 
@@ -554,9 +580,12 @@ function disable(){
   running = painting = false;
   if(trigger){ trigger.kill(); trigger = null; }
   stage.classList.remove('xs-on','xs-running');
-  ['top','clipPath','opacity'].forEach(k=>works.style[k]='');
+  ['top','clipPath','opacity','pointerEvents'].forEach(k=>works.style[k]='');
   ['transform','transformOrigin'].forEach(k=>worksIn.style[k]='');
   heroL.style.visibility = '';
+  heroCovered = false;
+  if(window.HeroVideo) HeroVideo.set(true);
+  if(window.FuzzyText && FuzzyText.parkAll) FuzzyText.parkAll(false);
   stage.style.paddingBottom = '';
   const dust = document.getElementById('hdust');
   if(dust) dust.style.opacity = '';

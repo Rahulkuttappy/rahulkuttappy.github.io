@@ -29,9 +29,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/style.css?v=20260930r"/>
-<link rel="stylesheet" href="css/garage.css?v=20260930r"/>
-<link rel="stylesheet" href="css/tether.css?v=20260930r"/>
+<link rel="stylesheet" href="css/style.css?v=20261002c"/>
+<link rel="stylesheet" href="css/garage.css?v=20261002c"/>
+<link rel="stylesheet" href="css/tether.css?v=20261002c"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js" defer></script>
@@ -48,7 +48,7 @@ setTimeout(function(){
 <body>
 <div class="grain" aria-hidden="true"></div>
 <canvas id="cursorFX" aria-hidden="true"></canvas>
-<div id="pageFade"><span class="pf-mark"><img src="assets/images/logo.png" alt=""/></span></div>
+<div id="pageFade"><span class="pf-mark"><img src="assets/images/logo.png" alt="" decoding="async"/></span></div>
 <!-- preload=none: nobody should download a track they never play -->
 <audio id="bgm" preload="none"></audio>
 <div id="audioDock" data-audio-base="assets/audio/">
@@ -83,7 +83,7 @@ setTimeout(function(){
 
 <!-- NAV -->
 <nav id="nav" style="opacity:1;">
-  <a href="index.html"><img class="nav-logo" src="assets/images/logo.png" alt="RK"/></a>
+  <a href="index.html"><img class="nav-logo" src="assets/images/logo.png" alt="RK" decoding="async"/></a>
   <ul class="nav-links" id="navLinks">
     <li><a href="index.html#works">Works</a></li>
     <li><a href="films.html">Films</a></li>
@@ -103,7 +103,7 @@ setTimeout(function(){
 <!-- HERO -->
 <section id="thero">
   <div class="thero-bg" aria-hidden="true">
-    <img src="assets/images/garage/tether.jpg" alt=""/>
+    <img src="assets/images/garage/tether.jpg" alt="" decoding="async" fetchpriority="high"/>
   </div>
   <div class="thero-inner">
     <a class="thero-back" href="garage.html">&larr; Garage</a>
@@ -230,11 +230,11 @@ setTimeout(function(){
 
 <footer>
   <canvas id="plexus" aria-hidden="true"></canvas>
-  <img class="f-logo" src="assets/images/logo.png" alt="RK"/>
+  <img class="f-logo" src="assets/images/logo.png" alt="RK" decoding="async"/>
   <p>&copy; 2026 Rahul Kuttappy. All rights reserved</p>
   <a class="f-back" href="garage.html">Back to the garage &uarr;</a>
 </footer>
 
-<script src="js/main.js?v=20260930r" defer></script>
+<script src="js/main.js?v=20261002c" defer></script>
 </body>
 </html>

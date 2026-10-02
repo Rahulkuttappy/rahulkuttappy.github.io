@@ -49,7 +49,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/style.css?v=20260930r"/>
+<link rel="stylesheet" href="css/style.css?v=20261002c"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js" defer></script>
@@ -66,7 +66,7 @@ setTimeout(function(){
 <body>
 <div class="grain" aria-hidden="true"></div>
 <canvas id="cursorFX" aria-hidden="true"></canvas>
-<div id="pageFade"><span class="pf-mark"><img src="assets/images/logo.png" alt=""/></span></div>
+<div id="pageFade"><span class="pf-mark"><img src="assets/images/logo.png" alt="" decoding="async"/></span></div>
 <!-- preload=none: nobody should download a track they never play -->
 <audio id="bgm" preload="none"></audio>
 <div id="audioDock" data-audio-base="assets/audio/">
@@ -121,7 +121,7 @@ setTimeout(function(){
 
 <!-- NAV -->
 <nav id="nav">
-  <a href="#hero" id="navLogoLink"><img class="nav-logo" src="assets/images/logo.png" alt="RK"/></a>
+  <a href="#hero" id="navLogoLink"><img class="nav-logo" src="assets/images/logo.png" alt="RK" decoding="async"/></a>
   <ul class="nav-links" id="navLinks">
     <li><a href="#works">Works</a></li>
     <li><a href="films.html">Films</a></li>
@@ -234,7 +234,7 @@ setTimeout(function(){
   <div class="wgrid lv" id="wgrid">
 
     <a class="wc reveal" href="work/gala-night.html">
-      <div class="wc-img"><img src="assets/images/gala/gala-01.jpg" alt="Signature Estates x Harper&#x27;s Bazaar"/></div>
+      <div class="wc-img"><img data-src="assets/images/gala/gala-01.jpg" alt="Signature Estates x Harper&#x27;s Bazaar" decoding="async" loading="lazy"/></div>
       <span class="wc-num">01</span>
       <span class="wc-list-type">Event Reels &middot; Edit</span>
       <div class="wc-info">
@@ -244,7 +244,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/spunk-your-creek.html">
-      <div class="wc-img"><img src="assets/images/projects/eilin.jpg" alt="Spunk Your Creek"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/eilin.jpg" alt="Spunk Your Creek" decoding="async" loading="lazy"/></div>
       <span class="wc-num">02</span>
       <span class="wc-list-type">Dance Battle · Showcase</span>
       <div class="wc-info">
@@ -254,7 +254,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/ards.html">
-      <div class="wc-img"><img src="assets/images/projects/ards.jpg" alt="ARDS"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/ards.jpg" alt="ARDS" decoding="async" loading="lazy"/></div>
       <span class="wc-num">03</span>
       <span class="wc-list-type">Performance Film</span>
       <div class="wc-info">
@@ -264,7 +264,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/amg-sl-roadster.html">
-      <div class="wc-img"><img src="assets/images/projects/amg-sl-roadster.jpg" alt="AMG SL ROADSTER"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/amg-sl-roadster.jpg" alt="AMG SL ROADSTER" decoding="async" loading="lazy"/></div>
       <span class="wc-num">04</span>
       <span class="wc-list-type">Automotive &middot; Photography</span>
       <div class="wc-info">
@@ -274,7 +274,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/pearl-noir.html">
-      <div class="wc-img"><img src="assets/images/projects/pearl-noir.jpg" alt="PEARL NOIR"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/pearl-noir.jpg" alt="PEARL NOIR" decoding="async" loading="lazy"/></div>
       <span class="wc-num">05</span>
       <span class="wc-list-type">Fashion BTS</span>
       <div class="wc-info">
@@ -284,7 +284,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/knari-ss24.html">
-      <div class="wc-img"><img src="assets/images/projects/knari-ss24.jpg" alt="KNARI"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/knari-ss24.jpg" alt="KNARI" decoding="async" loading="lazy"/></div>
       <span class="wc-num">06</span>
       <span class="wc-list-type">Brand Promo</span>
       <div class="wc-info">
@@ -294,7 +294,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc wc-wide reveal" href="work/miles-masterclass.html">
-      <div class="wc-img"><img src="assets/images/projects/joe-oringel.jpg" alt="MILES Masterclass"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/joe-oringel.jpg" alt="MILES Masterclass" decoding="async" loading="lazy"/></div>
       <span class="wc-play" aria-hidden="true">&#9654;</span>
       <span class="wc-num">07</span>
       <span class="wc-list-type">Trailer Series</span>
@@ -305,7 +305,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/hyrox.html">
-      <div class="wc-img"><img src="assets/images/hyrox/hyrox-01.jpg" alt="HYROX"/></div>
+      <div class="wc-img"><img data-src="assets/images/hyrox/hyrox-01.jpg" alt="HYROX" decoding="async" loading="lazy"/></div>
       <span class="wc-num">08</span>
       <span class="wc-list-type">Sports &middot; Race Day</span>
       <div class="wc-info">
@@ -315,7 +315,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/concert.html">
-      <div class="wc-img"><img src="assets/images/projects/concert/concert-04.jpg" alt="Concert"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/concert/concert-04.jpg" alt="Concert" decoding="async" loading="lazy"/></div>
       <span class="wc-num">09</span>
       <span class="wc-list-type">Live Music · Photography</span>
       <div class="wc-info">
@@ -325,7 +325,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/brand-showreels.html">
-      <div class="wc-img"><img src="assets/images/projects/showreels/ffm-fashion.jpg" alt="Brand Showreels"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/showreels/ffm-fashion.jpg" alt="Brand Showreels" decoding="async" loading="lazy"/></div>
       <span class="wc-num">10</span>
       <span class="wc-list-type">Showreel &middot; Edit</span>
       <div class="wc-info">
@@ -335,7 +335,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/wedding-films.html">
-      <div class="wc-img"><img src="assets/images/projects/wedding/haldi-highlights.jpg" alt="Wedding Films"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/wedding/haldi-highlights.jpg" alt="Wedding Films" decoding="async" loading="lazy"/></div>
       <span class="wc-num">11</span>
       <span class="wc-list-type">Wedding &middot; Documentary</span>
       <div class="wc-info">
@@ -345,7 +345,7 @@ setTimeout(function(){
       </div>
     </a>
     <a class="wc reveal" href="work/abida-onam.html">
-      <div class="wc-img"><img src="assets/images/projects/abida/abida-01.jpg" alt="Onam&#x27;23 w/Abida"/></div>
+      <div class="wc-img"><img data-src="assets/images/projects/abida/abida-01.jpg" alt="Onam&#x27;23 w/Abida" decoding="async" loading="lazy"/></div>
       <span class="wc-num">12</span>
       <span class="wc-list-type">Food Show &middot; Episode</span>
       <div class="wc-info">
@@ -390,7 +390,7 @@ setTimeout(function(){
   <div class="modal-backdrop" data-close></div>
   <button class="lb-close" data-close aria-label="Close">&times;</button>
   <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">&larr;</button>
-  <img class="lb-img" id="lbImg" src="" alt=""/>
+  <img class="lb-img" id="lbImg" src="" alt="" decoding="async" loading="lazy"/>
   <button class="lb-nav lb-next" id="lbNext" aria-label="Next">&rarr;</button>
 </div>
 
@@ -402,20 +402,20 @@ setTimeout(function(){
     <p class="photo-sub">Photographs from between shoots: backstage, on the floor, after hours.</p>
   </div>
   <div class="photo-grid">
-    <div class="photo-item reveal"><img src="assets/images/photography/concert-01.jpg" alt="Concert photography"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/edit-bay-01.jpg" alt="Edit bay, grading session"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/dance-01.jpg" alt="Dance photography"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/bts-02.jpg" alt="Editing behind the scenes"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/clubs-03.jpg" alt="Club photography"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/portrait-02.jpg" alt="Portrait detail"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/bts-01.jpg" alt="Studio portrait"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/clubs-01.jpg" alt="Club photography"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/dance-02.jpg" alt="Dance photography"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/fashion-01.jpg" alt="Fashion photography"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/bts-04.jpg" alt="Rooftop silhouette"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/clubs-02.jpg" alt="Club photography"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/portrait-01.jpg" alt="Portrait photography"/></div>
-    <div class="photo-item reveal"><img src="assets/images/photography/clubs-04.jpg" alt="Club photography"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/concert-01.jpg" alt="Concert photography" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/edit-bay-01.jpg" alt="Edit bay, grading session" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/dance-01.jpg" alt="Dance photography" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/bts-02.jpg" alt="Editing behind the scenes" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/clubs-03.jpg" alt="Club photography" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/portrait-02.jpg" alt="Portrait detail" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/bts-01.jpg" alt="Studio portrait" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/clubs-01.jpg" alt="Club photography" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/dance-02.jpg" alt="Dance photography" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/fashion-01.jpg" alt="Fashion photography" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/bts-04.jpg" alt="Rooftop silhouette" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/clubs-02.jpg" alt="Club photography" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/portrait-01.jpg" alt="Portrait photography" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="assets/images/photography/clubs-04.jpg" alt="Club photography" decoding="async" loading="lazy"/></div>
   </div>
 </section>
 
@@ -425,7 +425,7 @@ setTimeout(function(){
     <h2 class="about-hed" data-text="I FILM WHAT LINGERS">I FILM WHAT <em>LINGERS</em></h2>
     <p class="about-pull">Not the event, the second after. Not the word, the breath before it.</p>
     <div class="about-img">
-      <img src="assets/images/about.jpg" alt="Rahul at work"/>
+      <img src="assets/images/about.jpg" alt="Rahul at work" decoding="async" loading="lazy"/>
     </div>
   </div>
   <div class="reveal">
@@ -452,7 +452,7 @@ setTimeout(function(){
   <!-- click to play: the file is only fetched once someone asks for it -->
   <article class="film reveal" data-type="file" data-src="assets/video/reel.mp4">
     <button class="film-media" aria-label="Play the showreel">
-      <img src="assets/images/reel-poster.jpg" alt="Showreel" loading="lazy"/>
+      <img src="assets/images/reel-poster.jpg" alt="Showreel" loading="lazy" decoding="async"/>
       <span class="film-play">&#9654;</span>
     </button>
   </article>
@@ -518,7 +518,7 @@ setTimeout(function(){
 <!-- CONTACT -->
 <section id="contact">
   <div class="contact-bg" aria-hidden="true">
-    <img src="assets/images/about/about-03.jpg" alt=""/>
+    <img src="assets/images/about/about-03.jpg" alt="" decoding="async" loading="lazy"/>
   </div>
   <div class="contact-inner">
     <div class="reveal">
@@ -528,7 +528,7 @@ setTimeout(function(){
       <!-- the monogram as a dot orb; the static logo stays as the fallback and
            is hidden once the orb has actually mounted -->
       <span class="c-orb" data-orb="rk" data-orb-size="medium" data-orb-bg="none"
-            aria-label="Rahul Kuttappy"><img src="assets/images/logo.png" alt=""/></span>
+            aria-label="Rahul Kuttappy"><img src="assets/images/logo.png" alt="" decoding="async"/></span>
       <p class="c-lbl">Open to projects, collabs, conversations</p>
       <!-- Kept in its own face and size: the fuzz is a drop-in over whatever
            the stylesheet already sets. Base intensity stays very low, because
@@ -550,14 +550,14 @@ setTimeout(function(){
 
 <footer>
   <canvas id="plexus" aria-hidden="true"></canvas>
-  <img class="f-logo" src="assets/images/logo.png" alt="RK"/>
+  <img class="f-logo" src="assets/images/logo.png" alt="RK" decoding="async"/>
   <p>&copy; 2026 Rahul Kuttappy. All rights reserved</p>
   <a class="f-back" href="#hero">Back to top ↑</a>
 </footer>
 
-<script src="js/brand-orbs.js?v=20260930r" defer></script>
-<script src="js/fuzzy-text.js?v=20260930r" defer></script>
-<script src="js/works-transition.js?v=20260930r" defer></script>
-<script src="js/main.js?v=20260930r" defer></script>
+<script src="js/brand-orbs.js?v=20261002c" defer></script>
+<script src="js/fuzzy-text.js?v=20261002c" defer></script>
+<script src="js/works-transition.js?v=20261002c" defer></script>
+<script src="js/main.js?v=20261002c" defer></script>
 </body>
 </html>

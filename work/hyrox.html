@@ -29,8 +29,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="../css/style.css?v=20260930r"/>
-<link rel="stylesheet" href="../css/work.css?v=20260930r"/>
+<link rel="stylesheet" href="../css/style.css?v=20261002c"/>
+<link rel="stylesheet" href="../css/work.css?v=20261002c"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js" defer></script>
@@ -47,7 +47,7 @@ setTimeout(function(){
 <body>
 <div class="grain" aria-hidden="true"></div>
 <canvas id="cursorFX" aria-hidden="true"></canvas>
-<div id="pageFade"><span class="pf-mark"><img src="../assets/images/logo.png" alt=""/></span></div>
+<div id="pageFade"><span class="pf-mark"><img src="../assets/images/logo.png" alt="" decoding="async"/></span></div>
 <!-- preload=none: nobody should download a track they never play -->
 <audio id="bgm" preload="none"></audio>
 <div id="audioDock" data-audio-base="../assets/audio/">
@@ -82,7 +82,7 @@ setTimeout(function(){
 
 <!-- NAV -->
 <nav id="nav" style="opacity:1;">
-  <a href="../index.html"><img class="nav-logo" src="../assets/images/logo.png" alt="RK"/></a>
+  <a href="../index.html"><img class="nav-logo" src="../assets/images/logo.png" alt="RK" decoding="async"/></a>
   <ul class="nav-links" id="navLinks">
     <li><a href="../index.html#works">Works</a></li>
     <li><a href="../films.html">Films</a></li>
@@ -102,7 +102,7 @@ setTimeout(function(){
 <!-- HERO -->
 <section id="wkhero">
   <div class="wkhero-bg">
-    <img src="../assets/images/hyrox/hyrox-01.jpg" alt="HYROX"/>
+    <img src="../assets/images/hyrox/hyrox-01.jpg" alt="HYROX" decoding="async" fetchpriority="high"/>
   </div>
   <div class="wkhero-content">
     <a class="wkhero-back" href="../index.html#works">&larr; All Works</a>
@@ -140,10 +140,10 @@ setTimeout(function(){
     <h2 class="s-hed">FROM THE SHOOT</h2>
   </div>
   <div class="wkgallery-grid">
-    <div class="photo-item reveal"><img src="../assets/images/hyrox/hyrox-01.jpg" alt="HYROX frame 1"/></div>
-    <div class="photo-item reveal"><img src="../assets/images/hyrox/hyrox-02.jpg" alt="HYROX frame 2"/></div>
-    <div class="photo-item reveal"><img src="../assets/images/hyrox/hyrox-03.jpg" alt="HYROX frame 3"/></div>
-    <div class="photo-item reveal"><img src="../assets/images/hyrox/hyrox-04.jpg" alt="HYROX frame 4"/></div>
+    <div class="photo-item reveal"><img src="../assets/images/hyrox/hyrox-01.jpg" alt="HYROX frame 1" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="../assets/images/hyrox/hyrox-02.jpg" alt="HYROX frame 2" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="../assets/images/hyrox/hyrox-03.jpg" alt="HYROX frame 3" decoding="async" loading="lazy"/></div>
+    <div class="photo-item reveal"><img src="../assets/images/hyrox/hyrox-04.jpg" alt="HYROX frame 4" decoding="async" loading="lazy"/></div>
   </div>
 </section>
 
@@ -152,14 +152,14 @@ setTimeout(function(){
   <div class="modal-backdrop" data-close></div>
   <button class="lb-close" data-close aria-label="Close">&times;</button>
   <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">&larr;</button>
-  <img class="lb-img" id="lbImg" src="" alt=""/>
+  <img class="lb-img" id="lbImg" src="" alt="" decoding="async" loading="lazy"/>
   <button class="lb-nav lb-next" id="lbNext" aria-label="Next">&rarr;</button>
 </div>
 
 
 <!-- NEXT: scale nav. Works as a plain link to the next project without JS. -->
 <section id="wknext" class="wks" data-current="hyrox.html">
-  <div class="wks-bg" aria-hidden="true"><img alt=""/><img alt=""/></div>
+  <div class="wks-bg" aria-hidden="true"><img alt="" decoding="async" loading="lazy"/><img alt="" decoding="async" loading="lazy"/></div>
   <div class="wks-head">
     <p class="s-eye">Next Project</p>
     <p class="wks-hint" id="wksHint" aria-hidden="true">Drag:[on] &middot; Keys:[&larr; &rarr;]</p>
@@ -181,11 +181,11 @@ setTimeout(function(){
 
 <footer>
   <canvas id="plexus" aria-hidden="true"></canvas>
-  <img class="f-logo" src="../assets/images/logo.png" alt="RK"/>
+  <img class="f-logo" src="../assets/images/logo.png" alt="RK" decoding="async"/>
   <p>&copy; 2026 Rahul Kuttappy. All rights reserved</p>
   <a class="f-back" href="../index.html#works">Back to works &uarr;</a>
 </footer>
 
-<script src="../js/main.js?v=20260930r" defer></script>
+<script src="../js/main.js?v=20261002c" defer></script>
 </body>
 </html>

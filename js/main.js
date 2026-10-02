@@ -126,6 +126,7 @@ tick();setInterval(tick,1000);
    stands in. */
 const heroVideo=document.getElementById('heroVideo');
 const heroVideo2=document.getElementById('heroVideo2');
+let parked=false;
 if(heroVideo){
   let active=heroVideo;
   let inView=true, attempts=0;
@@ -141,6 +142,7 @@ if(heroVideo){
 
   function resumeHero(reset){
     if(reset) attempts=0;
+    if(parked) return;                      /* covered, not merely off screen */
     if(!inView||document.hidden||!active.paused) return;
     if(attempts++>MAX_ATTEMPTS) return;
     const p=active.play();
@@ -210,6 +212,28 @@ if(heroVideo){
       else if(!active.paused) active.pause();
     },{threshold:0.01}).observe(heroVideo);
   }
+
+  /* Intersecting is not the same as visible. On the homepage the hero is held
+     at the top of the scroll and covered by the section that opens over it
+     rather than scrolled past, so the observer above never once reports it
+     gone and both clips decode their way through the entire page. Whatever is
+     covering it says so. */
+  window.HeroVideo = {
+    set(on){
+      if(on === !parked) return;
+      parked = !on;
+      if(parked){ if(!active.paused) active.pause(); return; }
+      /* Straight to play rather than through resumeHero, which gates on the
+         observer's idea of whether the hero is on screen. Being covered is
+         not being off screen, but the observer reports it as one while the
+         layer is hidden, so by the time the cover lifts it is holding a
+         "false" and the clip would never start again. Uncovered, the hero is
+         the whole window; there is nothing left to ask. */
+      attempts = 0;
+      const pr = active.play();
+      if(pr && pr.catch) pr.catch(()=>{});
+    }
+  };
 }
 
 /* ── Mobile menu ──
@@ -956,6 +980,18 @@ function revealHero(){
   startHeroDust();
 
   const tl = gsap.timeline();
+  /* The scroll can arrive before this has finished. Both write to the same
+     four lines and the same four dots, so rather than letting them fight --
+     or leaving the transition unarmed until the entrance is good and ready --
+     the entrance can be run to its end on demand and hand over there. */
+  window.HeroEntrance = {
+    done: false,
+    finish(){
+      if(this.done) return;
+      this.done = true;
+      tl.progress(1);            /* onComplete below does the handing over */
+    }
+  };
   /* The orbs swell into view while they are already travelling, rather than
      appearing first and setting off afterwards: on a refresh that wait was
      most of the delay before anything happened. */
@@ -990,7 +1026,10 @@ function revealHero(){
     /* The frame is drawn; from here the scroll owns it. The transition writes
        to these same four lines and four dots, so it is not allowed to start
        until this has stopped. */
-    .add(()=>{ if(window.WorksTransition) WorksTransition.enable(); });
+    .add(()=>{
+      if(window.HeroEntrance) HeroEntrance.done = true;
+      if(window.WorksTransition) WorksTransition.enable();
+    });
 }
 
 function showHeroInstantly(){
@@ -1000,6 +1039,7 @@ function showHeroInstantly(){
   gsap.set('.hg-t,.hg-b',{x:0,y:0,rotation:0,scaleX:1});
   gsap.set('.hg-dot',{x:0,y:0,scale:1,opacity:1});
   gsap.set('#hrule',{scaleX:1});
+  window.HeroEntrance = { done:true, finish(){} };
   if(window.WorksTransition) WorksTransition.enable();
 }
 
@@ -1102,8 +1142,33 @@ if(loaderEl){
 const wg=document.getElementById('wgrid');
 const gbtn=document.getElementById('gbtn');
 const lbtn=document.getElementById('lbtn');
+
+/* The artwork behind each row is fetched when it is first wanted rather than
+   with the page. In list view it sits at zero opacity until the row is
+   hovered, but it cannot be deferred with loading="lazy": the list is held at
+   the top of the screen for the whole of the hero transition, so every one of
+   these is inside the viewport as far as the browser is concerned and all
+   twelve download before anything has been looked at. Together they were
+   about two and a half megabytes of the homepage.
+
+   Grid view shows them outright, so switching to it fetches the lot. */
+function wakeRowImage(row){
+  const img=row && row.querySelector('.wc-img img[data-src]');
+  if(!img) return;
+  img.src=img.dataset.src;
+  delete img.dataset.src;
+}
+function wakeAllRowImages(){ if(wg) wg.querySelectorAll('.wc').forEach(wakeRowImage); }
+if(wg){
+  wg.querySelectorAll('.wc').forEach(row=>{
+    const wake=()=>wakeRowImage(row);
+    row.addEventListener('pointerenter',wake,{once:true});
+    row.addEventListener('focusin',wake,{once:true});
+  });
+}
+
 if(wg&&gbtn&&lbtn){
-  gbtn.addEventListener('click',function(){wg.classList.remove('lv');this.classList.add('active');lbtn.classList.remove('active');});
+  gbtn.addEventListener('click',function(){wakeAllRowImages();wg.classList.remove('lv');this.classList.add('active');lbtn.classList.remove('active');});
   lbtn.addEventListener('click',function(){wg.classList.add('lv');this.classList.add('active');gbtn.classList.remove('active');});
 }
 
