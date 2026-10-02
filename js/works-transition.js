@@ -593,7 +593,7 @@ function bindAnchor(){
       e.preventDefault();
       e.stopPropagation();
       const y = stage.getBoundingClientRect().top + window.scrollY + TR;
-      if(smooth()) smooth().scrollTo(y);
+      if(smooth()) smooth().scrollTo(y, {force:true});
       else window.scrollTo({top:y, behavior:'smooth'});
     });
   });
@@ -615,16 +615,65 @@ bindAnchor();
    Done from enable() rather than on load: while the loading screen is up Lenis
    is stopped and owns the scroll, so a jump made then goes nowhere. By the
    time the hero is ready, whichever way it got there, the scroll is live. */
-let hashHandled = false;
+let hashHandled = false, hashCalls = 0, lastJump = null;
 function wantsWorks(){ return location.hash === '#works'; }
 function honourIncomingHash(){
-  if(hashHandled || !running || !wantsWorks()) return;
-  hashHandled = true;
-  const y = stage.getBoundingClientRect().top + window.scrollY + TR;
-  const s = smooth();
-  if(s) s.scrollTo(y, {immediate:true});
-  else window.scrollTo(0, y);
+  hashCalls++;
+  if(hashHandled || !running || !wantsWorks()){
+    lastJump = 'skipped:'+(hashHandled?'handled':(!running?'notrunning':'nohash'));
+    return;
+  }
+  const target = Math.round(stageTop + TR);
+  const jump = () => {
+    const s = smooth();
+    /* force, because Lenis ignores scrollTo entirely while it is stopped --
+       and it is stopped for the whole of the loading screen, which is exactly
+       when this runs. It reported the jump as made and the page never moved:
+       "to 1440 landed 0". main.js's own scroll-to-top passes the same flag
+       for the same reason. */
+    if(s){
+      /* Remeasure first. Lenis caches the scrollable height, and this runs
+         while the page is still assembling -- it had a stale limit of nothing
+         and clamped every jump straight back to zero, reporting the move as
+         made. The scroll-to-top in main.js resizes for the same reason. */
+      if(typeof s.resize === 'function') s.resize();
+      s.scrollTo(target, {immediate:true, force:true});
+    }
+    else window.scrollTo(0, target);
+    if(Math.abs(window.scrollY - target) > 4) window.scrollTo(0, target);
+    /* and paint where we have landed. Moving the scroll does not by itself
+       run the transition, so without this the page sits at the end of the
+       transition still drawn as the beginning -- the hero, over a list that
+       has already been scrolled past -- until the first wheel movement
+       repaints it and the whole thing appears to jump. */
+    apply(clamp01((window.scrollY - stageTop) / TR));
+    lastJump = 'to ' + target + ' landed ' + Math.round(window.scrollY);
+  };
+  jump();
+  /* Something else wants the scroll on every arrival: the page transitions
+     put each new page back at the top, and that runs after this does. Rather
+     than guessing an order, this checks where it actually ended up and says so
+     again, for as long as it keeps being overruled. */
+  /* Keeps asking until it is actually there, and only then stops. A deadline
+     was the wrong thing to stop on: several things move the scroll while a
+     page is settling -- the restore, the page transitions, a ScrollTrigger
+     refresh, the document growing as images arrive -- so giving up after a
+     fixed time just meant giving up before the last of them had finished. The
+     success check is the only thing that ends it; the deadline is a backstop
+     so this can never run forever. */
+  const deadline = performance.now() + 3000;
+  const settle = () => {
+    if(Math.abs(window.scrollY - target) <= 4){
+      hashHandled = true;                   /* there, and it stayed there */
+      return;
+    }
+    if(performance.now() > deadline) return;   /* give up quietly, stay unhandled */
+    jump();
+    requestAnimationFrame(settle);
+  };
+  requestAnimationFrame(settle);
 }
+window.addEventListener('load', ()=>requestAnimationFrame(honourIncomingHash));
 
 let rt;
 window.addEventListener('resize', ()=>{
@@ -665,6 +714,10 @@ function disable(){
   if(panel){ panel.style.transform=''; panel.style.opacity=''; }
 }
 
-window.WorksTransition = { prepare, enable, disable, relayout, eligible, wantsWorks };
+window.WorksTransition = { prepare, enable, disable, relayout, eligible, wantsWorks,
+  /* read-only view of the internals, for working out why something did not
+     happen without having to guess from the outside */
+  state: () => ({running, painting, hashHandled, hashCalls, lastJump, stageTop, TR,
+                 lenis: !!smooth(), lastP}) };
 prepare();
 })();
