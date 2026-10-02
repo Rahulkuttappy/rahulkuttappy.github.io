@@ -59,11 +59,26 @@ function wakeRows(){
 }
 
 /* how long the staggers get to run in total, however many rules there are */
-const BIRTH_SPAN = .20, JOIN_SPAN = .18;
+const BIRTH_SPAN = .16, JOIN_SPAN = .18;
+/* Every dot is on its mark by here, however late it set off, and the first
+   line strikes a beat later.
+
+   The dots were given a fixed length of run each instead, which sounds right
+   and is not: they are born outermost first, because they multiply out of the
+   four that are already on the frame, but they connect innermost first. Those
+   two orders are opposites, so the dots that arrive first are the ones that
+   wait longest -- the outer four landed at .22 and then sat on their marks,
+   doing nothing, until .66. Two thirds of the transition with the outline
+   already drawn in dots and nothing happening to it.
+
+   Giving them a common arrival instead of a common duration means the later
+   ones simply travel quicker, everything is in place by .34, and the drawing
+   starts there rather than a fifth of the way further on. */
+const ARRIVE_BY = .34, JOIN_LEAD = .03;
 /* where the last rule has finished connecting -- the frame has to be able to
    show a rule by here or it is never seen */
 const DRAWN_BY = .80;
-let tierBirth = .05, tierJoin = .045;
+let tierBirth = .05, tierJoin = .045, joinBase = .46;
 
 
 /* ── the heading ──────────────────────────────────────────────────────────
@@ -275,6 +290,9 @@ function buildGrid(){
      same length whatever the section holds. */
   tierBirth = BIRTH_SPAN / deepest;
   tierJoin  = JOIN_SPAN  / deepest;
+  /* the heading's separator goes first, a tier ahead of the innermost, so the
+     base sits one tier above the moment everything has landed */
+  joinBase  = ARRIVE_BY + JOIN_LEAD + tierJoin;
 
   [...hLines, ...vLines].forEach(ln=>{
     ln.joinOrder = deepest - ln.order;
@@ -432,8 +450,8 @@ function apply(p){
      drawing. */
   /* A dot sets off as soon as it appears, rather than being born on its tier
      and then waiting for a run that starts on a different schedule. */
-  const runOf  = ln => ease(clamp01((p - ln.birth - .02) / .20));
-  const joinOf = ln => clamp01((p - .46 - ln.joinOrder*tierJoin - ln.skew*.03 - ln.axis) / .09);
+  const runOf  = ln => ease(clamp01((p - ln.birth - .02) / Math.max(.10, ARRIVE_BY - ln.birth - .02)));
+  const joinOf = ln => clamp01((p - joinBase - ln.joinOrder*tierJoin - ln.skew*.03 - ln.axis) / .09);
 
   hLines.forEach(ln=>{
     ln.on   = clamp01((p - ln.birth) / .06) * (1 - leave);
@@ -731,6 +749,15 @@ window.WorksTransition = { prepare, enable, disable, relayout, eligible, wantsWo
   /* read-only view of the internals, for working out why something did not
      happen without having to guess from the outside */
   state: () => ({running, painting, hashHandled, hashCalls, lastJump, stageTop, TR,
-                 lenis: !!smooth(), lastP}) };
+                 lenis: !!smooth(), lastP}),
+  schedule: () => ({tierBirth, tierJoin, visibleRows,
+    lines: [...hLines.map(l=>({axis:'h',...l})), ...vLines.map(l=>({axis:'v',...l}))]
+      .map(l=>({axis:l.axis, order:l.order, joinOrder:l.joinOrder,
+                birth:+l.birth.toFixed(4),
+                runEnd:+(l.birth + .02 + Math.max(.10, ARRIVE_BY - l.birth - .02)).toFixed(4),
+                runEndCommon:ARRIVE_BY,
+                joinStart:+(joinBase + l.joinOrder*tierJoin + l.skew*.03 + l.axis).toFixed(4),
+                joinEnd:+(joinBase + l.joinOrder*tierJoin + l.skew*.03 + l.axis + .09).toFixed(4)}))
+      .sort((a,b)=>a.joinStart-b.joinStart) }) };
 prepare();
 })();
