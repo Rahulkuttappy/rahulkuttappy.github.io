@@ -399,6 +399,13 @@
 
   global.FuzzyText = {
     mount: mount, auto: auto, DEFAULTS: DEFAULTS,
-    parkAll: function (v) { mounted.forEach(function (m) { m.setParked(v); }); }
+    /* Scoped on purpose. Parking everything on the page took the contact
+       email's fuzz with it: it is the same effect, far down the page, and it
+       has nothing to do with whatever is covering the hero. */
+    park: function (root, v) {
+      mounted.forEach(function (m) {
+        if (!root || root.contains(m.el)) m.setParked(v);
+      });
+    }
   };
 })(window);

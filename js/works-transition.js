@@ -47,6 +47,16 @@ const SPAN = 1.6;
 let W=0, H=0, TR=0, box=null, base=null, dpr=1;
 let hLines=[], vLines=[], visibleRows=0, lastP=0;
 let running=false, painting=false, trigger=null, fontsWatched=false, heroCovered=false;
+let rowsWoken=false;
+
+function wakeRows(){
+  if(rowsWoken) return;
+  rowsWoken = true;
+  cards.forEach(c=>{
+    const i = c.querySelector('.wc-img img[data-src]');
+    if(i){ i.src = i.dataset.src; delete i.dataset.src; }
+  });
+}
 
 /* how long the staggers get to run in total, however many rules there are */
 const BIRTH_SPAN = .20, JOIN_SPAN = .18;
@@ -333,7 +343,7 @@ function layout(p){
   if(covered !== heroCovered){
     heroCovered = covered;
     if(window.HeroVideo) HeroVideo.set(!covered);
-    if(window.FuzzyText && FuzzyText.parkAll) FuzzyText.parkAll(covered);
+    if(window.FuzzyText && FuzzyText.park) FuzzyText.park(heroL, covered);
   }
   /* The hero's dust drifts across a canvas the size of the window, eighty
      motes redrawn every frame. It is there for the hero at rest; the moment
@@ -348,6 +358,13 @@ function layout(p){
   if(dust) dust.style.opacity = String(1 - clamp01((p - .04) / .26));
   if(window.HeroDust) HeroDust.set(p < .04);
 
+  /* The artwork behind the rows is fetched as the frame finishes opening
+     rather than on the hover that wants it. Waiting for the hover meant the
+     row's half-second fade started against an empty box and the picture
+     arrived partway through it, which read as a flash. By here the initial
+     load is long past and the list is about to be the page. */
+  if(p > .5) wakeRows();
+
   const resolve = clamp01((p - .80) / .2);
   cards.forEach((c,i)=>{
     c.style.opacity = String(clamp01((resolve - (i%3)*.04) / .88));
@@ -357,12 +374,6 @@ function layout(p){
 }
 
 function apply(p){
-  /* Moving at all means the reader is past the hero, so the entrance gives
-     up its claim on the frame and jumps to its finished state rather than
-     carrying on underneath a transition that is already drawing. */
-  if(!painting && p > .002 && window.HeroEntrance && !HeroEntrance.done){
-    HeroEntrance.finish();
-  }
   const rect = layout(p);
   if(!rect || !painting) return;
   const l = rect.l, r = rect.r, t = rect.t, b = rect.b;
@@ -494,18 +505,6 @@ function prepare(){
   cards.forEach(c=>c.classList.remove('reveal'));
   measure();
   layout(0);
-  /* Armed from the start rather than when the entrance finishes. It used to
-     be created at the end of the hero's own animation, which left a two and a
-     half second window on every refresh where the page scrolled and nothing
-     was listening -- the reader arrived in the middle of a transition that
-     had never been told it had begun. */
-  trigger = ScrollTrigger.create({
-    trigger: stage,
-    start: 'top top',
-    end: () => '+=' + TR,
-    scrub: true,
-    onUpdate: self => apply(self.progress)
-  });
 }
 
 /* Phase two: the drawing. Held back until the hero's own entrance has
@@ -518,8 +517,20 @@ function enable(){
     midOrb = BrandOrbs.mount(orbEl, {variant:'rk', size:'medium', bg:'none'});
   }
   measure();
-  apply(lastP);
+  apply(0);
+  /* Created here, not at prepare(). Nothing can scroll before this point --
+     the entrance holds the scroll and releases it as it hands over -- so there
+     is no window where the page moves with nobody listening, and no need to
+     reach into a running update to catch up. */
+  trigger = ScrollTrigger.create({
+    trigger: stage,
+    start: 'top top',
+    end: () => '+=' + TR,
+    scrub: true,
+    onUpdate: self => apply(self.progress)
+  });
   ScrollTrigger.refresh();
+  honourIncomingHash();
 }
 
 /* The nav's own link points at the list, whose box is still where it always
@@ -564,11 +575,32 @@ bindAnchor();
   if(b) b.addEventListener('click', ()=>setTimeout(relayout, 0));
 });
 
+/* Arriving from another page on #works. Every other page links here with
+   index.html#works, and the browser jumps to the section's layout box -- which
+   during the transition is a whole viewport below where the section actually
+   renders, so the jump lands back on the hero. The end of the transition is
+   what #works means here.
+
+   Done from enable() rather than on load: while the loading screen is up Lenis
+   is stopped and owns the scroll, so a jump made then goes nowhere. By the
+   time the hero is ready, whichever way it got there, the scroll is live. */
+let hashHandled = false;
+function wantsWorks(){ return location.hash === '#works'; }
+function honourIncomingHash(){
+  if(hashHandled || !running || !wantsWorks()) return;
+  hashHandled = true;
+  const y = stage.getBoundingClientRect().top + window.scrollY + TR;
+  const s = smooth();
+  if(s) s.scrollTo(y, {immediate:true});
+  else window.scrollTo(0, y);
+}
+
 let rt;
 window.addEventListener('resize', ()=>{
   clearTimeout(rt);
   rt = setTimeout(()=>{
-    if(!running) return;
+    /* a window dragged out past the breakpoint has never been set up */
+    if(!running){ if(eligible()) prepare(); return; }
     if(!eligible()){ disable(); return; }
     relayout();
   }, 180);
@@ -587,7 +619,7 @@ function disable(){
   heroL.style.visibility = '';
   heroCovered = false;
   if(window.HeroVideo) HeroVideo.set(true);
-  if(window.FuzzyText && FuzzyText.parkAll) FuzzyText.parkAll(false);
+  if(window.FuzzyText && FuzzyText.park) FuzzyText.park(heroL, false);
   stage.style.paddingBottom = '';
   const dust = document.getElementById('hdust');
   if(dust) dust.style.opacity = '';
@@ -603,6 +635,6 @@ function disable(){
   if(panel){ panel.style.transform=''; panel.style.opacity=''; }
 }
 
-window.WorksTransition = { prepare, enable, disable, relayout, eligible };
+window.WorksTransition = { prepare, enable, disable, relayout, eligible, wantsWorks };
 prepare();
 })();

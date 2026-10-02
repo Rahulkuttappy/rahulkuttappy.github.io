@@ -814,7 +814,56 @@ function startHeroDust(){
   });
 }
 
+/* The transition is armed as soon as the page is laid out, but the hero's
+   entrance does not start until the loader is dismissed -- so a scroll can
+   arrive while there is no entrance to hand over from. This exists from the
+   start so there always is one. Scrolled before it has begun, the entrance is
+   not played late underneath a transition that is already drawing: it is
+   skipped, and the hero is simply shown finished. */
+window.HeroEntrance = {
+  done: false,
+  skipped: false,
+  _jump: null,
+  finish(){
+    if(this.done) return;
+    this.done = true;
+    if(this._jump) this._jump();        /* already running: run it to its end */
+    else this.skipped = true;           /* not started: do not start it */
+    if(window.WorksTransition) WorksTransition.enable();
+    if(lenis) lenis.start();
+  }
+};
+
+/* The scroll is held for as long as the hero is drawing itself, and the first
+   attempt to move releases it early.
+
+   The transition and the entrance both write to the same four lines and the
+   same four dots, so they cannot run together. Letting the scroll through and
+   catching up afterwards meant reaching into a running ScrollTrigger update to
+   hand over -- which left the scrub in a state where it stopped calling back
+   at all, and the page froze on whatever had been drawn. Holding the scroll
+   instead means there is nothing to catch up with: the wheel is what ends the
+   entrance, and by the time anything scrolls the transition owns the frame. */
+function holdScrollForEntrance(){
+  if(lenis) lenis.stop();
+  const release = () => {
+    ['wheel','touchstart','keydown'].forEach(e=>window.removeEventListener(e,release));
+    if(window.HeroEntrance) HeroEntrance.finish();
+  };
+  ['wheel','touchstart','keydown'].forEach(e=>
+    window.addEventListener(e, release, {passive:true, once:true}));
+}
+
 function revealHero(){
+  /* the reader is already past the hero; drawing it now would be drawing it
+     underneath the section that has replaced it */
+  if(window.HeroEntrance && HeroEntrance.skipped){ showHeroInstantly(); return; }
+  /* and someone who followed a link to #works asked for the list, not two and
+     a half seconds of the hero drawing itself before being thrown past it */
+  if(window.WorksTransition && WorksTransition.wantsWorks && WorksTransition.wantsWorks()){
+    showHeroInstantly(); return;
+  }
+  holdScrollForEntrance();
   const hero = document.getElementById('hero');
   const grid = document.querySelector('.hero-grid');
   const dots = [...document.querySelectorAll('.hg-dot')];          /* tl tr bl br */
@@ -980,18 +1029,8 @@ function revealHero(){
   startHeroDust();
 
   const tl = gsap.timeline();
-  /* The scroll can arrive before this has finished. Both write to the same
-     four lines and the same four dots, so rather than letting them fight --
-     or leaving the transition unarmed until the entrance is good and ready --
-     the entrance can be run to its end on demand and hand over there. */
-  window.HeroEntrance = {
-    done: false,
-    finish(){
-      if(this.done) return;
-      this.done = true;
-      tl.progress(1);            /* onComplete below does the handing over */
-    }
-  };
+  /* now that there is a timeline, finishing means running it to its end */
+  if(window.HeroEntrance) HeroEntrance._jump = () => tl.progress(1);
   /* The orbs swell into view while they are already travelling, rather than
      appearing first and setting off afterwards: on a refresh that wait was
      most of the delay before anything happened. */
@@ -1029,6 +1068,7 @@ function revealHero(){
     .add(()=>{
       if(window.HeroEntrance) HeroEntrance.done = true;
       if(window.WorksTransition) WorksTransition.enable();
+      if(lenis) lenis.start();
     });
 }
 
@@ -1039,8 +1079,9 @@ function showHeroInstantly(){
   gsap.set('.hg-t,.hg-b',{x:0,y:0,rotation:0,scaleX:1});
   gsap.set('.hg-dot',{x:0,y:0,scale:1,opacity:1});
   gsap.set('#hrule',{scaleX:1});
-  window.HeroEntrance = { done:true, finish(){} };
+  if(window.HeroEntrance) HeroEntrance.done = true;
   if(window.WorksTransition) WorksTransition.enable();
+  if(lenis) lenis.start();
 }
 
 if(loaderEl){
