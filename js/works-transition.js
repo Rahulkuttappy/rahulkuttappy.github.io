@@ -132,10 +132,10 @@ let midOrb = null;
    second. */
 const ORB_PX = 56, ORB_BAND = 18;
 const BAYER4 = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
-let orbMask = null, orbMaskW = 0;
+let orbMask = null, orbMaskW = 0, orbMaskFailed = false;
 
 function buildOrbMask(){
-  if(orbMask) return;
+  if(orbMask || orbMaskFailed) return;
   const d = Math.min(2, window.devicePixelRatio || 1);
   const W = Math.round(ORB_PX*d), B = Math.round(ORB_BAND*d), H = W;
   /* The grain is sized in CSS pixels, not device ones. A matrix stepped once
@@ -167,7 +167,13 @@ function buildOrbMask(){
     }
   }
   c.putImageData(img, 0, 0);
+  /* Reading a canvas back is not always allowed. Browsers with fingerprinting
+     defences -- Brave's among them -- can refuse toDataURL outright or hand
+     back something altered, and this runs inside the scroll paint, so a throw
+     here would take the whole transition down with it for the sake of an edge
+     treatment. It falls back to the plain wipe instead. */
   orbMask = cv.toDataURL('image/png');
+  if(!orbMask || orbMask.length < 128) throw new Error('mask unavailable');
   orbEl.style.webkitMaskImage = orbEl.style.maskImage = 'url(' + orbMask + ')';
   orbEl.style.webkitMaskRepeat = orbEl.style.maskRepeat = 'no-repeat';
   orbEl.style.webkitMaskSize = orbEl.style.maskSize = orbMaskW + 'px ' + ORB_PX + 'px';
@@ -180,13 +186,18 @@ function paintOrb(p){
      the frame. */
   const inK  = clamp01((p - .12) / .10);
   const outK = clamp01((p - .34) / .08);
-  buildOrbMask();
-  /* Where the mask sits. Coming in, it travels from clear of the right-hand
-     side to the mark's own width; going out, on by the same distance again. */
-  const B = ORB_BAND, W = ORB_PX;
-  const x = outK > 0 ? lerp(-B, -(W + B*2), outK)
-                     : lerp(W + B, -B, inK);
-  orbEl.style.webkitMaskPosition = orbEl.style.maskPosition = x.toFixed(1) + 'px 0';
+  try { buildOrbMask(); } catch(e){ orbMaskFailed = true; }
+  if(orbMask){
+    /* Where the mask sits. Coming in, it travels from clear of the right-hand
+       side to the mark's own width; going out, on by the same distance again. */
+    const B = ORB_BAND, W = ORB_PX;
+    const x = outK > 0 ? lerp(-B, -(W + B*2), outK)
+                       : lerp(W + B, -B, inK);
+    orbEl.style.webkitMaskPosition = orbEl.style.maskPosition = x.toFixed(1) + 'px 0';
+  } else {
+    /* no mask to be had: the straight-edged wipe, which is at least a wipe */
+    orbEl.style.clipPath = 'inset(0 ' + ((1-inK)*100).toFixed(1) + '% 0 ' + (outK*100).toFixed(1) + '%)';
+  }
   const show = (inK > 0 && outK < 1) ? 1 : 0;
   orbEl.style.opacity = String(show);
   if(midOrb){
@@ -590,7 +601,12 @@ function apply(p){
   gsap.set(lines, {opacity: 1 - leave});
   gsap.set(dots,  {opacity: 1 - leave});
 
-  paintOrb(p);
+  /* The monogram is decoration sitting on top of the transition, not part of
+     it. It mounts a third-party canvas in an iframe and builds its mask by
+     reading a canvas back -- two things a browser is entitled to refuse. If
+     any of that fails it should cost us the monogram, not the frame, the mask
+     and the list. */
+  try { paintOrb(p); } catch(e){ /* decoration only */ }
 }
 
 
@@ -877,7 +893,8 @@ window.WorksTransition = { prepare, enable, disable, relayout, eligible, wantsWo
   /* read-only view of the internals, for working out why something did not
      happen without having to guess from the outside */
   state: () => ({running, painting, hashHandled, hashCalls, lastJump, stageTop, TR,
-                 lenis: !!smooth(), lastP, worksRequested, watching, trace}),
+                 lenis: !!smooth(), lastP, worksRequested, watching,
+                 orbMaskBuilt: !!orbMask, orbMaskFailed, trace}),
   schedule: () => ({tierBirth, tierJoin, visibleRows,
     lines: [...hLines.map(l=>({axis:'h',...l})), ...vLines.map(l=>({axis:'v',...l}))]
       .map(l=>({axis:l.axis, order:l.order, joinOrder:l.joinOrder,
