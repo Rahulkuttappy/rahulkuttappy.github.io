@@ -304,7 +304,15 @@
 
     whenReady(function () {
       build();
-      if (calm) drawStill(); else play();
+      /* Draw the word once, whatever happens next. The animation loop is what
+         normally puts it on the canvas, and play() refuses to start it when
+         the element is off screen, the tab is in the background, or the thing
+         has been parked -- so building without this leaves an empty canvas and
+         the word simply missing. Open the site in a background tab and the
+         hero had no name until you looked at it. When the loop does run, its
+         first frame overwrites this immediately; the cost is one drawImage. */
+      drawStill();
+      if (!calm) play();
     });
     if (o.glitchMode && !calm) startGlitch();
 
@@ -331,7 +339,9 @@
     var rt;
     function onResize() {
       clearTimeout(rt);
-      rt = setTimeout(function () { build(); if (calm) drawStill(); }, 180);
+      /* and again after a rebuild, for the same reason: a resize while the tab
+         is hidden used to clear the canvas and leave it cleared */
+      rt = setTimeout(function () { build(); drawStill(); if (!calm) play(); }, 180);
     }
     addEventListener('resize', onResize);
 
