@@ -449,7 +449,11 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
 .hero-disc i{color:rgba(237,234,226,.28);font-style:normal;margin:0 .5rem;}
 .hero-name{
   font-family:'Geist',sans-serif;font-weight:600;
-  font-size:clamp(2.6rem,7.4vw,7.2rem);
+  /* The floor governs phones and nothing else: 7.4vw only overtakes 3.3rem
+     at about 735px of viewport, so raising it moves the name on a handset and
+     leaves every wider layout exactly where it was. At 2.6rem the name used
+     barely two thirds of the panel it sits in and read as a caption. */
+  font-size:clamp(3.3rem,7.4vw,7.2rem);
   line-height:.88;letter-spacing:-0.052em;
   /* A canvas has no line box, so line-height stopped separating the two
      lines the moment the name became one: they stacked at glyph height and
@@ -537,6 +541,15 @@ body.nav-open .nav-toggle span:nth-child(2){transform:translateY(-3.5px) rotate(
    list begins at the top of the stage, underneath them. Both hold at the top
    for the stage's whole length; the script offsets the list to keep it still
    while the frame opens, and lets it go afterwards. */
+/* The list is scaled up while the frame opens, which makes it wider than the
+   window -- 130px wider at 1440 -- and clip-path is paint only, so none of
+   that comes off the document's scrollable width. The page grew a horizontal
+   scrollbar for the length of the transition.
+
+   overflow-x:clip rather than hidden: hidden would make the stage a scroll
+   container, and the hero inside it is sticky. clip does not, so the hero
+   goes on sticking to the window while the overspill is cut. */
+.xs-on{overflow-x:clip;}
 .xs-on .xhero{position:sticky;top:0;z-index:1;}
 .xs-on .xover{position:sticky;height:0;z-index:3;}
 .xs-on .xframe{height:100svh;}
